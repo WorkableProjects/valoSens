@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Valorant sensitivity finder</title>
+<style>
+  :root {
+    --bg: #EFF1F3;
+    --card: #FFFFFF;
+    --ink: #141A20;
+    --muted: #55616D;
+    --line: #D3D9DF;
+    --tape: #F5C518;
+    --on-tape: #141A20;
+    --focus: #2457D6;
+    --band: rgba(245, 197, 24, 0.22);
+    --band-strong: rgba(245, 197, 24, 0.5);
+    --good: #1B7A43;
+    --warn: #A15C00;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12171C; --card: #1A2128; --ink: #E9EDF1; --muted: #9AA6B2; --line: #2C3741; --focus: #7EA4FF;
+      --band: rgba(245, 197, 24, 0.16); --band-strong: rgba(245, 197, 24, 0.38);
+      --good: #55C987; --warn: #F0A84A;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12171C; --card: #1A2128; --ink: #E9EDF1; --muted: #9AA6B2; --line: #2C3741; --focus: #7EA4FF;
+    --band: rgba(245, 197, 24, 0.16); --band-strong: rgba(245, 197, 24, 0.38);
+    --good: #55C987; --warn: #F0A84A;
+    color-scheme: dark;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; -webkit-text-size-adjust: 100%; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px 18px 64px; }
+  h1, h2, .big { font-family: "Bahnschrift", "DIN Alternate", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif; }
+
+  .tape { height: 46px; border-radius: 5px; background: var(--tape); position: relative; overflow: hidden;
+    background-image: repeating-linear-gradient(90deg, var(--on-tape) 0 1px, transparent 1px 10px), repeating-linear-gradient(90deg, var(--on-tape) 0 2px, transparent 2px 50px);
+    background-size: 100% 9px, 100% 20px; background-repeat: no-repeat; background-position: left bottom, left bottom; }
+  .tape::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 14px; background: var(--on-tape); }
+  h1 { font-size: clamp(2rem, 7vw, 3.1rem); line-height: 1.04; margin: 22px 0 10px; letter-spacing: -0.01em; font-weight: 700; }
+  .lede { color: var(--muted); max-width: 60ch; margin: 0 0 26px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 22px 20px; }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 0.88rem; color: var(--muted); }
+  .meta b { color: var(--ink); }
+  .bar { height: 12px; border-radius: 3px; border: 1px solid var(--line); overflow: hidden; margin-bottom: 20px;
+    background-image: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 8px); }
+  .bar > i { display: block; height: 100%; background: var(--tape); width: 0; transition: width .25s ease; }
+  h2 { font-size: 1.55rem; line-height: 1.15; margin: 0 0 8px; font-weight: 700; }
+  .why { color: var(--muted); margin: 0 0 6px; font-size: 0.97rem; }
+  .ev { display: inline-flex; align-items: center; gap: 7px; font-size: 0.82rem; color: var(--muted); margin: 4px 0 18px; }
+  .pips { display: inline-flex; gap: 3px; }
+  .pips b { width: 14px; height: 6px; border-radius: 2px; background: var(--line); }
+  .pips b.on { background: var(--tape); outline: 1px solid color-mix(in srgb, var(--on-tape) 35%, transparent); }
+
+  .choices { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  .choices.c2 { grid-template-columns: repeat(2, 1fr); }
+  .choices.c3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 520px) { .choices.c2, .choices.c3 { grid-template-columns: 1fr; } }
+  .choice { text-align: left; font: inherit; color: inherit; cursor: pointer; background: var(--card); border: 1.5px solid var(--line);
+    border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; min-height: 48px; }
+  .choice:hover { border-color: var(--muted); }
+  .choice[aria-pressed="true"] { border-color: var(--tape); background: color-mix(in srgb, var(--tape) 18%, var(--card)); box-shadow: inset 0 0 0 1px var(--tape); }
+  .c-l { font-weight: 600; }
+  .c-s { font-size: 0.86rem; color: var(--muted); }
+
+  label.f { display: block; font-weight: 600; margin: 14px 0 6px; font-size: 0.95rem; }
+  label.f small { font-weight: 400; color: var(--muted); }
+  input[type="number"], select, textarea { font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--line);
+    border-radius: 8px; padding: 11px 12px; width: 100%; max-width: 280px; min-height: 46px; }
+  textarea { max-width: 100%; min-height: 96px; resize: vertical; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .row > div { flex: 1 1 180px; }
+  input[type="range"] { width: 100%; accent-color: var(--tape); margin: 8px 0 2px; height: 28px; }
+  .ends { display: flex; justify-content: space-between; font-size: 0.86rem; color: var(--muted); gap: 12px; }
+  .ends span:last-child { text-align: right; }
+  details { margin: 14px 0 0; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 0.95rem; }
+  details p { margin: 8px 0 0; color: var(--muted); font-size: 0.93rem; }
+  .mini { margin-top: 10px; }
+  .tip { color: var(--muted); font-size: 0.9rem; margin: 6px 0 0; }
+
+  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 26px; }
+  .btn { font: inherit; font-weight: 700; cursor: pointer; border-radius: 8px; padding: 12px 20px; min-height: 48px; border: 1.5px solid var(--line); background: transparent; color: var(--ink); }
+  .btn.primary { background: var(--tape); color: var(--on-tape); border-color: var(--tape); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn:hover:not(:disabled) { filter: brightness(1.05); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  .big { font-size: clamp(3.4rem, 15vw, 5.6rem); line-height: 1; font-weight: 700; letter-spacing: -0.02em; }
+  .big small { font-size: 0.32em; font-weight: 600; letter-spacing: 0; color: var(--muted); margin-left: 8px; }
+  .sub { color: var(--muted); margin: 6px 0 0; }
+  .pill { display: inline-block; border: 1.5px solid var(--line); border-radius: 999px; padding: 3px 12px; font-size: 0.88rem; font-weight: 600; margin-top: 12px; }
+  .pill.hi { border-color: var(--good); color: var(--good); }
+  .pill.mid { border-color: var(--tape); }
+  .pill.lo { border-color: var(--warn); color: var(--warn); }
+  h3 { font-size: 1.15rem; margin: 30px 0 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--muted); font-size: 0.86rem; }
+  tr.hl td { background: color-mix(in srgb, var(--tape) 18%, transparent); font-weight: 700; }
+  .scroll-x { overflow-x: auto; }
+  .good { color: var(--good); font-weight: 600; }
+  .warn { color: var(--warn); font-weight: 600; }
+
+  .scale { position: relative; height: 92px; margin: 18px 6px 4px; }
+  .rail { position: absolute; left: 0; right: 0; top: 34px; height: 26px; border: 1px solid var(--line); border-radius: 4px;
+    background-image: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 5%); }
+  .band { position: absolute; top: 34px; height: 26px; }
+  .band.sci { background: var(--band); }
+  .band.pro { background: var(--band-strong); top: 44px; height: 16px; }
+  .mk { position: absolute; top: 4px; transform: translateX(-50%); text-align: center; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+  .mk::after { content: ""; display: block; width: 3px; height: 54px; margin: 2px auto 0; background: var(--tape); outline: 1px solid var(--on-tape); }
+  .mk.cur { top: auto; bottom: -8px; }
+  .mk.cur::after { display: none; }
+  .mk.cur::before { content: ""; display: block; width: 3px; height: 14px; margin: 0 auto 2px; background: var(--ink); }
+  .ticks { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); position: absolute; left: 0; right: 0; top: 62px; pointer-events: none; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
+  .legend i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+  .parts { list-style: none; padding: 0; margin: 0; }
+  .parts li { display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .parts .pn { font-weight: 600; }
+  .parts .pv { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; }
+  .parts .pd { grid-column: 1 / -1; color: var(--muted); font-size: 0.88rem; }
+  ol.plan { padding-left: 1.2em; margin: 0; }
+  ol.plan li { margin: 0 0 10px; }
+  .note { border-left: 4px solid var(--tape); padding: 8px 14px; margin: 18px 0 0; background: color-mix(in srgb, var(--tape) 10%, transparent); border-radius: 0 6px 6px 0; font-size: 0.95rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+  .src { font-size: 0.92rem; color: var(--muted); padding-left: 1.2em; }
+  .src li { margin-bottom: 4px; }
+  .src a { color: var(--ink); }
+  .toast { font-size: 0.9rem; color: var(--muted); align-self: center; }
+  footer { margin-top: 22px; font-size: 0.85rem; color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .bar > i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tape" aria-hidden="true"></div>
+  <h1>Find your Valorant sensitivity</h1>
+  <p class="lede">Answer up to 22 short questions about your setup, your body, how you play, and (optionally) your season stats. You’ll get a starting cm/360, the sens to type in for your DPI, and a plan to test it.</p>
+
+  <main id="app" class="card" aria-live="polite"></main>
+
+  <footer>Built from published research and public pro-settings data. It gives you a well-grounded starting point, not a guarantee of a single “perfect” number. Nothing you enter leaves this page.</footer>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- Constants ---------- */
+var YAW = 0.07;
+var K = 360 * 2.54 / YAW;                 // cm/360 = K / (DPI * sens)
+var OTHER_YAW = { cs2: 0.022, apex: 0.022, ow2: 0.0066 };
+var BASE_CM = 45;
+var SCI_MIN = 20, SCI_MAX = 80;
+var PRO_Q1 = 914.4 / (YAW * 280), PRO_Q3 = 914.4 / (YAW * 184);
+
+/* ---------- State ---------- */
+function freshState() {
+  return {
+    dpiSel: null, dpiCustom: "", weight: null,
+    pad: null, lifts: null,
+    cur: "", measured: "", otherGame: "none", otherSens: "", sat: 3, miss: null,
+    style: null, grip: null, ache: null, monSize: 24.5, monDist: 60,
+    role: null, weapon: null, range: null, peek: null, scoped: null, priority: 3,
+    exp: null, train: null,
+    statsGate: null,
+    stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stKast: "", stFk: "", stFd: "", stWr: "", stPs: "", stPaste: ""
+  };
+}
+var S = freshState();
+var currentId = "dpi";
+
+/* ---------- Helpers ---------- */
+function pos(x) { var n = parseFloat(x); return isFinite(n) && n > 0 ? n : NaN; }
+function has(v) { return v !== "" && isFinite(parseFloat(v)); }
+function nv(v) { return parseFloat(v); }
+function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function getDpi() {
+  if (S.dpiSel === "unsure") return 800;
+  var d = S.dpiSel === "other" ? parseFloat(S.dpiCustom) : parseFloat(S.dpiSel);
+  return isFinite(d) ? d : NaN;
+}
+function anchor() {
+  var dpi = getDpi();
+  if (pos(S.measured) === pos(S.measured)) return { cm: pos(S.measured), src: "your measured cm/360" };
+  if (pos(S.cur) === pos(S.cur) && dpi > 0) return { cm: K / (dpi * pos(S.cur)), src: "your current Valorant sensitivity" };
+  if (S.otherGame !== "none" && pos(S.otherSens) === pos(S.otherSens) && dpi > 0)
+    return { cm: 914.4 / (dpi * pos(S.otherSens) * OTHER_YAW[S.otherGame]), src: "your sensitivity in another game" };
+  return null;
+}
+function sensFor(cm, dpi) { return K / (cm * dpi); }
+function f1(x) { return x.toFixed(1); }
+
+/* ---------- Season stats ---------- */
+var HS_REF = { iron: 13, gold: 22.4, plat: 26, diamond: 27.7, asc: 29.9 };
+var KD_RANGE = { iron: [0.8, 1.1], bronze: [0.8, 1.1], silver: [0.8, 1.1], gold: [1.0, 1.3], plat: [1.0, 1.3], diamond: [1.1, 1.5], asc: [1.1, 1.5], imm: [1.2, 99], rad: [1.2, 99] };
+var RANKS = [["unsure", "Not sure / unranked"], ["iron", "Iron"], ["bronze", "Bronze"], ["silver", "Silver"], ["gold", "Gold"], ["plat", "Platinum"], ["diamond", "Diamond"], ["asc", "Ascendant"], ["imm", "Immortal"], ["rad", "Radiant"]];
+
+function statsGiven() {
+  if (S.statsGate !== "yes") return false;
+  return has(S.stHs) || has(S.stKd) || has(S.stAdr) || has(S.stKast) || has(S.stWr) || has(S.stPs) || (has(S.stFk) && has(S.stFd));
+}
+function statsInfo() {
+  if (!statsGiven()) return null;
+  var rows = [], comps = [];
+  var rank = S.stRank;
+  var hsRef = HS_REF[rank] || 22;
+  var hsRefNote = HS_REF[rank] ? "median for your rank in one tracker’s sample" : "general “average to solid” level";
+  if (has(S.stHs)) {
+    var hs = nv(S.stHs);
+    var v = hs < hsRef - 3 ? ["Below", "warn"] : hs > hsRef + 3 ? ["Above", "good"] : ["Near", ""];
+    rows.push({ n: "Headshot %", val: hs.toFixed(1) + "%", ref: "about " + hsRef + "% (" + hsRefNote + ")", v: v });
+    comps.push(clamp((hs - hsRef) / 8, -1, 1));
+  }
+  if (has(S.stKd)) {
+    var kd = nv(S.stKd);
+    var rg = KD_RANGE[rank];
+    var refTxt, v2;
+    if (rg) {
+      refTxt = rg[1] >= 99 ? rg[0] + " or higher" : rg[0] + "–" + rg[1];
+      v2 = kd < rg[0] ? ["Below", "warn"] : kd > rg[1] ? ["Above", "good"] : ["Within", ""];
+      comps.push(clamp((kd - (rg[1] >= 99 ? 1.3 : (rg[0] + rg[1]) / 2)) / 0.3, -1, 1));
+    } else {
+      refTxt = "1.0 means you trade evenly";
+      v2 = kd < 0.9 ? ["Below", "warn"] : kd > 1.1 ? ["Above", "good"] : ["Even", ""];
+      comps.push(clamp((kd - 1.0) / 0.3, -1, 1));
+    }
+    rows.push({ n: "K/D", val: kd.toFixed(2), ref: refTxt, v: v2 });
+  }
+  if (has(S.stAdr)) {
+    var adr = nv(S.stAdr);
+    var v3 = adr < 110 ? ["Below solid", "warn"] : adr < 130 ? ["Solid", ""] : adr < 150 ? ["Strong", "good"] : ["Very strong", "good"];
+    rows.push({ n: "ADR (damage per round)", val: adr.toFixed(0), ref: "110–130 is solid, 150+ is strong", v: v3 });
+    comps.push(clamp((adr - 120) / 30, -1, 1));
+  }
+  if (has(S.stKast)) {
+    var ka = nv(S.stKast);
+    var v4 = ka < 65 ? ["Below", "warn"] : ka < 75 ? ["Good", "good"] : ["Star level", "good"];
+    rows.push({ n: "KAST %", val: ka.toFixed(0) + "%", ref: "above 65% is good, 75–85% is star level", v: v4 });
+  }
+  if (has(S.stFk) && has(S.stFd) && nv(S.stFd) > 0) {
+    var r = nv(S.stFk) / nv(S.stFd);
+    var v5 = r > 1.1 ? ["Winning openers", "good"] : r >= 0.9 ? ["Even", ""] : ["Losing openers", "warn"];
+    rows.push({ n: "First bloods ÷ first deaths", val: r.toFixed(2), ref: "above 1.0 is good for entry roles; support roles often sit lower", v: v5 });
+  }
+  if (has(S.stWr)) {
+    var wr = nv(S.stWr);
+    rows.push({ n: "Win rate", val: wr.toFixed(0) + "%", ref: "50% is break-even", v: wr > 52 ? ["Above", "good"] : wr < 48 ? ["Below", "warn"] : ["Near", ""] });
+  }
+  if (has(S.stPs)) {
+    rows.push({ n: "Performance Score (average)", val: nv(S.stPs).toFixed(0), ref: "no official benchmark; tracked as your baseline", v: ["Baseline", ""] });
+  }
+  var matches = has(S.stMatches) ? nv(S.stMatches) : 15;
+  var sw = clamp(matches / 30, 0, 1);
+  var aim = comps.length ? (comps.reduce(function (a, b) { return a + b; }, 0) / comps.length) * sw : 0;
+  return { rows: rows, aim: aim, sw: sw, matches: has(S.stMatches) ? nv(S.stMatches) : null, hsLow: has(S.stHs) && nv(S.stHs) < hsRef - 5 };
+}
+
+/* ---------- Model ---------- */
+var F = {
+  style:  { wrist: 0.70, wf: 0.85, forearm: 1.0, arm: 1.25, unsure: 1.0 },
+  grip:   { palm: 1.03, claw: 1.0, tip: 0.95, unsure: 1.0 },
+  role:   { duelist: 0.93, init: 0.97, ctrl: 1.0, sent: 1.07, flex: 1.0 },
+  weapon: { rifle: 1.0, spray: 0.97, sniper: 1.1, close: 0.92 },
+  range:  { close: 0.95, mixed: 1.0, long: 1.06 },
+  peek:   { hold: 1.04, mixed: 1.0, swing: 0.96 },
+  ache:   { none: 1.0, some: 1.05, often: 1.12, unsure: 1.0 },
+  lifts:  { never: 1.0, some: 0.96, often: 0.88, unsure: 1.0 },
+  miss:   { over: 1.15, under: 0.87, mixed: 1.0, unsure: 1.0 }
+};
+var PAD_W = { 22: 22, 32: 32, 42: 42, 55: 55, 72: 72, 90: 90 };
+
+function compute() {
+  var parts = [], notes = [];
+  var prod = 1;
+  function add(label, f, ev, desc) { parts.push({ label: label, f: f, ev: ev, desc: desc }); prod *= f; }
+
+  add("Aiming style", F.style[S.style], "moderate", S.style === "unsure"
+    ? "You weren’t sure, so no adjustment was made and your suggested range is a bit wider. The test plan will help you find out."
+    : "Wrist aimers need fast, small movements; arm aimers need room. Sensitivity and joint use track each other (CHI 2024).");
+  add("Grip", F.grip[S.grip], "weak", "Tiny effect. Mostly about comfort, not accuracy.");
+  add("Agent type", F.role[S.role], "weak", "Community tendency only: entry roles lean a bit faster, anchors a bit slower.");
+  add("Main weapon", F.weapon[S.weapon], "weak", "Long-range and precision shots favor slower; close-range favors faster.");
+  add("Typical fight distance", F.range[S.range], "weak", "Longer sightlines reward fine control; tight spaces reward quick repositioning.");
+  add("How you take fights", F.peek[S.peek], "weak", "Holding angles means small corrections; wide swings mean bigger flicks.");
+  add("Control vs. turning speed", Math.exp(-0.08 * (S.priority - 3)), "moderate", "The speed–precision trade-off is the core finding in the lab data.");
+  add("Wrist/forearm soreness", F.ache[S.ache], "moderate", "More wrist use correlated with higher upper-limb load. A slower setting moves effort toward the arm.");
+
+  var W = S.monSize * 16 / Math.sqrt(16 * 16 + 9 * 9);
+  var theta = 2 * Math.atan((W / 2) / S.monDist) * 180 / Math.PI;
+  add("Screen size and distance", clamp(Math.pow(theta / 48.4, 0.15), 0.95, 1.05), "weak", "Physical reasoning only (capped at ±5%). Your screen spans about " + theta.toFixed(0) + "° of your view.");
+
+  var si = statsInfo();
+  if (si && si.hsLow) add("Season headshot rate", 1 + 0.04 * si.sw, "weak", "Your headshot rate is well below the usual level for your rank. That can mean you need finer control on small corrections, but it can also just be crosshair placement or weapon choice, so this is a small nudge.");
+
+  prod = clamp(prod, 0.6, 1.6);
+  var model = BASE_CM * prod;
+
+  var a = anchor();
+  var target, weight = 0, shift = 0;
+  if (a) {
+    var k = (6 - S.sat) / 5;
+    var adj = a.cm * Math.pow(F.miss[S.miss || "mixed"], k) * Math.pow(F.lifts[S.lifts], k);
+    shift = si ? 0.10 * si.aim : 0;
+    weight = clamp(0.25 + 0.15 * (S.sat - 1) + shift, 0.15, 0.9);
+    target = Math.exp(weight * Math.log(adj) + (1 - weight) * Math.log(model));
+  } else {
+    target = model * F.lifts[S.lifts];
+  }
+
+  var unclamped = target;
+  target = clamp(target, SCI_MIN, SCI_MAX);
+  if (unclamped !== target) notes.push("Your answers pointed outside the 20–80 cm/360 range where lab players performed best, so the result was pulled back inside it.");
+
+  var cap = Math.max(SCI_MIN, PAD_W[S.pad] * 1.15);
+  if (target > cap) {
+    target = cap;
+    notes.push("Your swipe space is smaller than the ideal value, so the result was capped near your usable width. A larger pad would let you run slower if you want to.");
+  }
+
+  var spread = (S.exp === "new" ? 0.18 : 0.12) + (a ? 0 : 0.04) + (S.style === "unsure" ? 0.03 : 0) + (S.train === "none" ? 0.02 : 0);
+
+  var unsureCount = ["style", "grip", "ache", "lifts", "miss"].filter(function (k2) { return S[k2] === "unsure"; }).length;
+  var pts = 0, why = [];
+  if (a) { pts += S.sat >= 4 ? 3 : 2; why.push("you gave a current setting"); } else why.push("no current setting to anchor to");
+  if (si && si.matches !== null && si.matches >= 15) { pts += 1; why.push("season stats with a decent sample"); }
+  if (S.exp !== "new") { pts += 1; why.push("some experience"); } else why.push("you’re newer to tactical shooters");
+  if (S.style !== "unsure") pts += 1;
+  pts -= unsureCount;
+  if (unsureCount > 0) why.push(unsureCount + " “not sure” answer" + (unsureCount > 1 ? "s" : ""));
+  var conf = pts >= 5 ? "high" : pts >= 3 ? "medium" : "low";
+
+  return { cm: target, parts: parts, notes: notes, anchor: a, weight: weight, shift: shift, model: model, spread: spread, si: si, conf: conf, why: why };
+}
+
+/* ---------- DOM helpers ---------- */
+function el(tag, attrs, html) {
+  var n = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+  if (html != null) n.innerHTML = html;
+  return n;
+}
+function choices(host, key, opts, cols) {
+  var wrap = el("div", { "class": "choices" + (cols ? " c" + cols : ""), role: "group" });
+  opts.forEach(function (o) {
+    var b = el("button", { type: "button", "class": "choice", "aria-pressed": String(S[key] === o.v) },
+      '<span class="c-l">' + o.l + '</span>' + (o.s ? '<span class="c-s">' + o.s + '</span>' : ""));
+    b.addEventListener("click", function () {
+      S[key] = o.v;
+      Array.prototype.forEach.call(wrap.children, function (c) { c.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true");
+      refreshNav();
+    });
+    wrap.appendChild(b);
+  });
+  host.appendChild(wrap);
+}
+function numField(host, label, key, opts) {
+  var box = el("div");
+  box.appendChild(el("label", { "class": "f", "for": "in-" + key }, label));
+  var i = el("input", { type: "number", id: "in-" + key, inputmode: "decimal", step: "any", min: "0" });
+  if (opts && opts.ph) i.setAttribute("placeholder", opts.ph);
+  i.value = S[key];
+  i.addEventListener("input", function () { S[key] = i.value; refreshNav(); });
+  box.appendChild(i);
+  host.appendChild(box);
+  return i;
+}
+function slider(host, key, endsL, endsR, min, max) {
+  var i = el("input", { type: "range", min: String(min), max: String(max), step: "1", "aria-label": "Rating from " + min + " to " + max });
+  i.value = S[key];
+  i.addEventListener("input", function () { S[key] = parseInt(i.value, 10); });
+  host.appendChild(i);
+  host.appendChild(el("div", { "class": "ends" }, "<span>" + endsL + "</span><span>" + endsR + "</span>"));
+}
+function okRange(v, lo, hi) { return v === "" || (isFinite(parseFloat(v)) && parseFloat(v) >= lo && parseFloat(v) <= hi); }
+
+/* ---------- Paste parser ---------- */
+function grab(text, labels, intOnly) {
+  var num = intOnly ? "([0-9][0-9,]*)" : "([0-9]+(?:\\.[0-9]+)?)";
+  for (var i = 0; i < labels.length; i++) {
+    var after = new RegExp(labels[i] + "[^0-9\\n]{0,24}" + num, "i").exec(text);
+    if (after) return after[1].replace(/,/g, "");
+    var before = new RegExp(num + "\\s*%?\\s*" + labels[i], "i").exec(text);
+    if (before) return before[1].replace(/,/g, "");
+  }
+  return null;
+}
+function parseStats(text) {
+  var map = [
+    ["stHs", ["head\\s*shots?(?:\\s*(?:%|rate|percentage))?"], false],
+    ["stKd", ["K\\s*\\/\\s*D(?:\\s*ratio)?"], false],
+    ["stAdr", ["ADR", "damage\\s*\\/\\s*round", "damage\\s*per\\s*round"], false],
+    ["stKast", ["KAST"], false],
+    ["stWr", ["win\\s*(?:rate|%)"], false],
+    ["stMatches", ["matches(?:\\s*played)?", "games(?:\\s*played)?"], true],
+    ["stFk", ["first\\s*bloods?"], true],
+    ["stFd", ["first\\s*deaths?"], true],
+    ["stPs", ["performance\\s*score"], false]
+  ];
+  var n = 0;
+  map.forEach(function (m) {
+    try { var v = grab(text, m[1], m[2]); if (v !== null) { S[m[0]] = v; n++; } } catch (e) {}
+  });
+  return n;
+}
+
+/* ---------- Questions ---------- */
+var Q = [
+  /* Your setup */
+  { id: "dpi", sec: "Your setup", ev: "calibration", title: "What DPI is your mouse set to?",
+    why: "DPI is a mouse setting. We need it to turn your result into the number you type into Valorant. Check your mouse software if you’re unsure.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "dpiSel", [{ v: "400", l: "400" }, { v: "800", l: "800", s: "Most common" }, { v: "1600", l: "1600" }, { v: "other", l: "Another number" }, { v: "unsure", l: "Not sure", s: "We’ll assume 800" }], 2);
+      var box = el("div"); h.appendChild(box);
+      function sync() { box.innerHTML = ""; if (S.dpiSel === "other") numField(box, "Your DPI", "dpiCustom", { ph: "e.g. 3200" }); }
+      h.querySelectorAll(".choice").forEach(function (b) { b.addEventListener("click", sync); });
+      sync();
+    },
+    valid: function () { var d = getDpi(); return d >= 100 && d <= 32000; } },
+
+  { id: "weight", sec: "Your setup", ev: "weak", title: "How heavy is your mouse?",
+    why: "The weight is printed on the box or the maker’s website. It doesn’t change your number, but very heavy mice can make aim harder to control.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "weight", [
+        { v: "u60", l: "Under 60 g", s: "Ultralight" },
+        { v: "u80", l: "60–80 g" },
+        { v: "u100", l: "80–100 g" },
+        { v: "o100", l: "Over 100 g" },
+        { v: "unsure", l: "Not sure" }], 2);
+    },
+    valid: function () { return !!S.weight; } },
+
+  { id: "pad", sec: "Your setup", ev: "strong", title: "How much room do you have to swipe sideways?",
+    why: "Slower sensitivities need more space. Measure the flat area where your mouse glides, from edge to edge.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "pad", [
+        { v: 22, l: "Under 28 cm", s: "Small pad" },
+        { v: 32, l: "28–38 cm", s: "Medium pad" },
+        { v: 42, l: "38–48 cm", s: "Standard large pad (about 45 cm)" },
+        { v: 55, l: "48–65 cm", s: "Extended pad" },
+        { v: 72, l: "65–85 cm", s: "XL pad" },
+        { v: 90, l: "85 cm or more", s: "Desk mat or full desk" }], 2);
+    },
+    valid: function () { return S.pad !== null; } },
+
+  { id: "lifts", sec: "Your setup", ev: "moderate", title: "How often do you reach the edge of your pad and have to lift the mouse?",
+    why: "Lifting mid-fight costs time and precision. If it happens a lot, your setting is too slow for your space.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "lifts", [
+        { v: "never", l: "Almost never" },
+        { v: "some", l: "Sometimes", s: "Mostly on big turns" },
+        { v: "often", l: "Often", s: "Even in normal fights" },
+        { v: "unsure", l: "Not sure", s: "I haven’t noticed" }]);
+    },
+    valid: function () { return !!S.lifts; } },
+
+  /* Your current sensitivity */
+  { id: "cur", sec: "Your current settings", ev: "strong", title: "What sensitivity do you use in Valorant right now?",
+    why: "This is the best clue we have. In Valorant it’s in Settings, then General, then Mouse. Leave both blank if you’re new, and we’ll build the result from your other answers.",
+    show: function () { return true; },
+    render: function (h) {
+      var row = el("div", { "class": "row" });
+      numField(row, "In-game sensitivity <small>(at the DPI above)</small>", "cur", { ph: "e.g. 0.35" });
+      numField(row, "Or measured cm/360 <small>(optional, more exact)</small>", "measured", { ph: "e.g. 46" });
+      h.appendChild(row);
+      h.appendChild(el("p", { "class": "tip" }, "Measured cm/360: put your crosshair on a landmark, drag the mouse in a straight line until you’ve spun all the way around, and measure the distance with a ruler."));
+    },
+    valid: function () { return (S.cur === "" || pos(S.cur) === pos(S.cur)) && (S.measured === "" || pos(S.measured) === pos(S.measured)); } },
+
+  { id: "other", sec: "Your current settings", ev: "strong", title: "Do you play another shooter where your aim feels good?",
+    why: "We can copy the same hand movement into Valorant so your muscle memory carries over.",
+    show: function () { return S.cur === "" && S.measured === ""; },
+    render: function (h) {
+      h.appendChild(el("label", { "class": "f", "for": "og" }, "Game"));
+      var sel = el("select", { id: "og" }, '<option value="none">None, skip this</option><option value="cs2">Counter-Strike 2</option><option value="apex">Apex Legends</option><option value="ow2">Overwatch 2</option>');
+      sel.value = S.otherGame;
+      var box = el("div");
+      function sync() { box.innerHTML = ""; if (S.otherGame !== "none") numField(box, "Your in-game sensitivity <small>(at the DPI above)</small>", "otherSens", { ph: "e.g. 1.2" }); }
+      sel.addEventListener("change", function () { S.otherGame = sel.value; sync(); refreshNav(); });
+      h.appendChild(sel); h.appendChild(box); sync();
+    },
+    valid: function () { return S.otherGame === "none" || pos(S.otherSens) === pos(S.otherSens); } },
+
+  { id: "sat", sec: "Your current settings", ev: "calibration", title: "How does your current sensitivity feel?",
+    why: "The happier you are with it, the more we keep it close. If you’re fighting it, we lean more on the research-based estimate.",
+    show: function () { return anchor() !== null; },
+    render: function (h) { slider(h, "sat", "1: I fight it constantly", "5: It feels natural", 1, 5); },
+    valid: function () { return true; } },
+
+  { id: "miss", sec: "Your current settings", ev: "moderate", title: "When you miss a head, how does it usually go wrong?",
+    why: "Flying past the head means your crosshair moves too fast for your hand. Stopping short, or feeling too slow to catch up, means the opposite.",
+    show: function () { return anchor() !== null; },
+    render: function (h) {
+      choices(h, "miss", [
+        { v: "over", l: "I fly past it", s: "I overshoot and have to correct back" },
+        { v: "under", l: "I stop short or feel slow", s: "I can’t quite get there in time" },
+        { v: "mixed", l: "Both about equally" },
+        { v: "unsure", l: "Not sure", s: "I haven’t noticed" }]);
+    },
+    valid: function () { return !!S.miss; } },
+
+  /* Your body */
+  { id: "style", sec: "Your body and grip", ev: "moderate", title: "Which part of your arm does most of the aiming?",
+    why: "Not sure? Rest your hand on the pad and swipe side to side as if turning around. If your forearm stays put and just the hand pivots, that’s wrist. If your elbow or shoulder moves the mouse, that’s arm. “Not sure” is fine.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "style", [
+        { v: "wrist", l: "Mostly wrist", s: "Forearm stays still, small fast flicks" },
+        { v: "wf", l: "Wrist and forearm", s: "Wrist for small moves, forearm for bigger ones" },
+        { v: "forearm", l: "Forearm and elbow", s: "Pivoting from the elbow" },
+        { v: "arm", l: "Whole arm", s: "Shoulder and elbow move, wrist stays quiet" },
+        { v: "unsure", l: "Not sure", s: "I’ve never paid attention" }]);
+    },
+    valid: function () { return !!S.style; } },
+
+  { id: "grip", sec: "Your body and grip", ev: "weak", title: "How do you hold the mouse?",
+    why: "Grip has a small effect, mostly on comfort. We apply only a few percent.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "grip", [
+        { v: "palm", l: "Palm", s: "Whole hand rests on the mouse" },
+        { v: "claw", l: "Claw", s: "Fingers arched, palm touching the back" },
+        { v: "tip", l: "Fingertip", s: "Only fingertips touch" },
+        { v: "unsure", l: "Not sure" }], 2);
+    },
+    valid: function () { return !!S.grip; } },
+
+  { id: "ache", sec: "Your body and grip", ev: "moderate", title: "Do your wrist or forearm get sore after long sessions?",
+    why: "Heavier wrist use correlated with more load on the arm in research. If you’re sore, a slower setting that spreads movement across the arm can help. This isn’t medical advice; ongoing pain deserves a professional’s opinion.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "ache", [{ v: "none", l: "No" }, { v: "some", l: "Sometimes" }, { v: "often", l: "Often" }, { v: "unsure", l: "Not sure" }], 2);
+    },
+    valid: function () { return !!S.ache; } },
+
+  { id: "mon", sec: "Your body and grip", ev: "weak", title: "How big is your screen, and how far are your eyes from it?",
+    why: "Your result in cm/360 doesn’t depend on the screen. How big it looks to you only affects comfort a little, so we cap this at 5%.",
+    show: function () { return true; },
+    render: function (h) {
+      var row = el("div", { "class": "row" });
+      numField(row, "Screen size <small>(inches, diagonal)</small>", "monSize");
+      numField(row, "Distance to your eyes <small>(cm)</small>", "monDist");
+      h.appendChild(row);
+    },
+    valid: function () { return pos(S.monSize) === pos(S.monSize) && pos(S.monDist) === pos(S.monDist) && S.monSize < 70 && S.monDist < 300; } },
+
+  /* How you play */
+  { id: "role", sec: "How you play", ev: "weak", title: "Which type of agent do you play most?",
+    why: "Entry players take faster, messier fights. Anchors hold angles. Community data shows tendencies, not rules.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "role", [
+        { v: "duelist", l: "Duelist", s: "First into the site" },
+        { v: "init", l: "Initiator", s: "Flashes and info to set up your team" },
+        { v: "ctrl", l: "Controller", s: "Smokes and map control" },
+        { v: "sent", l: "Sentinel", s: "Holds angles and defends" },
+        { v: "flex", l: "A mix of everything" }], 2);
+    },
+    valid: function () { return !!S.role; } },
+
+  { id: "weapon", sec: "How you play", ev: "weak", title: "Which weapon do you use most?",
+    why: "Tight, long shots reward control. Close fights reward quick repositioning.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "weapon", [
+        { v: "rifle", l: "Rifle, tap and burst", s: "Vandal or Phantom, controlled shots" },
+        { v: "spray", l: "Rifle, aggressive spray", s: "Lots of swinging and tracking" },
+        { v: "sniper", l: "Operator or Marshal", s: "Slow, deliberate angles" },
+        { v: "close", l: "SMG or shotgun", s: "Close-range fights" }], 2);
+    },
+    valid: function () { return !!S.weapon; } },
+
+  { id: "range", sec: "How you play", ev: "weak", title: "Where do most of your fights happen?",
+    why: "Think about where you usually win or lose duels.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "range", [
+        { v: "close", l: "Up close", s: "Tight corners and short lanes" },
+        { v: "mixed", l: "A mix of distances" },
+        { v: "long", l: "Far away", s: "Long lanes and big open sightlines" }]);
+    },
+    valid: function () { return !!S.range; } },
+
+  { id: "peek", sec: "How you play", ev: "weak", title: "How do you usually take a fight?",
+    why: "Holding an angle means small, precise adjustments. Swinging wide means bigger, faster flicks.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "peek", [
+        { v: "hold", l: "I hold an angle and wait", s: "Small, careful corrections" },
+        { v: "mixed", l: "A mix of both" },
+        { v: "swing", l: "I swing wide or shoulder-peek", s: "Bigger, faster flicks" }]);
+    },
+    valid: function () { return !!S.peek; } },
+
+  { id: "scoped", sec: "How you play", ev: "calibration", title: "How often do you use scoped weapons, like the Operator or Marshal?",
+    why: "This doesn’t change your main number. It decides what we suggest for your scoped sensitivity setting.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "scoped", [{ v: "never", l: "Rarely or never" }, { v: "some", l: "Sometimes" }, { v: "main", l: "It’s my main weapon" }]);
+    },
+    valid: function () { return !!S.scoped; } },
+
+  { id: "priority", sec: "How you play", ev: "moderate", title: "Would you rather have steadier aim or faster turning?",
+    why: "Lab players traded speed for precision as targets got smaller and farther away. Pick where you want to sit on that trade-off.",
+    show: function () { return true; },
+    render: function (h) { slider(h, "priority", "1: Steadiest aim", "5: Fastest turning", 1, 5); },
+    valid: function () { return true; } },
+
+  /* Background */
+  { id: "exp", sec: "Your background", ev: "calibration", title: "How long have you played tactical shooters?",
+    why: "This doesn’t change the number. It changes how wide we make your suggested range, because newer players have a less settled preference.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "exp", [
+        { v: "new", l: "Under 6 months" }, { v: "mid", l: "6 months to 2 years" },
+        { v: "exp", l: "2+ years" }, { v: "comp", l: "Competitive or Diamond and up" }], 2);
+    },
+    valid: function () { return !!S.exp; } },
+
+  { id: "train", sec: "Your background", ev: "calibration", title: "Do you warm up or use an aim trainer?",
+    why: "Having a way to test is what lets you fine-tune later. This only changes how wide the range is and what we suggest for testing.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "train", [
+        { v: "none", l: "Rarely or never" }, { v: "some", l: "A few times a week" }, { v: "regular", l: "Almost every session" }]);
+    },
+    valid: function () { return !!S.train; } },
+
+  /* Stats */
+  { id: "statsGate", sec: "Your season stats", ev: "calibration", title: "Do you want to add your season stats?",
+    why: "Stats show whether your current setup is working. They can’t tell us which way to change it, so they only nudge the result a little. They’re also useful as a “before” snapshot to compare against after you switch.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "statsGate", [
+        { v: "yes", l: "Yes, add my stats", s: "Takes about a minute with a tracker open" },
+        { v: "no", l: "Skip this", s: "You’ll still get a full result" }]);
+    },
+    valid: function () { return !!S.statsGate; } },
+
+  { id: "stats", sec: "Your season stats", ev: "weak", title: "Enter your stats for this season",
+    why: "Fill in what you can and leave the rest blank. A bigger sample of matches makes the stats count for more.",
+    show: function () { return S.statsGate === "yes"; },
+    render: function (h) {
+      h.appendChild(el("details", null,
+        "<summary>Where do I find these?</summary><p>Valorant’s own screens show your Performance Score and match history. Headshot %, ADR, KAST, and K/D come from tracker sites such as tracker.gg. Never enter your Riot password on a tracker. Since patch 13.06 (Sept 22, 2026), the old ACS has been replaced by a 0–500 Performance Score, so that’s what we ask for.</p>"));
+      var r0 = el("div", { "class": "row" });
+      var rb = el("div");
+      rb.appendChild(el("label", { "class": "f", "for": "in-rank" }, "Current rank"));
+      var sel = el("select", { id: "in-rank" }, RANKS.map(function (r) { return '<option value="' + r[0] + '">' + r[1] + "</option>"; }).join(""));
+      sel.value = S.stRank;
+      sel.addEventListener("change", function () { S.stRank = sel.value; });
+      rb.appendChild(sel); r0.appendChild(rb);
+      numField(r0, "Matches played <small>(this season)</small>", "stMatches", { ph: "e.g. 60" });
+      h.appendChild(r0);
+      var r1 = el("div", { "class": "row" });
+      numField(r1, "Headshot %", "stHs", { ph: "e.g. 24" });
+      numField(r1, "K/D", "stKd", { ph: "e.g. 1.1" });
+      numField(r1, "ADR <small>(damage/round)</small>", "stAdr", { ph: "e.g. 135" });
+      h.appendChild(r1);
+      var r2 = el("div", { "class": "row" });
+      numField(r2, "KAST %", "stKast", { ph: "e.g. 72" });
+      numField(r2, "Win rate %", "stWr", { ph: "e.g. 51" });
+      numField(r2, "Performance Score <small>(avg, 0–500)</small>", "stPs", { ph: "e.g. 230" });
+      h.appendChild(r2);
+      var r3 = el("div", { "class": "row" });
+      numField(r3, "First bloods <small>(season total)</small>", "stFk", { ph: "e.g. 30" });
+      numField(r3, "First deaths <small>(season total)</small>", "stFd", { ph: "e.g. 28" });
+      h.appendChild(r3);
+
+      var det = el("details", null, "<summary>Or paste your tracker’s summary</summary>");
+      var pasteInfo = el("p", null, "Copy the stats text from your tracker and paste it here. We’ll fill in what we recognize, and you can fix anything that looks wrong above. Nothing is sent anywhere.");
+      var ta = el("textarea", { id: "paste", "aria-label": "Pasted stats text", placeholder: "e.g. Headshot % 24.1  K/D 1.12  ADR 138  KAST 71%  Win Rate 52%" });
+      ta.value = S.stPaste;
+      ta.addEventListener("input", function () { S.stPaste = ta.value; });
+      var btn = el("button", { type: "button", "class": "btn mini" }, "Fill from pasted text");
+      var msg = el("p", { "class": "tip", role: "status" });
+      btn.addEventListener("click", function () {
+        var n = parseStats(S.stPaste || "");
+        if (n === 0) { msg.textContent = "We didn’t recognize any stats in that text. Try typing them in above."; }
+        else { renderQ(); var m2 = document.getElementById("pasteMsg"); if (m2) m2.textContent = "Filled " + n + " field" + (n > 1 ? "s" : "") + ". Check them above."; }
+      });
+      msg.id = "pasteMsg";
+      det.appendChild(pasteInfo); det.appendChild(ta); det.appendChild(btn); det.appendChild(msg);
+      h.appendChild(det);
+    },
+    valid: function () {
+      return okRange(S.stHs, 0, 100) && okRange(S.stKd, 0, 10) && okRange(S.stAdr, 0, 400) && okRange(S.stKast, 0, 100) &&
+        okRange(S.stWr, 0, 100) && okRange(S.stPs, 0, 500) && okRange(S.stMatches, 0, 5000) && okRange(S.stFk, 0, 5000) && okRange(S.stFd, 0, 5000);
+    } }
+];
+
+/* ---------- Flow ---------- */
+var app = document.getElementById("app");
+function visible() { return Q.filter(function (q) { return q.show(); }); }
+function idxOf(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return i; return 0; }
+function qNow() { return Q.filter(function (q) { return q.id === currentId; })[0]; }
+function refreshNav() { var q = qNow(); var nx = document.getElementById("next"); if (nx && q) nx.disabled = !q.valid(); }
+
+function renderQ() {
+  var list = visible();
+  var i = idxOf(list, currentId);
+  var q = list[i]; currentId = q.id;
+  app.innerHTML = "";
+  var pct = Math.round((i / list.length) * 100);
+  app.appendChild(el("div", { "class": "meta" }, "<span><b>" + q.sec + "</b>, question " + (i + 1) + " of " + list.length + "</span><span>" + pct + "%</span>"));
+  app.appendChild(el("div", { "class": "bar", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(pct) }, '<i style="width:' + pct + '%"></i>'));
+  var evMap = { strong: [3, "Evidence: strong"], moderate: [2, "Evidence: moderate"], weak: [1, "Evidence: weak, small adjustment"], calibration: [0, "Used for calibration, not the estimate itself"] };
+  var e = evMap[q.ev];
+  var pips = "";
+  for (var p = 0; p < 3; p++) pips += '<b class="' + (p < e[0] ? "on" : "") + '"></b>';
+  app.appendChild(el("h2", { tabindex: "-1", id: "qh" }, q.title));
+  app.appendChild(el("p", { "class": "why" }, q.why));
+  app.appendChild(el("div", { "class": "ev" }, '<span class="pips" aria-hidden="true">' + pips + "</span><span>" + e[1] + "</span>"));
+  var body = el("div"); app.appendChild(body);
+  q.render(body);
+  var isLast = i === list.length - 1;
+  var nav = el("div", { "class": "nav" });
+  var back = el("button", { type: "button", "class": "btn", id: "back" }, "Back");
+  back.disabled = i === 0;
+  back.addEventListener("click", function () { var l = visible(); var j = idxOf(l, currentId); if (j > 0) { currentId = l[j - 1].id; renderQ(); focusH(); } });
+  var next = el("button", { type: "button", "class": "btn primary", id: "next" }, isLast ? "Show my result" : "Next");
+  next.addEventListener("click", function () {
+    var l = visible(); var j = idxOf(l, currentId);
+    if (j < l.length - 1) { currentId = l[j + 1].id; renderQ(); focusH(); } else { renderResult(); }
+  });
+  nav.appendChild(back); nav.appendChild(next);
+  app.appendChild(nav);
+  refreshNav();
+}
+function focusH() { var h = document.getElementById("qh"); if (h) { h.focus({ preventScroll: true }); h.scrollIntoView({ block: "start" }); } }
+
+/* ---------- Results ---------- */
+function renderResult() {
+  var R = compute();
+  var dpi = getDpi();
+  var cm = R.cm;
+  var lo = Math.max(SCI_MIN, cm / (1 + R.spread)), hi = Math.min(SCI_MAX, cm * (1 + R.spread));
+  var s = sensFor(cm, dpi);
+  var edpi = dpi * s;
+  var fast = Math.max(SCI_MIN, cm * 0.87), slow = Math.min(SCI_MAX, cm * 1.15);
+  var a = R.anchor;
+  var si = R.si;
+
+  var vs;
+  if (cm < PRO_Q1 - 2) vs = "That’s faster than most pros. The middle half of verified Valorant pros run about " + f1(PRO_Q1) + "–" + f1(PRO_Q3) + " cm/360.";
+  else if (cm > PRO_Q3 + 2) vs = "That’s slower than most pros. The middle half of verified Valorant pros run about " + f1(PRO_Q1) + "–" + f1(PRO_Q3) + " cm/360.";
+  else vs = "That sits inside the middle half of verified Valorant pros (about " + f1(PRO_Q1) + "–" + f1(PRO_Q3) + " cm/360).";
+
+  var dpiRows = [400, 800, 1600].concat([dpi]).filter(function (v, i, arr) { return arr.indexOf(v) === i; }).sort(function (x, y) { return x - y; })
+    .map(function (d) {
+      var ss = sensFor(cm, d);
+      return '<tr class="' + (d === dpi ? "hl" : "") + '"><td>' + d + (d === dpi ? " (yours)" : "") + "</td><td>" + ss.toFixed(3) + "</td><td>" + Math.round(d * ss) + "</td></tr>";
+    }).join("");
+
+  function pc(x) { return Math.min(100, x) + "%"; }
+  var scale =
+    '<div class="scale" role="img" aria-label="Scale from 0 to 100 centimeters per 360 degrees showing the research range, the pro middle half, and your result">' +
+    '<div class="rail"></div>' +
+    '<div class="band sci" style="left:' + pc(SCI_MIN) + ";width:" + (SCI_MAX - SCI_MIN) + '%"></div>' +
+    '<div class="band pro" style="left:' + pc(PRO_Q1) + ";width:" + (PRO_Q3 - PRO_Q1) + '%"></div>' +
+    '<div class="mk" style="left:' + pc(cm) + '">' + f1(cm) + " cm</div>" +
+    (a ? '<div class="mk cur" style="left:' + pc(a.cm) + '">now ' + f1(a.cm) + "</div>" : "") +
+    '<div class="ticks"><span>0</span><span>20</span><span>40</span><span>60</span><span>80</span><span>100 cm</span></div></div>' +
+    '<div class="legend"><span><i style="background:var(--band)"></i>Best range in lab study (20–80)</span><span><i style="background:var(--band-strong)"></i>Pro middle half</span><span><i style="background:var(--tape);outline:1px solid var(--on-tape)"></i>Your result</span></div>';
+
+  var partsHtml = R.parts.map(function (p) {
+    var pctv = Math.round((p.f - 1) * 100);
+    var txt = pctv === 0 ? "no change" : (pctv > 0 ? "+" + pctv + "% slower" : Math.abs(pctv) + "% faster");
+    return '<li><span class="pn">' + p.label + '</span><span class="pv">' + txt + '</span><span class="pd">' + p.desc + " Evidence: " + p.ev + ".</span></li>";
+  }).join("");
+
+  var anchorHtml;
+  if (a) {
+    var shiftTxt = Math.abs(R.shift) >= 0.005 ? " Your season stats " + (R.shift > 0 ? "raised" : "lowered") + " that weight by " + Math.abs(Math.round(R.shift * 100)) + " points, because " + (R.shift > 0 ? "your numbers suggest your current setup is working." : "your numbers suggest it may not be.") : "";
+    anchorHtml = '<li><span class="pn">Anchored to ' + a.src + '</span><span class="pv">' + f1(a.cm) + ' cm</span><span class="pd">Weighted ' + Math.round(R.weight * 100) + "% toward your current feel (after your miss pattern and pad-edge answers) and " + Math.round((1 - R.weight) * 100) + "% toward the profile estimate of " + f1(R.model) + " cm." + shiftTxt + "</span></li>";
+  } else {
+    anchorHtml = '<li><span class="pn">No current setting to anchor to</span><span class="pv">' + f1(R.model) + ' cm</span><span class="pd">The estimate starts from a neutral 45 cm and adjusts from your answers, so the suggested range is a little wider.</span></li>';
+  }
+
+  var noteHtml = R.notes.map(function (n) { return '<div class="note">' + n + "</div>"; }).join("");
+  if (S.dpiSel === "unsure") noteHtml += '<div class="note">You weren’t sure of your DPI, so the table below assumes 800. Check your mouse software, then use the row that matches.</div>';
+  if (S.exp === "new") noteHtml += '<div class="note">Because you’re newer to tactical shooters, don’t chase decimals. The optimum is broad, so pick the center value, commit, and let your hands adapt.</div>';
+  if (S.weight === "o100") noteHtml += '<div class="note">Your mouse is on the heavy side. A 2021 study of 72 players found people were about 4% faster and 9% more accurate with mice under 100 g than with a 100 g one, and most pros use mice around 55–65 g. Not essential, but worth considering.</div>';
+
+  var confLabel = { high: "Confidence: high", mid: "", medium: "Confidence: medium", low: "Confidence: lower" }[R.conf];
+  var confCls = R.conf === "high" ? "hi" : R.conf === "medium" ? "mid" : "lo";
+  var confHtml = '<span class="pill ' + confCls + '">' + confLabel + '</span> <span class="sub" style="font-size:.88rem">' + R.why.join("; ") + ".</span>";
+
+  var scopedMain = S.weapon === "sniper" || S.scoped === "main";
+  var scopedHtml =
+    "<h3>Scoped and aim-down-sights settings</h3>" +
+    '<p class="sub" style="margin-top:0">Keep <b>ADS multiplier at 1.0</b> to start. For <b>scoped multiplier</b>, ' +
+    (scopedMain
+      ? "start at <b>1.0</b>. Since you use scoped weapons a lot, if scoped tracking feels jumpy, try <b>0.85–0.95</b>."
+      : "leave it at <b>1.0</b>.") +
+    " Roughly 7 in 10 tracked pros use 1.0, and those who change it almost always go lower. Online calculators disagree on a “perfect” match value, so test with a bot at long range instead of chasing a number.</p>";
+
+  var statsHtml = "";
+  if (si) {
+    var srows = si.rows.map(function (r) {
+      var cls = r.v[1] === "good" ? "good" : r.v[1] === "warn" ? "warn" : "";
+      return "<tr><td>" + r.n + "</td><td><b>" + r.val + '</b></td><td class="' + cls + '">' + r.v[0] + '</td><td class="sub" style="font-size:.86rem">' + r.ref + "</td></tr>";
+    }).join("");
+    var sampleNote = si.matches !== null && si.matches < 15 ? " With under 15 matches this is a small sample, so we gave it less weight." : "";
+    statsHtml =
+      "<h3>Your season stats</h3>" +
+      '<div class="scroll-x"><table><thead><tr><th>Stat</th><th>You</th><th>Vs. reference</th><th>Reference</th></tr></thead><tbody>' + srows + "</tbody></table></div>" +
+      '<p class="sub">Read these next to your role: duelists by opening duels and damage, controllers and sentinels by KAST and survival. Reference points are rules of thumb from trackers and guides, not official Riot numbers, and there’s no reliable public benchmark for headshot % by rank.' + sampleNote + "</p>" +
+      '<div class="note"><b>Keep this as your “before” snapshot.</b> After 2–4 weeks on your new sensitivity, compare the same stats over a similar number of matches. Look for a trend, not one good or bad game. If stats stay flat but the setting feels better and more controlled, that’s still a win. Stats also depend heavily on role, weapons, and teammates, which is why they only nudge the number.</div>';
+  }
+
+  var trainTip = S.train === "none"
+    ? "You don’t use an aim trainer, so run the same test in the Range with bots (strafing bots on medium difficulty work well) and in Deathmatch."
+    : "Use the same trainer scenarios each time, and match its sensitivity to your Valorant cm/360 so practice transfers.";
+
+  app.innerHTML =
+    '<h2 id="qh" tabindex="-1">Your starting sensitivity</h2>' +
+    '<div class="big" style="margin-top:14px">' + f1(cm) + "<small>cm per 360°</small></div>" +
+    '<p class="sub">Suggested range for you: ' + f1(lo) + "–" + f1(hi) + " cm/360. " + vs + "</p>" +
+    "<div>" + confHtml + "</div>" +
+    noteHtml +
+
+    "<h3>Type this into Valorant</h3>" +
+    '<div class="scroll-x"><table><thead><tr><th>Mouse DPI</th><th>In-game sensitivity</th><th>eDPI</th></tr></thead><tbody>' + dpiRows + "</tbody></table></div>" +
+    '<p class="sub">Formula: cm/360 = 914.4 ÷ (DPI × sens × 0.07). Valorant’s sensitivity setting is in Settings, General, Mouse.</p>' +
+
+    scopedHtml +
+
+    "<h3>Where it sits</h3>" + scale +
+
+    "<h3>Three values to test</h3>" +
+    '<div class="scroll-x"><table><thead><tr><th>Candidate</th><th>cm/360</th><th>Sens at ' + dpi + ' DPI</th></tr></thead><tbody>' +
+    "<tr><td>Faster</td><td>" + f1(fast) + "</td><td>" + sensFor(fast, dpi).toFixed(3) + "</td></tr>" +
+    '<tr class="hl"><td>Center (recommended)</td><td>' + f1(cm) + "</td><td>" + s.toFixed(3) + "</td></tr>" +
+    "<tr><td>Slower</td><td>" + f1(slow) + "</td><td>" + sensFor(slow, dpi).toFixed(3) + "</td></tr>" +
+    "</tbody></table></div>" +
+
+    statsHtml +
+
+    "<h3>How to lock it in</h3>" +
+    '<ol class="plan">' +
+    "<li><b>Clean up your input.</b> Valorant uses raw input automatically. Turn off Windows “Enhance pointer precision” and any acceleration in your mouse software, and keep your DPI fixed from now on.</li>" +
+    "<li><b>Test all three.</b> Run each value on static clicking, tracking, and target switching. " + trainTip + " Rotate the order so the last value doesn’t benefit from warm-up. Write down score, accuracy, and how tense your hand felt.</li>" +
+    "<li><b>Do two quick checks.</b> <i>Turn check:</i> from the middle of your pad, one comfortable swipe should turn you about 180°. <i>Control check:</i> aim at a bot’s head and strafe left and right. If you keep flying past it, go a bit slower; if you can’t keep up, go a bit faster.</li>" +
+    "<li><b>Give it time.</b> Most players feel comfortable within 3–7 days and need 2–4 weeks for it to become automatic. Your aim may feel worse before it gets better, so don’t switch during a bad session.</li>" +
+    "<li><b>Fine-tune in small steps.</b> If after 2+ weeks you still have a persistent pattern, adjust by 5–10% at a time. Lab players showed no strong hard-wired attachment to one setting, but constant switching still stops you from building consistency.</li>" +
+    "</ol>" +
+
+    "<h3>How the number was built</h3>" +
+    '<ul class="parts">' + anchorHtml + partsHtml + "</ul>" +
+
+    '<div class="note"><b>Honest caveat:</b> the 20–80 cm/360 range and the speed–precision trade-off come from controlled research. The individual adjustments above are heuristics I weighted from community data and motor-control reasoning. They are small, capped, and labeled by evidence strength. Sensitivity also doesn’t track rank closely; it’s tied more to play style. No study has validated this exact formula, which is why the test step matters.</div>' +
+
+    "<h3>Sources</h3>" +
+    '<ul class="src">' +
+    '<li>Boudaoud, Spjut &amp; Kim (NVIDIA), “Mouse Sensitivity in First-Person Targeting Tasks,” IEEE Transactions on Games, 2023: <a href="https://arxiv.org/abs/2203.12050" target="_blank" rel="noopener">arxiv.org/abs/2203.12050</a></li>' +
+    '<li>Kang et al., “Quantifying Wrist-Aiming Habits with a Dual-Sensor Mouse,” CHI 2024: <a href="https://dl.acm.org/doi/10.1145/3613904.3642797" target="_blank" rel="noopener">dl.acm.org/doi/10.1145/3613904.3642797</a></li>' +
+    '<li>Effect of mouse mass on target acquisition, Applied Ergonomics, 2021: <a href="https://www.sciencedirect.com/science/article/abs/pii/S0003687021002842" target="_blank" rel="noopener">sciencedirect.com</a></li>' +
+    '<li>Valorant pro settings: <a href="https://senslab.pro/guides/best-valorant-sensitivity" target="_blank" rel="noopener">SensLab</a> (648 pros, median 224 eDPI), <a href="https://www.setup.gg/game/valorant/best-sens/" target="_blank" rel="noopener">setup.gg</a> (668 pros, median 231 eDPI, scoped multiplier data), <a href="https://esportsettings.com/blog/valorant-pro-sensitivity-guide/" target="_blank" rel="noopener">EsportSettings</a> (435 pros)</li>' +
+    '<li>Scoped multiplier usage among 113 pros: <a href="https://proconfig.net/stats/valorant-scoped-sensitivity/" target="_blank" rel="noopener">proconfig.net</a></li>' +
+    '<li>Riot patch 13.06 (Performance Score replaces ACS): <a href="https://playvalorant.com/en-us/news/game-updates/valorant-patch-notes-13-06/" target="_blank" rel="noopener">playvalorant.com</a></li>' +
+    '<li>Stat benchmarks (rules of thumb): <a href="https://ranksurge.games/blogs/news/valorant-stats-explained" target="_blank" rel="noopener">RankSurge</a>, <a href="https://upforge.gg/valorant/stats/average-headshot-percentage" target="_blank" rel="noopener">UpForge</a>, <a href="https://www.instalock.net/blog/how-to-read-valorant-career-stats" target="_blank" rel="noopener">Instalock</a>, <a href="https://topfragly.com/guides/valorant-headshot-percentage-guide/" target="_blank" rel="noopener">FragLy</a></li>' +
+    '<li>Rank and sensitivity discussion: <a href="https://www.vlr.gg/245704/rank-and-sensitivity-survey" target="_blank" rel="noopener">VLR.gg</a>. Adaptation timelines: <a href="https://gamerhardware.org/find-perfect-mouse-sensitivity/" target="_blank" rel="noopener">Gamer Hardware</a>, <a href="https://playerbenchmark.com/blog/how-to-improve-your-aim" target="_blank" rel="noopener">Player Benchmark</a></li>' +
+    '<li>Aimlabs and Voltaic cm/360 guidance: <a href="https://aimlabs.com/articles/aimlabs/a-quick-explainer-on-cm-360-and-the-common-cm-360-by-game/" target="_blank" rel="noopener">aimlabs.com</a></li>' +
+    "</ul>" +
+
+    '<div class="actions">' +
+    '<button type="button" class="btn primary" id="copy">Copy my settings</button>' +
+    '<button type="button" class="btn" id="edit">Change my answers</button>' +
+    '<button type="button" class="btn" id="reset">Start over</button>' +
+    '<span class="toast" id="toast" role="status"></span>' +
+    "</div>";
+
+  var line = "Valorant: " + dpi + " DPI, " + s.toFixed(3) + " sens (eDPI " + Math.round(edpi) + ", about " + f1(cm) + " cm/360)";
+  document.getElementById("copy").addEventListener("click", function () {
+    var t = document.getElementById("toast");
+    function ok() { t.textContent = "Copied."; }
+    function fail() { t.textContent = line; }
+    try { navigator.clipboard.writeText(line).then(ok, fail); } catch (e) { fail(); }
+  });
+  document.getElementById("edit").addEventListener("click", function () { currentId = "dpi"; renderQ(); focusH(); });
+  document.getElementById("reset").addEventListener("click", function () { S = freshState(); currentId = "dpi"; renderQ(); focusH(); });
+  focusH();
+}
+
+renderQ();
+</script>
+</body>
+</html>
