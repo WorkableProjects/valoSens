@@ -1,0 +1,1824 @@
+{
+ "generated": "2026-11-01",
+ "sources": [
+  {
+   "id": "prosettings_list",
+   "url": "https://prosettings.net/lists/valorant/",
+   "accessed": "2026-11-01",
+   "notes": "Fetched (HTTP 200). All 32 dataset rows match the list exactly (DPI/sens/eDPI). List shows no per-row date. Team column groups creators under orgs (SirMaza=Team Heretics, Shanks=G2, PROD=Fnatic, Lothar=DRX)."
+  },
+  {
+   "id": "prosettings_player",
+   "url": "https://prosettings.net/players/<slug>/",
+   "accessed": "2026-11-01",
+   "notes": "All 32 pages fetched (HTTP 200); 'Last updated' date and bio read from each page. Values identical to list for all 32."
+  },
+  {
+   "id": "specs_gg",
+   "url": "https://specs.gg/players/<slug>",
+   "accessed": "2026-11-01",
+   "notes": "Fetched. 21 pro profiles with settings; 10 not found (BeYN, Blowz, Lothar, Neon, PROD, Sato, SirMaza, spikeziN, Veqaj, ZynX - 'Profile Not Found' or no settings); /kingg is a non-pro user. Page title 'Updated November 2026' and dateModified equal the fetch date (auto-generated), so no real update date is available -> recorded null. Some values clearly stale (Cloud listed on GIANTX) or erroneous (kaajak 0.9, leaf 0.8)."
+  },
+  {
+   "id": "vlr_lol",
+   "url": "https://www.vlr.lol/pro-settings",
+   "accessed": "2026-11-01",
+   "notes": "Fetched (HTTP 200). Banner 'Data updated: March 2026 - VCT 2026 Kickoff rosters'. Only ~23 players; covers ZmjjKK, Smoggy, nobody, crashies, Alfajer from this set. Low reliability: lists crashies on NRG (left Sep 2024) and values disagree with ProSettings."
+  },
+  {
+   "id": "vlr_gg_player",
+   "url": "https://www.vlr.gg/player/<id>",
+   "accessed": "2026-11-01",
+   "notes": "All 32 player pages fetched (HTTP 200); Current Teams / Past Teams / inactive flags / latest news used for status."
+  },
+  {
+   "id": "vlr_gg_team_mandatory",
+   "url": "https://www.vlr.gg/team/7967/mandatory",
+   "accessed": "2026-11-01",
+   "notes": "Mandatory played VCL 26: EMEA LCQ (Challengers tier)."
+  },
+  {
+   "id": "fnatic_prod",
+   "url": "https://fnatic.com/community/5803-join-us-in-welcoming-prod",
+   "accessed": "2026-11-01",
+   "notes": "Fnatic welcomes PROD as a Creator co-streaming VCT games; page timestamps 2025-04-11 / 2025-07-28."
+  }
+ ],
+ "duplicates_check": "No two rows are the same person: all 32 have distinct real names (ProSettings) and distinct VLR ids. Ambiguous handles (Neon, Cloud, PROD, leaf, nobody, Karon, Sato, Lothar) resolved by matching ProSettings real name to VLR real name. Alias note: t3xture formerly 's3xture' (same row). specs.gg 'kingg' is a different person and was excluded.",
+ "players": [
+  {
+   "name": "ZmjjKK",
+   "real_name": "Zheng Yongkang",
+   "vlr_id": 3520,
+   "vlr_url": "https://www.vlr.gg/player/3520",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/3520"
+   ],
+   "team_2026": "EDward Gaming",
+   "current_team_2026_11_01": "EDward Gaming",
+   "dpi": 800,
+   "sens": 0.395,
+   "edpi": 316,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.395,
+     "edpi": 316,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/zmjjkk/",
+     "dpi": 800.0,
+     "sens": 0.395,
+     "edpi": 316.0,
+     "hz": "4000",
+     "updated": "2026-08-31"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/zmjjkk",
+     "dpi": 1600.0,
+     "sens": 0.1,
+     "edpi": 160.0,
+     "hz": "4000HZ",
+     "updated": null
+    },
+    {
+     "source_id": "vlr_lol",
+     "dpi": 800,
+     "sens": 0.36,
+     "edpi": 288,
+     "team_listed": "EDward Gaming",
+     "updated": "2026-03"
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 1600 DPI / 0.1 sens / 160 eDPI; vlr.lol (Mar 2026, low reliability) shows 800/0.36/288",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-31",
+   "role": "duelist",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: current EDG (joined Sep 2021); news 2026-10-02 EDG at Champions."
+  },
+  {
+   "name": "Smoggy",
+   "real_name": "Zhang Zhao",
+   "vlr_id": 4742,
+   "vlr_url": "https://www.vlr.gg/player/4742",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/4742"
+   ],
+   "team_2026": "EDward Gaming",
+   "current_team_2026_11_01": "EDward Gaming",
+   "dpi": 800,
+   "sens": 0.31,
+   "edpi": 248,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.31,
+     "edpi": 248,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/smoggy/",
+     "dpi": 800.0,
+     "sens": 0.31,
+     "edpi": 248.0,
+     "hz": "2000",
+     "updated": "2026-10-12"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/smoggy",
+     "dpi": 1600.0,
+     "sens": 0.155,
+     "edpi": 248.0,
+     "hz": "2000HZ",
+     "updated": null
+    },
+    {
+     "source_id": "vlr_lol",
+     "dpi": 800,
+     "sens": 0.42,
+     "edpi": 336,
+     "team_listed": "EDward Gaming",
+     "updated": "2026-03"
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 1600 DPI / 0.155 sens / 248 eDPI; vlr.lol (Mar 2026, low reliability) shows 800/0.42/336; specs.gg eDPI equals dataset (248) - DPI/sens split differs, effective sensitivity same",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-12",
+   "role": "controller",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR current EDG; missed EWC 2026 (news 2026-06-30) but still rostered."
+  },
+  {
+   "name": "CHICHOO",
+   "real_name": "Wan Shunzhi",
+   "vlr_id": 15559,
+   "vlr_url": "https://www.vlr.gg/player/15559",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/15559"
+   ],
+   "team_2026": "EDward Gaming",
+   "current_team_2026_11_01": "EDward Gaming",
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.2,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/chichoo/",
+     "dpi": 800.0,
+     "sens": 0.2,
+     "edpi": 160.0,
+     "hz": "1000",
+     "updated": "2026-08-03"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/chichoo",
+     "dpi": 800.0,
+     "sens": 0.21,
+     "edpi": 168.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.21 sens / 168 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-03",
+   "role": "sentinel",
+   "role_confidence": "low",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "nobody",
+   "real_name": "Wang Senxu",
+   "vlr_id": 3017,
+   "vlr_url": "https://www.vlr.gg/player/3017",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/3017"
+   ],
+   "team_2026": "EDward Gaming",
+   "current_team_2026_11_01": "EDward Gaming",
+   "dpi": 800,
+   "sens": 0.26,
+   "edpi": 208,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.26,
+     "edpi": 208,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/nobody/",
+     "dpi": 800.0,
+     "sens": 0.26,
+     "edpi": 208.0,
+     "hz": "1000",
+     "updated": "2026-09-30"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/nobody",
+     "dpi": 800.0,
+     "sens": 0.26,
+     "edpi": 208.0,
+     "hz": "1000HZ",
+     "updated": null
+    },
+    {
+     "source_id": "vlr_lol",
+     "dpi": 800,
+     "sens": 0.4,
+     "edpi": 320,
+     "team_listed": "EDward Gaming",
+     "updated": "2026-03"
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "vlr.lol (Mar 2026, low reliability) shows 800/0.4/320",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-09-30",
+   "role": "initiator",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Identity: ProSettings real name Wang Senxu = VLR 3017 Wang Senxu."
+  },
+  {
+   "name": "benjyfishy",
+   "real_name": "Benjamin David Fish",
+   "vlr_id": 29873,
+   "vlr_url": "https://www.vlr.gg/player/29873",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/29873"
+   ],
+   "team_2026": "Team Heretics",
+   "current_team_2026_11_01": "Team Heretics",
+   "dpi": 800,
+   "sens": 0.27,
+   "edpi": 216,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.27,
+     "edpi": 216,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/benjyfishy/",
+     "dpi": 800.0,
+     "sens": 0.27,
+     "edpi": 216.0,
+     "hz": "1000",
+     "updated": "2026-09-08"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/benjyfishy",
+     "dpi": 800.0,
+     "sens": 0.283,
+     "edpi": 226.4,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.283 sens / 226.4 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-09-08",
+   "role": "sentinel",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Former Fortnite pro; active VCT EMEA player."
+  },
+  {
+   "name": "SirMaza",
+   "real_name": "Daniel Maza",
+   "vlr_id": 2194,
+   "vlr_url": "https://www.vlr.gg/player/2194",
+   "status": "creator_or_streamer",
+   "status_evidence": [
+    "https://www.vlr.gg/player/2194",
+    "https://prosettings.net/players/sirmaza/"
+   ],
+   "team_2026": null,
+   "current_team_2026_11_01": null,
+   "dpi": 400,
+   "sens": 0.5,
+   "edpi": 200,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 400,
+     "sens": 0.5,
+     "edpi": 200,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/sirmaza/",
+     "dpi": 400.0,
+     "sens": 0.5,
+     "edpi": 200.0,
+     "hz": "1000",
+     "updated": "2026-02-23"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/sirmaza",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-02-23",
+   "role": "unverified",
+   "role_confidence": "unverified",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "ProSettings: 'currently a content creator for Team Heretics'. VLR 2194 (Daniel Maza) has no current team; only showmatch/influencer teams. ProSettings list groups him under Team Heretics, which is misleading for a pro comparison."
+  },
+  {
+   "name": "RieNs",
+   "real_name": "Enes Ecirli",
+   "vlr_id": 10971,
+   "vlr_url": "https://www.vlr.gg/player/10971",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/10971"
+   ],
+   "team_2026": "Team Heretics",
+   "current_team_2026_11_01": "Team Heretics",
+   "dpi": 800,
+   "sens": 0.27,
+   "edpi": 216,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.27,
+     "edpi": 216,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/riens/",
+     "dpi": 800.0,
+     "sens": 0.27,
+     "edpi": 216.0,
+     "hz": "1000",
+     "updated": "2026-07-13"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/riens",
+     "dpi": 800.0,
+     "sens": 0.27,
+     "edpi": 216.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-13",
+   "role": "initiator",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "t3xture",
+   "real_name": "Kim Na-ra",
+   "vlr_id": 9196,
+   "vlr_url": "https://www.vlr.gg/player/9196",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/9196"
+   ],
+   "team_2026": "Gen.G",
+   "current_team_2026_11_01": "Gen.G",
+   "dpi": 800,
+   "sens": 0.43,
+   "edpi": 344,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.43,
+     "edpi": 344,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/t3xture/",
+     "dpi": 800.0,
+     "sens": 0.43,
+     "edpi": 344.0,
+     "hz": "1000",
+     "updated": "2026-10-26"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/t3xture",
+     "dpi": 800.0,
+     "sens": 0.45,
+     "edpi": 360.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.45 sens / 360 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-26",
+   "role": "duelist",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "Lakia",
+   "real_name": "Kim Jong-min",
+   "vlr_id": 773,
+   "vlr_url": "https://www.vlr.gg/player/773",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/773"
+   ],
+   "team_2026": "Gen.G (Dec 2025 - Jul 2026)",
+   "current_team_2026_11_01": null,
+   "dpi": 800,
+   "sens": 0.3,
+   "edpi": 240,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.3,
+     "edpi": 240,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/lakia/",
+     "dpi": 800.0,
+     "sens": 0.3,
+     "edpi": 240.0,
+     "hz": "1000",
+     "updated": "2026-07-27"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/lakia",
+     "dpi": 800.0,
+     "sens": 0.3,
+     "edpi": 240.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-27",
+   "role": "initiator",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: no current team; Gen.G stint ended Jul 2026. Free agent as of 2026-11-01. ProSettings page (Jul 27, 2026) still lists Gen.G."
+  },
+  {
+   "name": "Karon",
+   "real_name": "Kim Won-tae",
+   "vlr_id": 34974,
+   "vlr_url": "https://www.vlr.gg/player/34974",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/34974"
+   ],
+   "team_2026": "Gen.G",
+   "current_team_2026_11_01": "Gen.G",
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.2,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/karon/",
+     "dpi": 800.0,
+     "sens": 0.2,
+     "edpi": 160.0,
+     "hz": "1000",
+     "updated": "2026-07-20"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/karon",
+     "dpi": 800.0,
+     "sens": 0.2,
+     "edpi": 160.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-20",
+   "role": "controller",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Identity: VLR 34974 Kim Won-tae matches ProSettings real name."
+  },
+  {
+   "name": "ZynX",
+   "real_name": "Kim Dong-ha",
+   "vlr_id": 51099,
+   "vlr_url": "https://www.vlr.gg/player/51099",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/51099"
+   ],
+   "team_2026": "Gen.G",
+   "current_team_2026_11_01": "Gen.G (inactive)",
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.1,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/zynx/",
+     "dpi": 1600.0,
+     "sens": 0.1,
+     "edpi": 160.0,
+     "hz": "4000",
+     "updated": "2026-07-20"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/zynx",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-20",
+   "role": "sentinel",
+   "role_confidence": "low",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: Gen.G, inactive from Jun 2026; news 2026-07-07 'Gen.G shuts down ZynX for the rest of 2026 due to wrist injury'."
+  },
+  {
+   "name": "kiNgg",
+   "real_name": "Francisco Aravena",
+   "vlr_id": 8549,
+   "vlr_url": "https://www.vlr.gg/player/8549",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/8549"
+   ],
+   "team_2026": "LEVIATAN",
+   "current_team_2026_11_01": "LEVIATAN",
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.1,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/kingg/",
+     "dpi": 1600.0,
+     "sens": 0.1,
+     "edpi": 160.0,
+     "hz": "4000",
+     "updated": "2026-08-10"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/kingg",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "profile at this slug is an unrelated non-pro user (800/0.362/289.6, no team); ignored"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-10",
+   "role": "controller",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "specs.gg /players/kingg is an unrelated user profile (no team) - not used."
+  },
+  {
+   "name": "spikeziN",
+   "real_name": "Rodrigo Lombardi",
+   "vlr_id": 21661,
+   "vlr_url": "https://www.vlr.gg/player/21661",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/21661"
+   ],
+   "team_2026": "LEVIATAN",
+   "current_team_2026_11_01": "LEVIATAN",
+   "dpi": 800,
+   "sens": 0.23,
+   "edpi": 184,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.23,
+     "edpi": 184,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/spikezin/",
+     "dpi": 800.0,
+     "sens": 0.23,
+     "edpi": 184.0,
+     "hz": "1000",
+     "updated": "2026-08-31"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/spikezin",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-31",
+   "role": "duelist",
+   "role_confidence": "high",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "Sato",
+   "real_name": "Eduardo Kenzo Nagahama Sato",
+   "vlr_id": 21659,
+   "vlr_url": "https://www.vlr.gg/player/21659",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/21659"
+   ],
+   "team_2026": "LEVIATAN",
+   "current_team_2026_11_01": "LEVIATAN",
+   "dpi": 800,
+   "sens": 0.35,
+   "edpi": 280,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.35,
+     "edpi": 280,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/sato/",
+     "dpi": 800.0,
+     "sens": 0.35,
+     "edpi": 280.0,
+     "hz": "4000",
+     "updated": "2026-10-05"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/sato",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-05",
+   "role": "duelist",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "Neon",
+   "real_name": "Bruno Rodríguez",
+   "vlr_id": 29243,
+   "vlr_url": "https://www.vlr.gg/player/29243",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/29243"
+   ],
+   "team_2026": "LEVIATAN",
+   "current_team_2026_11_01": "LEVIATAN",
+   "dpi": 800,
+   "sens": 0.21,
+   "edpi": 168,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.21,
+     "edpi": 168,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/neon/",
+     "dpi": 800.0,
+     "sens": 0.21,
+     "edpi": 168.0,
+     "hz": "4000",
+     "updated": "2026-08-10"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/neon",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-10",
+   "role": "flex",
+   "role_confidence": "low",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Ambiguous handle (also an agent name / other players). Resolved: ProSettings real name Bruno Rodriguez = VLR 29243 Bruno Rodríguez (LEVIATAN)."
+  },
+  {
+   "name": "Blowz",
+   "real_name": "Guilherme Oliviera",
+   "vlr_id": 21251,
+   "vlr_url": "https://www.vlr.gg/player/21251",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/21251"
+   ],
+   "team_2026": "LEVIATAN",
+   "current_team_2026_11_01": "LEVIATAN",
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.2,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/blowz/",
+     "dpi": 800.0,
+     "sens": 0.2,
+     "edpi": 160.0,
+     "hz": "4000",
+     "updated": "2026-07-13"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/blowz",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-13",
+   "role": "initiator",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "trent",
+   "real_name": "Trent Cairns",
+   "vlr_id": 15500,
+   "vlr_url": "https://www.vlr.gg/player/15500",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/15500"
+   ],
+   "team_2026": "G2 Esports",
+   "current_team_2026_11_01": "G2 Esports",
+   "dpi": 1600,
+   "sens": 0.16,
+   "edpi": 256,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.16,
+     "edpi": 256,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/trent/",
+     "dpi": 1600.0,
+     "sens": 0.16,
+     "edpi": 256.0,
+     "hz": "1000",
+     "updated": "2026-05-26"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/trent",
+     "dpi": 1600.0,
+     "sens": 0.133,
+     "edpi": 212.8,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 1600 DPI / 0.133 sens / 212.8 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-05-26",
+   "role": "initiator",
+   "role_confidence": "high",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "babybay",
+   "real_name": "Andrej Francisty",
+   "vlr_id": 2170,
+   "vlr_url": "https://www.vlr.gg/player/2170",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/2170"
+   ],
+   "team_2026": "G2 Esports",
+   "current_team_2026_11_01": "G2 Esports",
+   "dpi": 1600,
+   "sens": 0.11,
+   "edpi": 176,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.11,
+     "edpi": 176,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/babybay/",
+     "dpi": 1600.0,
+     "sens": 0.11,
+     "edpi": 176.0,
+     "hz": "1000",
+     "updated": "2026-09-28"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/babybay",
+     "dpi": 800.0,
+     "sens": 0.2,
+     "edpi": 160.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.2 sens / 160 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-09-28",
+   "role": "sentinel",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "leaf",
+   "real_name": "Nathan Orf",
+   "vlr_id": 7873,
+   "vlr_url": "https://www.vlr.gg/player/7873",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/7873"
+   ],
+   "team_2026": "G2 Esports",
+   "current_team_2026_11_01": "G2 Esports",
+   "dpi": 1600,
+   "sens": 0.08,
+   "edpi": 128,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.08,
+     "edpi": 128,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/leaf/",
+     "dpi": 1600.0,
+     "sens": 0.08,
+     "edpi": 128.0,
+     "hz": "2000",
+     "updated": "2026-10-19"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/leaf",
+     "dpi": 1600.0,
+     "sens": 0.8,
+     "edpi": 1280.0,
+     "hz": "2000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 1600 DPI / 0.8 sens / 1280 eDPI; specs.gg value is implausible (eDPI >1000), likely a data-entry error",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-19",
+   "role": "controller",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Ambiguous handle resolved: ProSettings Nathan Orf = VLR 7873 Nathan Orf."
+  },
+  {
+   "name": "Shanks",
+   "real_name": "Ryan Ngo",
+   "vlr_id": 262,
+   "vlr_url": "https://www.vlr.gg/player/262",
+   "status": "creator_or_streamer",
+   "status_evidence": [
+    "https://www.vlr.gg/player/262",
+    "https://prosettings.net/players/shanks/"
+   ],
+   "team_2026": null,
+   "current_team_2026_11_01": null,
+   "dpi": 800,
+   "sens": 0.22,
+   "edpi": 176,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.22,
+     "edpi": 176,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/shanks/",
+     "dpi": 800.0,
+     "sens": 0.22,
+     "edpi": 176.0,
+     "hz": "1000",
+     "updated": "2026-03-11"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/shanks",
+     "dpi": 800.0,
+     "sens": 0.22,
+     "edpi": 176.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-03-11",
+   "role": "unverified",
+   "role_confidence": "unverified",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "ProSettings: 'streamer and content creator... former professional VALORANT player'. VLR 262: no current team, last pro team Rise (2021-2022). specs.gg lists team 'Twitch'. ProSettings list groups him under G2 Esports (creator)."
+  },
+  {
+   "name": "valyn",
+   "real_name": "Jacob Batio",
+   "vlr_id": 3885,
+   "vlr_url": "https://www.vlr.gg/player/3885",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/3885"
+   ],
+   "team_2026": "G2 Esports (Sep 2023 - Oct 2026)",
+   "current_team_2026_11_01": null,
+   "dpi": 1600,
+   "sens": 0.15,
+   "edpi": 240,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.15,
+     "edpi": 240,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/valyn/",
+     "dpi": 1600.0,
+     "sens": 0.15,
+     "edpi": 240.0,
+     "hz": "1000",
+     "updated": "2026-02-16"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/valyn",
+     "dpi": 1600.0,
+     "sens": 0.15,
+     "edpi": 240.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-02-16",
+   "role": "controller",
+   "role_confidence": "high",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: G2 stint ended Oct 2026 (released 2026-10-27 per pro_roles.md); free agent as of 2026-11-01. Played the full 2026 season."
+  },
+  {
+   "name": "jawgemo",
+   "real_name": "Alexander Mor",
+   "vlr_id": 3993,
+   "vlr_url": "https://www.vlr.gg/player/3993",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/3993"
+   ],
+   "team_2026": "G2 Esports",
+   "current_team_2026_11_01": "G2 Esports",
+   "dpi": 1600,
+   "sens": 0.157,
+   "edpi": 251.2,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.157,
+     "edpi": 251.2,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/jawgemo/",
+     "dpi": 1600.0,
+     "sens": 0.157,
+     "edpi": 251.2,
+     "hz": "1000",
+     "updated": "2026-10-19"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/jawgemo",
+     "dpi": 1600.0,
+     "sens": 0.16,
+     "edpi": 256.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 1600 DPI / 0.16 sens / 256 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-19",
+   "role": "duelist",
+   "role_confidence": "high",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "Alfajer",
+   "real_name": "Emir Ali Beder",
+   "vlr_id": 9810,
+   "vlr_url": "https://www.vlr.gg/player/9810",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/9810"
+   ],
+   "team_2026": "FNATIC",
+   "current_team_2026_11_01": "FNATIC",
+   "dpi": 400,
+   "sens": 0.45,
+   "edpi": 180,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 400,
+     "sens": 0.45,
+     "edpi": 180,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/alfajer/",
+     "dpi": 400.0,
+     "sens": 0.45,
+     "edpi": 180.0,
+     "hz": "1000",
+     "updated": "2026-08-31"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/alfajer",
+     "dpi": 400.0,
+     "sens": 0.45,
+     "edpi": 180.0,
+     "hz": "1000HZ",
+     "updated": null
+    },
+    {
+     "source_id": "vlr_lol",
+     "dpi": 800,
+     "sens": 0.44,
+     "edpi": 352,
+     "team_listed": "Fnatic",
+     "updated": "2026-03"
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "vlr.lol (Mar 2026, low reliability) shows 800/0.44/352",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-31",
+   "role": "duelist",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "crashies",
+   "real_name": "Austin Roberts",
+   "vlr_id": 4,
+   "vlr_url": "https://www.vlr.gg/player/4",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/4"
+   ],
+   "team_2026": "FNATIC",
+   "current_team_2026_11_01": "FNATIC",
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.1,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/crashies/",
+     "dpi": 1600.0,
+     "sens": 0.1,
+     "edpi": 160.0,
+     "hz": "8000",
+     "updated": "2026-08-31"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/crashies",
+     "dpi": 800.0,
+     "sens": 0.23,
+     "edpi": 184.0,
+     "hz": "8000HZ",
+     "updated": null
+    },
+    {
+     "source_id": "vlr_lol",
+     "dpi": 800,
+     "sens": 0.43,
+     "edpi": 344,
+     "team_listed": "NRG",
+     "updated": "2026-03"
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.23 sens / 184 eDPI; vlr.lol (Mar 2026, low reliability) shows 800/0.43/344",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-31",
+   "role": "flex",
+   "role_confidence": "low",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "vlr.lol still lists him on NRG (he left NRG Sep 2024), evidence vlr.lol data is stale/unreliable."
+  },
+  {
+   "name": "Boaster",
+   "real_name": "Jake Howlett",
+   "vlr_id": 438,
+   "vlr_url": "https://www.vlr.gg/player/438",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/438"
+   ],
+   "team_2026": "FNATIC",
+   "current_team_2026_11_01": "FNATIC (inactive)",
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.2,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/boaster/",
+     "dpi": 800.0,
+     "sens": 0.2,
+     "edpi": 160.0,
+     "hz": "1000",
+     "updated": "2026-09-08"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/boaster",
+     "dpi": 800.0,
+     "sens": 0.24,
+     "edpi": 192.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.24 sens / 192 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-09-08",
+   "role": "controller",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: FNATIC, inactive from Sep 2026; news 2026-09-08 'Boaster to explore options outside of FNATIC after six years'. Played most of 2026 season."
+  },
+  {
+   "name": "PROD",
+   "real_name": "Connor Moran",
+   "vlr_id": 8847,
+   "vlr_url": "https://www.vlr.gg/player/8847",
+   "status": "creator_or_streamer",
+   "status_evidence": [
+    "https://www.vlr.gg/player/8847",
+    "https://fnatic.com/community/5803-join-us-in-welcoming-prod",
+    "https://prosettings.net/players/prod/"
+   ],
+   "team_2026": null,
+   "current_team_2026_11_01": null,
+   "dpi": 800,
+   "sens": 0.52,
+   "edpi": 416,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.52,
+     "edpi": 416,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/prod/",
+     "dpi": 800.0,
+     "sens": 0.52,
+     "edpi": 416.0,
+     "hz": "1000",
+     "updated": "2026-02-04"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/prod",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-02-04",
+   "role": "duelist",
+   "role_confidence": "low",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Identity resolved: ProSettings real name Connor Moran = VLR 8847 Connor Moran. Fnatic community post (page timestamps 2025-04-11/2025-07-28) welcomes PROD as a Fnatic Creator who co-streams VCT games. VLR: no current team; only community events (FunhaverGG, Untamable Beasts 2026). ProSettings bio calls him 'professional VALORANT player' and lists him under Fnatic, but he is NOT on Fnatic's VCT roster."
+  },
+  {
+   "name": "Cloud",
+   "real_name": "Kirill Nehozhin",
+   "vlr_id": 4181,
+   "vlr_url": "https://www.vlr.gg/player/4181",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/4181"
+   ],
+   "team_2026": "FNATIC (from Jun 2026; GIANTX before)",
+   "current_team_2026_11_01": "FNATIC",
+   "dpi": 800,
+   "sens": 0.4,
+   "edpi": 320,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 800,
+     "sens": 0.4,
+     "edpi": 320,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/cloud/",
+     "dpi": 800.0,
+     "sens": 0.4,
+     "edpi": 320.0,
+     "hz": "1000",
+     "updated": "2026-08-31"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/cloud",
+     "dpi": 800.0,
+     "sens": 0.35,
+     "edpi": 280.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 800 DPI / 0.35 sens / 280 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-08-31",
+   "role": "initiator",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Ambiguous handle resolved: ProSettings Kirill Nehozhin = VLR 4181 Kirill Nehozhin. specs.gg still lists GIANTX (stale)."
+  },
+  {
+   "name": "kaajak",
+   "real_name": "Kajetan Haremski",
+   "vlr_id": 9554,
+   "vlr_url": "https://www.vlr.gg/player/9554",
+   "status": "active_pro",
+   "status_evidence": [
+    "https://www.vlr.gg/player/9554"
+   ],
+   "team_2026": "FNATIC",
+   "current_team_2026_11_01": "FNATIC",
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.1,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/kaajak/",
+     "dpi": 1600.0,
+     "sens": 0.1,
+     "edpi": 160.0,
+     "hz": "2000",
+     "updated": "2026-10-26"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/kaajak",
+     "dpi": 1600.0,
+     "sens": 0.9,
+     "edpi": 1440.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 1600 DPI / 0.9 sens / 1440 eDPI; specs.gg value is implausible (eDPI >1000), likely a data-entry error",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-26",
+   "role": "duelist",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": ""
+  },
+  {
+   "name": "Veqaj",
+   "real_name": "Sylvain Pattyn",
+   "vlr_id": 12928,
+   "vlr_url": "https://www.vlr.gg/player/12928",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/12928",
+    "https://www.vlr.gg/team/7967/mandatory"
+   ],
+   "team_2026": "FNATIC (Nov 2025 - Oct 2026, inactive from Apr 2026)",
+   "current_team_2026_11_01": "Mandatory (VCL/Challengers EMEA-France, joined Oct 2026)",
+   "dpi": 1600,
+   "sens": 0.125,
+   "edpi": 200,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.125,
+     "edpi": 200,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/veqaj/",
+     "dpi": 1600.0,
+     "sens": 0.125,
+     "edpi": 200.0,
+     "hz": "Unknown",
+     "updated": "2026-10-05"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/veqaj",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-10-05",
+   "role": "unverified",
+   "role_confidence": "unverified",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "Benched on FNATIC from Apr 2026; joined Mandatory (played VCL 26 EMEA LCQ) in Oct 2026, so he is on a Challengers roster now but was not an active partnered player for most of 2026. Polling rate 'Unknown' on ProSettings."
+  },
+  {
+   "name": "MaKo",
+   "real_name": "Kim Myeong-gwan",
+   "vlr_id": 4462,
+   "vlr_url": "https://www.vlr.gg/player/4462",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/4462"
+   ],
+   "team_2026": "KIWOOM DRX (to Oct 2026)",
+   "current_team_2026_11_01": null,
+   "dpi": 400,
+   "sens": 0.45,
+   "edpi": 180,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 400,
+     "sens": 0.45,
+     "edpi": 180,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/mako/",
+     "dpi": 400.0,
+     "sens": 0.45,
+     "edpi": 180.0,
+     "hz": "1000",
+     "updated": "2026-07-20"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/mako",
+     "dpi": 400.0,
+     "sens": 0.48,
+     "edpi": 192.0,
+     "hz": "1000HZ",
+     "updated": null
+    }
+   ],
+   "settings_conflict": true,
+   "settings_conflict_detail": "specs.gg shows 400 DPI / 0.48 sens / 192 eDPI",
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-20",
+   "role": "controller",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: no current team; DRX stint ended Oct 2026 (news 2026-10-22 'KRX announces mass exodus following partnership snub'). Played the 2026 season."
+  },
+  {
+   "name": "Lothar",
+   "real_name": "Jakub Szygulski",
+   "vlr_id": 559,
+   "vlr_url": "https://www.vlr.gg/player/559",
+   "status": "creator_or_streamer",
+   "status_evidence": [
+    "https://www.vlr.gg/player/559",
+    "https://prosettings.net/players/lothar/"
+   ],
+   "team_2026": null,
+   "current_team_2026_11_01": null,
+   "dpi": 1600,
+   "sens": 0.2,
+   "edpi": 320,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 1600,
+     "sens": 0.2,
+     "edpi": 320,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/lothar/",
+     "dpi": 1600.0,
+     "sens": 0.2,
+     "edpi": 320.0,
+     "hz": "1000",
+     "updated": "2025-11-07"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/lothar",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2025-11-07",
+   "role": "unverified",
+   "role_confidence": "unverified",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": true,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "ProSettings: 'full-time content creator and streamer for DRX... former professional Fortnite player... freelance broadcast analyst'. VLR 559 Jakub Szygulski (same real name) shows only 'Team Lothar' showmatch entries. Could also be coach_or_analyst (broadcast analyst), but not a team coach/analyst."
+  },
+  {
+   "name": "BeYN",
+   "real_name": "Kang Ha-bin",
+   "vlr_id": 4678,
+   "vlr_url": "https://www.vlr.gg/player/4678",
+   "status": "inactive_or_benched",
+   "status_evidence": [
+    "https://www.vlr.gg/player/4678"
+   ],
+   "team_2026": "KIWOOM DRX (Jan 2025 - Oct 2026)",
+   "current_team_2026_11_01": null,
+   "dpi": 400,
+   "sens": 0.4,
+   "edpi": 160,
+   "sources": [
+    {
+     "source_id": "prosettings_list",
+     "dpi": 400,
+     "sens": 0.4,
+     "edpi": 160,
+     "updated": null
+    },
+    {
+     "source_id": "prosettings_player",
+     "url": "https://prosettings.net/players/beyn/",
+     "dpi": 400.0,
+     "sens": 0.4,
+     "edpi": 160.0,
+     "hz": "1000",
+     "updated": "2026-07-20"
+    },
+    {
+     "source_id": "specs_gg",
+     "url": "https://specs.gg/players/beyn",
+     "dpi": null,
+     "sens": null,
+     "edpi": null,
+     "updated": null,
+     "note": "no profile / no settings at this slug"
+    }
+   ],
+   "settings_conflict": false,
+   "settings_conflict_detail": null,
+   "settings_stale": false,
+   "prosettings_last_updated": "2026-07-20",
+   "role": "initiator",
+   "role_confidence": "medium",
+   "role_changed": false,
+   "duplicate_of": null,
+   "identity_ambiguous": false,
+   "identity_resolved": true,
+   "verified_date": "2026-11-01",
+   "notes": "VLR: no current team; DRX stint ended Oct 2026. Played the 2026 season."
+  }
+ ]
+}

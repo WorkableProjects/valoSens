@@ -121,7 +121,7 @@
 <div class="wrap">
   <div class="tape" aria-hidden="true"></div>
   <h1>Valorant Sensitivity Finder</h1>
-  <p class="lede">Answer about a dozen questions on your current sensitivity, your mousepad, your role and (optionally) your stats. Instead of adding fixed bonuses for each answer, a cost model works out the cm/360 that best balances precision, turning speed and pad space for you. It's calibrated on 2026 VCT pro settings.</p>
+  <p class="lede">Answer about a dozen questions on your current sensitivity, your mousepad, your role and (optionally) your stats. Instead of adding fixed bonuses for each answer, a cost model estimates the cm/360 that best balances precision, turning speed and pad space for you. VCT 2026 pro settings are shown for comparison only.</p>
   <main id="app" class="card" aria-live="polite"></main>
   <footer>Everything runs in your browser and nothing you enter leaves this page. Treat the result as a well-reasoned starting point, then confirm it with the test plan.</footer>
 </div>
@@ -159,7 +159,7 @@ function currentCm() {
   var dpi = getDpi();
   if (S.curMode === "val" && pos(S.cur) > 0 && dpi > 0) return M.cmFrom(dpi, pos(S.cur));
   if (S.curMode === "cm" && pos(S.measured) > 0) return pos(S.measured);
-  if (S.curMode === "other" && pos(S.otherSens) > 0 && dpi > 0) return 914.4 / (dpi * pos(S.otherSens) * M.OTHER_YAW[S.otherGame]);
+  if (S.curMode === "other" && pos(S.otherSens) > 0 && dpi > 0) return M.cmFrom(dpi, pos(S.otherSens), S.otherGame);
   return null;
 }
 function statsInput() {
@@ -247,8 +247,8 @@ var Q = [
     valid: function () { var d = getDpi(); return d >= 100 && d <= 32000; } },
 
   { id: "cur", sec: "Your sensitivity", title: "What sensitivity do you use now?",
-    why: "This is the most informative input. The model blends it with its own estimate, weighted by how much you trust it.",
-    uses: "Bayesian anchor: the result moves toward this in proportion to your confidence in it.",
+    why: "If your current setting is already in the near-optimal range, the result keeps it. Otherwise the result moves only as far as it needs to.",
+    uses: "The result is the near-optimal setting closest to this one.",
     show: function () { return true; },
     render: function (h) {
       var box = el("div");
@@ -275,8 +275,8 @@ var Q = [
     valid: function () { return S.curMode === "none" || (S.curMode !== null && currentCm() > 3 && currentCm() < 400); } },
 
   { id: "sat", sec: "Your sensitivity", title: "How well does that sensitivity work for you?",
-    why: "This sets how much weight your current setting gets. At 5 the result stays close to it; at 1 the model's estimate mostly takes over.",
-    uses: "Sets the anchor's standard deviation, from ±10% (5) to ±40% (1).",
+    why: "Comfort is a reason to stay put, but it isn't a measurement of accuracy. A high rating lets a slightly less optimal current setting stay.",
+    uses: "Widens the 'close enough to keep' margin, from 1× (rating 1) up to at most 2× (rating 5).",
     show: function () { return S.curMode && S.curMode !== "none"; },
     render: function (h) {
       var i = el("input", { type: "range", min: "1", max: "5", step: "1", "aria-label": "Satisfaction from 1 to 5" });
@@ -292,7 +292,7 @@ var Q = [
 
   { id: "pad", sec: "Your mousepad setup", title: "How wide is the area your mouse can glide on?",
     why: "Measure the usable width left to right in cm. A rough number is fine.",
-    uses: "Pad reach: travel past the edge costs a lift (about 0.3 s) in the model.",
+    uses: "Usable travel = width − mouse width. Expected lifts depend on where your hand starts and how far it has to go.",
     show: function () { return true; },
     render: function (h) {
       var box = el("div");
@@ -307,7 +307,7 @@ var Q = [
 
   { id: "surface", sec: "Your mousepad setup", title: "What kind of surface is it?",
     why: "More friction makes it easier to stop precisely but slows big movements. Low friction does the opposite.",
-    uses: "Scales your hand's stopping noise and travel speed.",
+    uses: "Recorded only. There's no reliable data linking surface type to the best sensitivity, so it doesn't change the number.",
     show: function () { return true; },
     render: function (h) {
       choices(h, "surface", [
@@ -320,7 +320,7 @@ var Q = [
 
   { id: "limb", sec: "Your mousepad setup", title: "Which joint does most of your aiming?",
     why: "Quick test: swipe as if turning 90°. If your forearm stays planted and your hand pivots, that's wrist. If your elbow slides, that's forearm. If your shoulder moves too, that's arm.",
-    uses: "Sets hand precision, travel speed, and how far you can move before switching joints (wrist ≈ 7 cm, arm ≈ 45 cm).",
+    uses: "Estimates how far you can move comfortably before a bigger joint takes over (about 2.5 cm each way for wrist, 10 cm for arm, mixed styles in between). This is a rough estimate with wide uncertainty.",
     show: function () { return true; },
     render: function (h) {
       choices(h, "limb", [
@@ -333,8 +333,8 @@ var Q = [
     valid: function () { return !!S.limb; } },
 
   { id: "role", sec: "Your role", title: "What role do you play most?",
-    why: "Each role has a different mix of micro-adjustments, flicks and big turns. Each role's engagement distance is fitted to the settings of pros who play it.",
-    uses: "Sets the task mix and the fitted engagement distance.",
+    why: "Roles differ a little in their mix of small corrections, target switches and big turns. There's no solid evidence for bigger role effects, so the effect is kept small.",
+    uses: "Nudges the assumed task mix by a few percent.",
     show: function () { return true; },
     render: function (h) {
       choices(h, "role", [
@@ -348,7 +348,7 @@ var Q = [
 
   { id: "weapon", sec: "Your role", title: "Which weapon do you use most?",
     why: "Snipers fight at longer range, which needs finer control. SMGs and shotguns fight close up, where heads are bigger on screen and fights involve more flicking.",
-    uses: "Scales engagement distance (×0.6 to ×1.35) and shifts the task mix.",
+    uses: "Sets typical fight distance (10, 20 or 30 m). Smaller targets on screen shift the flick optimum slightly slower, using the size of the effect NVIDIA measured.",
     show: function () { return true; },
     render: function (h) {
       choices(h, "weapon", [
@@ -360,7 +360,7 @@ var Q = [
 
   { id: "exp", sec: "Your stats", title: "How long have you played tactical shooters?",
     why: "Newer players haven't settled on a style yet, so the model is less certain about them.",
-    uses: "Widens or narrows the model's uncertainty.",
+    uses: "Shown for context only. It doesn't change the number.",
     show: function () { return true; },
     render: function (h) {
       choices(h, "exp", [{ v: "new", l: "Under 6 months" }, { v: "mid", l: "6 months to 2 years" }, { v: "exp", l: "2+ years" }, { v: "comp", l: "Competitive", s: "Diamond+ or organized play" }], 2);
@@ -368,8 +368,8 @@ var Q = [
     valid: function () { return !!S.exp; } },
 
   { id: "statsGate", sec: "Your stats", title: "Add your season stats?",
-    why: "Stats show how well your current setup is working, so they decide how much to trust it. They can't tell which direction to change it, so their effect is limited on purpose.",
-    uses: "A performance score relative to your rank, weighted by sample size.",
+    why: "Stats depend on role, teammates and game sense, so they can't show whether your sensitivity suits your hand. They're kept as a before snapshot only.",
+    uses: "Not used in the calculation. They're shown next to typical values for your rank.",
     show: function () { return true; },
     render: function (h) {
       choices(h, "statsGate", [{ v: "yes", l: "Yes, add stats", s: "About a minute with a tracker open" }, { v: "no", l: "Skip", s: "You'll still get a full result" }], 2);
@@ -377,7 +377,7 @@ var Q = [
     valid: function () { return !!S.statsGate; } },
 
   { id: "stats", sec: "Your stats", title: "Enter your stats for this season",
-    why: "Fill in what you have. The more matches they cover, the more they count: 20 matches is half weight.",
+    why: "Fill in what you have. Compare the same stats after 2–4 weeks on the new setting.",
     uses: "HS%, K/D and ADR are compared with typical values for your rank.",
     show: function () { return S.statsGate === "yes"; },
     render: function (h) {
@@ -455,7 +455,7 @@ function costChart(R) {
   function x(c) { return L + (c - xMin) / (xMax - xMin) * (W - L - Rt); }
   function y(v) { return T + (1 - Math.min(v, yMax * 1.5) / yMax) * (H - T - B); }
   function path(key) { return pts.map(function (p, i) { return (i ? "L" : "M") + x(p.C).toFixed(1) + " " + y(p[key]).toFixed(1); }).join(""); }
-  var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Cost curve: expected seconds lost per engagement against cm/360. Minimum near ' + f1(R.cModel) + ' cm.">';
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Cost curve: model-estimated extra time per engagement (unvalidated) against cm/360. Minimum near ' + f1(R.cModel) + ' cm.">';
   // band
   s += '<rect x="' + x(R.band[0]) + '" y="' + T + '" width="' + (x(R.band[1]) - x(R.band[0])) + '" height="' + (H - T - B) + '" fill="var(--band)"/>';
   // grid
@@ -494,7 +494,7 @@ function wireCostHover(host, R, geo) {
     var c = geo.xMin + (px - geo.L) / (geo.W - geo.L - geo.Rt) * (geo.xMax - geo.xMin);
     var p = R.curve[Math.max(0, Math.min(R.curve.length - 1, Math.round(c - 15)))];
     xh.setAttribute("x1", geo.x(p.C)); xh.setAttribute("x2", geo.x(p.C)); xh.setAttribute("visibility", "visible");
-    tt.innerHTML = "<b>" + p.C + " cm/360</b><br>Total <b>" + p.total.toFixed(3) + " s</b><br>Precision " + p.prec.toFixed(3) + " · Travel " + p.trav.toFixed(3) + " · Reach " + p.lift.toFixed(3);
+    tt.innerHTML = "<b>" + p.C + " cm/360</b><br>Model cost <b>" + p.total.toFixed(3) + "</b> (est. s, unvalidated)<br>Precision " + p.prec.toFixed(3) + " · Travel " + p.trav.toFixed(3) + " · Reach " + p.lift.toFixed(3);
     tt.style.display = "block";
     var left = geo.x(p.C) / geo.W * r.width;
     tt.style.left = Math.min(Math.max(0, left + 10), r.width - tt.offsetWidth) + "px";
@@ -574,11 +574,10 @@ function renderResult() {
   var near = R.nearPros.map(function (p) { return "<tr><td>" + esc(p.name) + "</td><td>" + (p.role ? M.ROLE[p.role].label : "unverified") + '</td><td class="n">' + f1(p.cm) + '</td><td class="n">' + Math.round(p.edpi) + "</td></tr>"; }).join("");
 
   // Explanation numbers
-  var rf = R.roleFit;
   var mixTxt = pr.mix.map(function (m, j) { return Math.round(m * 100) + "% " + M.TASKS[j].key + " (" + M.TASKS[j].theta + "°)"; }).join(", ");
   var anchorTxt = R.anchor
-    ? "Your current setting is " + f1(R.anchor.cm) + " cm (±" + Math.round(R.anchor.sd * 100) + "%) and the model's is " + f1(R.cModel) + " cm (±" + Math.round(R.sdModel * 100) + "%). Weighting each by its precision (inverse variance) in log space the result is " + Math.round(R.anchor.weight * 100) + "% your current setting and " + Math.round((1 - R.anchor.weight) * 100) + "% the model."
-    : "You didn't give a current setting, so the result is the model's optimum.";
+    ? "Your current " + f1(R.anchor.cm) + " cm costs about " + Math.round(R.anchor.costDiff * 1000) + " ms more per engagement than the model's best (" + f1(R.cModel) + " cm). Anything within " + Math.round(R.tolerance * 1000) + " ms counts as near-optimal, and your comfort rating stretches that to " + Math.round(R.anchor.tolStay * 1000) + " ms for keeping your current setting. Result: " + R.reason + "."
+    : "You didn't give a current setting, so the result is the model's minimum.";
 
   var statsHtml = "";
   if (R.stats) {
@@ -591,9 +590,7 @@ function renderResult() {
       '<div class="scroll-x"><table><thead><tr><th>Stat</th><th class="n">You</th><th class="n">Typical for rank</th></tr></thead><tbody>' +
       rowsS.map(function (r) { return '<tr><td>' + r[0] + '</td><td class="n ' + r[3] + '">' + r[1] + '</td><td class="n">' + r[2] + "</td></tr>"; }).join("") +
       "</tbody></table></div>" +
-      '<p class="sub">Performance score ' + (sg.perfZ >= 0 ? "+" : "") + sg.perfZ.toFixed(2) + " (sample weight " + Math.round(sg.sw * 100) + "%)" +
-      (R.anchor ? ". It " + (sg.perfZ >= 0 ? "tightened" : "loosened") + " the trust in your current setting." : ". With no current setting it only affects the headshot precision weight.") +
-      " Headshot % sets a small precision weight of ×" + sg.hsMul.toFixed(2) + " (capped, and moving the result by its cube root). Save these numbers as a before snapshot and compare them after 2–4 weeks.</p>";
+      '<p class="sub">These don\'t affect your result. Good or bad stats can\'t show whether a sensitivity suits your hand, because role, game sense and teammates matter more. Save them as a before snapshot and compare after 2–4 weeks.</p>';
   }
 
   var cc = costChart(R);
@@ -602,7 +599,7 @@ function renderResult() {
   app.innerHTML =
     '<h2 id="qh" tabindex="-1">Your optimal sensitivity</h2>' +
     '<div class="big" style="margin-top:12px">' + f1(cm) + "<small>cm / 360°</small></div>" +
-    '<p class="sub">Likely range ' + f1(R.lo) + "–" + f1(R.hi) + " cm. You're faster than " + (100 - pctTxt) + "% and slower than " + pctTxt + "% of the " + M.PRO_STATS.n + " VCT pros in the dataset.</p>" +
+    '<p class="sub">Near-optimal range ' + f1(R.lo) + "–" + f1(R.hi) + " cm (" + (R.mode === "measured" ? "from your test data" : "model estimate, unvalidated") + "). You're faster than " + (100 - pctTxt) + "% and slower than " + pctTxt + "% of the " + M.PRO_STATS.n + " VCT pros in the dataset.</p>" +
     '<div class="kpis">' +
     '<div class="kpi"><div class="k">Valorant sensitivity @ ' + dpi + ' DPI</div><div class="v">' + sens.toFixed(3) + "</div></div>" +
     '<div class="kpi"><div class="k">eDPI</div><div class="v">' + Math.round(edpi) + "</div></div>" +
@@ -615,9 +612,9 @@ function renderResult() {
     '<p class="sub">cm/360 = 914.4 ÷ (DPI × sens × 0.07). Keep the ADS and scoped multipliers at 1.0 to begin with.</p>' +
 
     "<h3>Why this number: your cost curve</h3>" +
-    '<p class="sub" style="margin-top:0">Each line estimates the time lost per engagement. Fast settings (left) cost precision because your hand\'s small errors get amplified. Slow settings (right) cost travel time, mouse lifts and joint switches. The model picks the bottom of the black curve. The yellow band marks settings within 3% of that minimum (' + bandTxt + " cm). The curve is flat there, which is why small changes barely matter.</p>" +
+    '<p class="sub" style="margin-top:0">Each line is the model\'s estimate of extra time per engagement, in seconds. The estimates are unvalidated, so read the shape rather than the exact numbers. Fast settings (left) cost precision because your hand\'s smallest controllable movement becomes large on screen. Slow settings (right) cost speed on big turns, mouse lifts and joint switches. The yellow band (' + bandTxt + " cm) covers settings within " + Math.round(R.tolerance * 1000) + " ms of the minimum. The curve is flat there, so small changes barely matter.</p>" +
     '<div class="chart" id="costChart">' + cc.svg + '<div class="tt"></div></div>' +
-    '<div class="legend"><span><i style="background:var(--ink)"></i>Total</span><span><i style="background:var(--s1)"></i>Precision cost</span><span><i style="background:var(--s2)"></i>Travel cost</span><span><i style="background:var(--s3)"></i>Pad / joint reach cost</span><span><i class="sq" style="background:var(--band)"></i>Within 3% of best</span></div>' +
+    '<div class="legend"><span><i style="background:var(--ink)"></i>Total</span><span><i style="background:var(--s1)"></i>Precision cost</span><span><i style="background:var(--s2)"></i>Speed / slow-flick cost</span><span><i style="background:var(--s3)"></i>Pad / joint reach cost</span><span><i class="sq" style="background:var(--band)"></i>Near-optimal</span></div>' +
 
     "<h3>Compared with VCT 2026 pros</h3>" +
     '<div class="chart" id="proChart">' + proChart(R) + '<div class="tt"></div></div>' +
@@ -639,29 +636,30 @@ function renderResult() {
 
     "<h3>How the model works</h3>" +
     '<div class="math">' +
-    "J(C) = λ·A / C²  +  B·C  +  0.30 s·lifts(C)  +  0.15 s·reposition(C)  +  zone(C)\n\n" +
-    "A = Σ share·precision_weight·(360·σ / head°)²      σ = " + (pr.sigma * 10).toFixed(2) + " mm hand noise\n" +
-    "B = Σ share·θ / (360·v)                            v = " + Math.round(pr.v) + " cm/s\n" +
-    "head° = 2·atan(0.125 m / r)  = " + pr.headDeg.toFixed(3) + "°   (r = " + f1(pr.r) + " m)\n" +
-    "lifts = Σ share·softplus(C·θ/360 − " + f1(pr.D) + " cm) / " + f1(pr.D) + "\n" +
-    "λ = " + M.LAMBDA.toFixed(4) + "  (calibrated so the reference player lands on the pro median)\n" +
-    "Model optimum C* = " + f1(R.cModel) + " cm" +
+    "cost(C) = Σ share × extra time for each task   (estimated seconds, unvalidated)\n\n" +
+    "small correction: t_sub·(1−p)/p,  p = erf(W / (2√2·σ0)),  W = C·head°/360\n" +
+    "   σ0 = " + (pr.sigma * 10).toFixed(2) + " mm hand noise floor,  head° = " + pr.headDeg.toFixed(3) + "° at 20 m\n" +
+    "target switch:    0.50 s × 0.035 × log2(C / " + f1(pr.cFlick) + ")²   (NVIDIA flick curve)\n" +
+    "big turns:        0.30 s·lifts + 0.06 s·P(travel > " + f1(pr.reach) + " cm reach) + speed limit\n" +
+    "   lifts = E[(travel − distance to edge)+] / regained travel;  usable pad " + f1(pr.usable) + " cm\n" +
+    "Averaged over " + R.nScenarios + " combinations of the uncertain constants.\n" +
+    "Model minimum C* = " + f1(R.cModel) + " cm;  near-optimal = within " + Math.round(R.tolerance * 1000) + " ms" +
     "</div>" +
     '<ul class="sub" style="padding-left:1.2em">' +
-    "<li><b>Role (" + roleName + "):</b> task mix " + mixTxt + ". The engagement distance r = " + f1(rf.r) + " m is <i>fitted</i> so that a reference player of this role lands on the pro median for the role (" + (rf.n || 0) + " pros, shrunk toward the overall median: " + f1(rf.target) + " cm" + (rf.rawCm ? ", raw " + f1(rf.rawCm) + " cm" : "") + ").</li>" +
-    "<li><b>Aiming joint (" + limbName + ") and surface:</b> together these set σ and v. The unconstrained optimum is C* = (2λA/B)^⅓, so your hand's precision and speed affect the result through a cube root.</li>" +
-    "<li><b>Mousepad:</b> " + f1(getPad()) + " cm wide, so " + f1(pr.D) + " cm from the centre to the edge. Movements that run past the edge or past your joint's comfortable sweep (" + M.LIMB[inp.limb === "unsure" ? "wf" : inp.limb].sweep + " cm) add time.</li>" +
-    "<li><b>Evidence zone:</b> a soft penalty outside 20–80 cm/360, where NVIDIA's study found performance stays flat.</li>" +
+    "<li><b>Task mix (" + roleName + "):</b> " + mixTxt + ". These shares are assumptions. Role only nudges them, and removing the role changes the result by a few percent.</li>" +
+    "<li><b>Aiming joint (" + limbName + "):</b> sets the estimated comfortable reach (" + f1(pr.reach) + " cm each way). Past that, a bigger joint takes over at a small time cost. Joint type changes the result only modestly.</li>" +
+    "<li><b>Mousepad:</b> " + f1(getPad()) + " cm wide, so about " + f1(pr.usable) + " cm usable. Lifts are estimated from where your hand starts and how far each turn needs. Surface type isn't used.</li>" +
+    "<li><b>NVIDIA study:</b> used only for target switches. It's a small lab study (13 players, small static flicks): about +3.5% flick time per octave² away from the best tested setting. It's not a 20–80 cm rule.</li>" +
     "<li><b>Your current setting:</b> " + anchorTxt + "</li>" +
     "</ul>" +
-    '<div class="note"><b>Honest limits:</b> the structure of the model comes from research: precision versus travel (Fitts and Casiez), wrist range of motion, and the 20–80 cm zone. Some parameters are reasoned estimates and haven\'t been measured. These are the task mixes, hand noise and speed per joint, and the lift cost. Calibrating to pros fixes the overall level. Role effects come from 28 role-tagged pros, each role on only 4–8 players, so they are shrunk heavily. No study has validated this exact formula, which is why the test step matters.</div>' +
+    '<div class="note"><b>Honest limits:</b> this questionnaire result is <b>unvalidated</b>. Its structure has research behind it: a hand noise floor (Casiez; Chapuis &amp; Dragicevic), gain-independent Fitts timing, and NVIDIA\'s flick curve. Several constants are estimates, though: task mix, head size, lift and joint-switch costs, and reach. The hand noise floor moves the answer most, which is why the result averages over its plausible range. Pro settings are shown for comparison only, because pros\' choices aren\'t evidence of what\'s optimal for you. Testing the three values is the only way to confirm it.</div>' +
 
     "<h3>Sources</h3>" +
     '<ul class="src">' +
     '<li>Boudaoud, Spjut & Kim (NVIDIA), “Mouse Sensitivity in First-Person Targeting Tasks,” IEEE ToG 2023: <a href="https://arxiv.org/abs/2203.12050" target="_blank" rel="noopener">arXiv 2203.12050</a></li>' +
     "<li>Casiez, Vogel, Balakrishnan & Cockburn, “The Impact of Control-Display Gain on User Performance in Pointing Tasks,” HCI 2008</li>" +
     '<li>Kang et al., “Quantifying Wrist-Aiming Habits with a Dual-Sensor Mouse,” CHI 2024: <a href="https://dl.acm.org/doi/10.1145/3613904.3642797" target="_blank" rel="noopener">ACM DL</a></li>' +
-    "<li>Palmer et al. 1985 and Ryu et al. 1991, functional wrist range of motion</li>" +
+    "<li>Palmer et al. 1985 and Ryu et al. 1991, functional wrist range of motion; Chapuis &amp; Dragicevic 2011, small-scale pointing limits</li>" +
     '<li>Pro settings: <a href="https://prosettings.net/lists/valorant/" target="_blank" rel="noopener">ProSettings.net</a> (32-player 2026 snapshot); roles from <a href="https://www.vlr.gg" target="_blank" rel="noopener">VLR.gg</a> agent usage</li>' +
     '<li>Headshot % by rank: <a href="https://upforge.gg/valorant/stats/average-headshot-percentage" target="_blank" rel="noopener">UpForge</a></li>' +
     "</ul>" +
