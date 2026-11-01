@@ -85,5 +85,12 @@ t("caps the number of sessions kept", () => {
   for (let i = 0; i < 15; i++) prior = V.parse(V.serialize(V.build({ prior, answers, xTest: [], hTest: [], agentOk })), agentOk).sessions;
   eq(prior.length, V.MAX_SESSIONS);
 });
+t("last results entered by hand", () => {
+  const m = V.manual({ sens: "0.35", dpi: "1200", highlight: "purple" }, M.cmFrom);
+  ok(m.manual && m.result.cm > 30 && m.answers.dpiSel === "other" && m.answers.dpiCustom === "1200" && m.answers.cur === "0.35" && m.answers.hCur === "purple", JSON.stringify(m));
+  let threw = 0; try { V.manual({}); } catch (e) { threw++; } try { V.manual({ code: "nope;;" }); } catch (e) { threw++; } eq(threw, 2);
+  const back = V.parse(V.serialize(V.build({ prior: [m], answers, xTest: [], hTest: [], agentOk })), agentOk).sessions;
+  ok(back.length === 2 && back[0].manual && back[0].result.highlight === "purple", "manual session survives a download");
+});
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

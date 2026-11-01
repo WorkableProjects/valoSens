@@ -26,7 +26,7 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
 
 **Results files and calibration runs (3.1)**
 - **Download.** The results screen has **Download results**, which saves `valosens-results-<date>-<n>-sessions.json` to your device. Nothing is kept in browser storage, so the file is the only copy.
-- **Import.** On the first screen, **Import results file** loads it, fills in your answers from the latest session, and offers **Skip to the tests**.
+- **Import.** On the first screen, **Import results file** loads it, fills in your answers from the latest session, and offers **Skip to the tests**. No file? **Enter last results** takes the sensitivity, DPI, crosshair code and highlight color you remember; they fill in your current settings and the results screen compares against them (there's no test data to pool).
 - **Pooling.** In the next run:
   - visibility-test picks and vision-test rounds from every session are combined in one fit;
   - the vision test's staircases start near your earlier thresholds;
@@ -50,7 +50,7 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
 - **Tests:**
   - `node test/model.test.js` (48)
   - `node test/xhair.test.js` (21, including simulated observers for the vision test)
-  - `node test/session.test.js` (8: file round trip, appending sessions, rejecting bad files, sanitising, pooling)
+  - `node test/session.test.js` (9: file round trip, appending sessions, rejecting bad files, sanitising, pooling)
   - `node test/ui.e2e.js` (browser test: both tests, the rotation, the animations, and download → import → second run; needs Playwright)
 - **Pro data:** regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`.
 - **Agent data:** regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`.

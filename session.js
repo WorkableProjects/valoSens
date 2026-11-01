@@ -73,7 +73,32 @@
     var a = cleanAnswers(s && s.answers, agentOk);
     var d = s && typeof s.date === "string" && !isNaN(Date.parse(s.date)) ? new Date(Date.parse(s.date)).toISOString() : null;
     return { date: d, answers: a.answers, xTest: cleanRounds(s && s.xTest), hTest: cleanTrials(s && s.hTest),
-      frameMs: s && isNum(s.frameMs) && s.frameMs > 1 && s.frameMs < 100 ? s.frameMs : null, result: cleanResult(s && s.result), _dropped: a.dropped };
+      frameMs: s && isNum(s.frameMs) && s.frameMs > 1 && s.frameMs < 100 ? s.frameMs : null, result: cleanResult(s && s.result),
+      manual: !!(s && s.manual === true), _dropped: a.dropped };
+  }
+
+  // A session typed in by hand from what the player remembers of their last result (no file, no test data).
+  // o = { sens, dpi, cm, code, highlight }. Throws an Error fit to show the player if nothing usable was given.
+  function manual(o, cmFrom) {
+    o = o || {};
+    var num = function (v) { var n = typeof v === "number" ? v : parseFloat(v); return isNum(n) && n > 0 ? n : null; };
+    var r = {}, sens = num(o.sens), dpi = num(o.dpi), cm = num(o.cm);
+    if (sens && sens > 100) throw new Error("That sensitivity looks too high. Valorant sensitivity is usually below 5.");
+    if (dpi && (dpi < 100 || dpi > 32000)) throw new Error("DPI should be between 100 and 32000.");
+    if (sens) r.sens = sens;
+    if (dpi) r.dpi = dpi;
+    if (!cm && sens && dpi && cmFrom) cm = cmFrom(dpi, sens);
+    if (cm) r.cm = cm;
+    var code = typeof o.code === "string" ? o.code.trim() : "";
+    if (code) { try { X.decode(code); r.code = code; } catch (e) { throw new Error("That crosshair code couldn't be read. Leave it blank or paste it exactly."); } }
+    if (o.highlight && X.HC[o.highlight]) r.highlight = o.highlight;
+    var res = cleanResult(r);
+    if (!res.cm && !res.sens && !res.code && !res.highlight) throw new Error("Enter at least your sensitivity, crosshair code or highlight color.");
+    var answers = {};
+    if (res.dpi) { var d = String(Math.round(res.dpi)); if (["400", "800", "1600"].indexOf(d) >= 0) answers.dpiSel = d; else { answers.dpiSel = "other"; answers.dpiCustom = d; } }
+    if (res.sens) { answers.curMode = "val"; answers.cur = String(res.sens); }
+    if (res.highlight) answers.hCur = res.highlight;
+    return { date: null, answers: answers, xTest: [], hTest: [], frameMs: null, result: res, manual: true, _dropped: [] };
   }
 
   // Build the file contents for a download: prior sessions + this one.
@@ -129,6 +154,6 @@
     return list.map(function (s) { var a = X.analyzeVision(s.trials); return { date: s.date, ok: !!(a && a.ok), colors: a && a.ok ? a.colors : null, catchPc: a && a.catchPc }; });
   }
 
-  return { FORMAT: FORMAT, MAX_SESSIONS: MAX_SESSIONS, ENUM: ENUM, build: build, serialize: serialize, fileName: fileName, parse: parse,
+  return { FORMAT: FORMAT, MAX_SESSIONS: MAX_SESSIONS, ENUM: ENUM, manual: manual, build: build, serialize: serialize, fileName: fileName, parse: parse,
     pooled: pooled, seenCounts: seenCounts, visionStart: visionStart, perSession: perSession, cleanAnswers: cleanAnswers };
 });
