@@ -25,7 +25,10 @@ async function flow(b, vp, steps) {
     await pick("I know my Valorant sens"); await p.fill("#in-cur", "0.5"); await next();
     await next();
     await pick("About 45 cm"); await next(); await pick("Speed"); await next(); await pick("Wrist + forearm"); await next();
-    await pick("Duelist"); await next(); await pick("Rifles"); await next(); await pick("2+ years"); await next();
+    await pick("Duelist"); await next();
+    if (await p.$("#in-agent1") && (await p.$$("#in-agent1 option")).length > 1) { await p.selectOption("#in-agent1", { index: 1 }); }
+    await next();
+    await pick("Rifles"); await next(); await pick("2+ years"); await next();
     await pick("Yes, add stats"); await next();
     await p.selectOption("#in-rank", "plat"); await p.fill("#in-stMatches", "60"); await p.fill("#in-stHs", "22"); await p.fill("#in-stKd", "1.05"); await p.fill("#in-stAdr", "130");
     await next();
@@ -36,7 +39,8 @@ async function flow(b, vp, steps) {
     await next();
     await pick("Enter exact width"); await p.fill("#in-padCustom", "90"); await next();
     await pick("Glass or hard"); await next(); await pick("Not sure"); await next();
-    await pick("Sentinel"); await next(); await pick("Operator"); await next(); await pick("Under 6 months"); await next();
+    await pick("Sentinel"); await next(); await next();
+    await pick("Operator"); await next(); await pick("Under 6 months"); await next();
     await pick("Skip"); await next();
   }));
   await b.close();
