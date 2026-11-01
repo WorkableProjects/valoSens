@@ -1,0 +1,1834 @@
+{
+ "generated": "2026-11-01",
+ "roster_source": "https://playvalorant.com/en-us/agents/",
+ "roster_cross_check": "https://wiki.playvalorant.com/en-us/Agents",
+ "roster_note": "30 playable agents per playvalorant.com and Riot's official wiki (agent #08 listed as not yet playable). Newest: Tejo (v10.00, Jan 2025), Waylay (v10.04, Mar 2025), Veto (v11.07b, Oct 2025), Miks (v12.05, Mar 2026), Hush (v13.09, 2026-10-27). Waylay was briefly disabled 2026-08-08 and hotfixed 2026-08-11 per Riot wiki.",
+ "conventions": {
+  "reorient_deg": "Always an ESTIMATE (no source quantifies post-ability camera reorientation); reasoning in notes. null = not a reposition or not meaningful.",
+  "zoom": "Only filled when Riot's wiki documents it (Chamber Headhunter x1.5). Otherwise null.",
+  "mechanic_tags": [
+   "reposition",
+   "weapon_ability",
+   "guided",
+   "placement",
+   "hold"
+  ],
+  "ability_source_default": "Riot official wiki page for the agent (wiki.playvalorant.com/en-us/<Agent>)",
+  "engagement": "Mostly ESTIMATE from role descriptions; Operator pattern for Jett/Chamber cited to a guide (opinion, not usage data). No per-agent weapon usage data was found."
+ },
+ "agents": [
+  {
+   "name": "Hush",
+   "role": "Duelist",
+   "release": 2026,
+   "release_note": "2026-10-27 (v13.09, Riot wiki; page marked under construction)",
+   "abilities": [
+    {
+     "key": "P",
+     "name": "Telekinesis",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Passive: aim crosshair at weapons/Spike/switches to interact from long distance. Uses look sens; not time-critical.",
+     "source": "https://wiki.playvalorant.com/en-us/Hush"
+    },
+    {
+     "key": "C",
+     "name": "Flow",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      90
+     ],
+     "zoom": null,
+     "notes": "Instantly create anchor; if airborne, hover briefly then propel toward anchor (Riot wiki). Distance/speed not documented. Camera presumably preserved; ESTIMATE 0-90 (new agent, no community data).",
+     "source": "https://wiki.playvalorant.com/en-us/Hush"
+    },
+    {
+     "key": "Q",
+     "name": "Flashbulb",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Throw flash; reactivate to direct it toward crosshair; detonates on surface/after delay. Time-critical-ish mouse steering mid-flight, normal look sensitivity (no separate setting found).",
+     "source": "https://wiki.playvalorant.com/en-us/Hush"
+    },
+    {
+     "key": "E",
+     "name": "Displacement",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown pull grenade, reactivate to direct toward crosshair; concusses on collisions; resets every 2 kills.",
+     "source": "https://wiki.playvalorant.com/en-us/Hush"
+    },
+    {
+     "key": "X",
+     "name": "Suspension",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Fire to send forward, steer with crosshair, reactivate/fire to detonate and levitate players (Riot wiki). Levitated targets become a vertical-tracking aim problem (ESTIMATE).",
+     "source": "https://wiki.playvalorant.com/en-us/Hush"
+    }
+   ],
+   "engagement": {
+    "style": "Duelist; too new for documented engagement data",
+    "weapons": [],
+    "source_or_ESTIMATE": "ESTIMATE (released 2026-10-27; no guides with data yet)"
+   }
+  },
+  {
+   "name": "Iso",
+   "role": "Duelist",
+   "release": 2023,
+   "release_note": "2023-10-31 (v7.09, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Contingency",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Pushes a wall forward.",
+     "source": "https://wiki.playvalorant.com/en-us/Iso"
+    },
+    {
+     "key": "Q",
+     "name": "Undercut",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Bolt sent forward: Vulnerable + Suppress 4 s.",
+     "source": "https://wiki.playvalorant.com/en-us/Iso"
+    },
+    {
+     "key": "E",
+     "name": "Double Tap",
+     "mechanics": [
+      "weapon_ability"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "While Focused, damaged/killed enemies drop orbs (3 s, v8.01) you must SHOOT to gain a 1-hit shield: a small-target flick/precision demand right after a kill.",
+     "source": "https://wiki.playvalorant.com/en-us/Iso"
+    },
+    {
+     "key": "X",
+     "name": "Kill Contract",
+     "mechanics": [
+      "weapon_ability",
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      90
+     ],
+     "zoom": null,
+     "notes": "Zone (length 36 m since v11.08) pulls Iso and first enemy hit into a 1v1 duel arena, 13 s. Arena size and weapon rules not on Riot wiki (community: each keeps current loadout, ESTIMATE). You are placed facing the opponent (ESTIMATE) -> small correction then a pure aim duel.",
+     "source": "https://wiki.playvalorant.com/en-us/Iso"
+    }
+   ],
+   "engagement": {
+    "style": "Isolated duels; take 1v1 off a shield",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Jett",
+   "role": "Duelist",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Cloudburst",
+     "mechanics": [
+      "guided",
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown smoke; hold fire to steer toward crosshair (uses normal look sens). Short-duration (2.5 s travel/steer window per Riot wiki). Not time-critical aim.",
+     "source": "https://wiki.playvalorant.com/en-us/Jett"
+    },
+    {
+     "key": "Q",
+     "name": "Updraft",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      45
+     ],
+     "zoom": null,
+     "notes": "Vertical launch (height not documented). Camera preserved; usually used to peek from height then look down -> small pitch correction. reorient_deg ESTIMATE.",
+     "source": "https://wiki.playvalorant.com/en-us/Jett"
+    },
+    {
+     "key": "E",
+     "name": "Tailwind",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      180
+     ],
+     "zoom": null,
+     "notes": "0.45 s dash, 1 s windup, 7.5 s charged window (Riot wiki); distance not documented. Camera preserved (dash in movement direction). Used both as entry dash (small correction ~0-45) and post-Operator-shot escape (often 90-180 turn to retreat or re-peek). ESTIMATE: camera direction preserved through the dash (you dash where you look/move); after landing a correction toward the contested angle of ~0-90 deg is typical. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Jett"
+    },
+    {
+     "key": "X",
+     "name": "Blade Storm",
+     "mechanics": [
+      "weapon_ability"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "5 throwing knives; dmg head 150 / body 50 / legs 42 (Riot wiki) -> head is lethal, body is not: high precision demand. Kills refresh knives. Riot wiki does not state hitscan vs projectile or range (community: fast near-instant projectile, ESTIMATE). No ADS/zoom documented.",
+     "source": "https://wiki.playvalorant.com/en-us/Jett"
+    }
+   ],
+   "engagement": {
+    "style": "Entry/space-taker; aggressive Operator peeks with Tailwind escape",
+    "weapons": [
+     "Operator",
+     "Vandal",
+     "Sheriff"
+    ],
+    "source_or_ESTIMATE": "Operator+escape pattern: https://www.dodge.gg/en-US/valorant/news/operator-weapon-guide-2026 (guide opinion, no usage numbers); role: https://www.vstats.gg/blog/valorant_agent_roles"
+   }
+  },
+  {
+   "name": "Neon",
+   "role": "Duelist",
+   "release": 2022,
+   "release_note": "2022-01-11 (v4.0, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Fast Lane",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Two vision-blocking walls sent forward.",
+     "source": "https://wiki.playvalorant.com/en-us/Neon"
+    },
+    {
+     "key": "Q",
+     "name": "Relay Bolt",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Bounces once, concuss 2.5 s; bounce lineups.",
+     "source": "https://wiki.playvalorant.com/en-us/Neon"
+    },
+    {
+     "key": "E",
+     "name": "High Gear",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      90
+     ],
+     "zoom": null,
+     "notes": "+35% speed sprint up to 10 s; alt fire slide (distance not documented), slide resets every 2 kills (Riot wiki). Camera preserved; slide-swing then aim: ESTIMATE 0-90 correction. Run-and-gun: Neon cannot shoot while sprinting (weapon stowed) - must re-equip before firing (common knowledge, ESTIMATE).",
+     "source": "https://wiki.playvalorant.com/en-us/Neon"
+    },
+    {
+     "key": "X",
+     "name": "Overdrive",
+     "mechanics": [
+      "weapon_ability",
+      "reposition"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Lightning beam, dmg 54-30 head / 18-10 body / 15-8 legs with falloff (Riot wiki); head multiplier 3.0 (v10.04 console note). Described as an 'accurate lightning beam' (hitscan not stated, ESTIMATE hitscan-like). Continuous-fire tracking weapon while moving fast -> high tracking demand. Range not listed; no zoom.",
+     "source": "https://wiki.playvalorant.com/en-us/Neon"
+    }
+   ],
+   "engagement": {
+    "style": "Fastest entry; sprint/slide swings into close-mid range",
+    "weapons": [
+     "Vandal/Phantom",
+     "Spectre (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Phoenix",
+   "role": "Duelist",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Blaze",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Fire wall; hold fire to steer toward crosshair (Riot wiki). Console can set toggle steering (v9.02). Uses normal look sensitivity; moderately time-critical (wall drawn in ~1-2 s, ESTIMATE).",
+     "source": "https://wiki.playvalorant.com/en-us/Phoenix"
+    },
+    {
+     "key": "Q",
+     "name": "Hot Hands",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Throw or lob fire zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Phoenix"
+    },
+    {
+     "key": "E",
+     "name": "Curveball",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Flash curving left (fire) / right (alt fire); 0.6 s windup. Usually followed by a swing, not an aim mechanic itself.",
+     "source": "https://wiki.playvalorant.com/en-us/Phoenix"
+    },
+    {
+     "key": "X",
+     "name": "Run It Back",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      180
+     ],
+     "zoom": null,
+     "notes": "On death/expiry (10 s) returns you to marker: camera direction after return not documented; player must re-acquire threats. reorient ESTIMATE.",
+     "source": "https://wiki.playvalorant.com/en-us/Phoenix"
+    }
+   ],
+   "engagement": {
+    "style": "Self-sufficient entry with flash-then-swing",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Raze",
+   "role": "Duelist",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Boom Bot",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Sent forward, chases first enemy seen; not steered.",
+     "source": "https://wiki.playvalorant.com/en-us/Raze"
+    },
+    {
+     "key": "Q",
+     "name": "Blast Pack",
+     "mechanics": [
+      "reposition",
+      "placement"
+     ],
+     "reorient_deg": [
+      0,
+      180
+     ],
+     "zoom": null,
+     "notes": "Satchel knockback; horizontal velocity reduced in v8.11/v9.01 (no numbers on Riot wiki). Camera preserved but satchel jumps often launch you over/around cover and you must find the target mid-air: ESTIMATE 0-90 typical, up to 180 on flank/rotate jumps.",
+     "source": "https://wiki.playvalorant.com/en-us/Raze"
+    },
+    {
+     "key": "E",
+     "name": "Paint Shells",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Cluster grenade; radius 5.5 m primary (v7.09). Throw/lob, lineup-able.",
+     "source": "https://wiki.playvalorant.com/en-us/Raze"
+    },
+    {
+     "key": "X",
+     "name": "Showstopper",
+     "mechanics": [
+      "weapon_ability"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Rocket launcher, 30-150 splash dmg, 1.4 s windup (Riot wiki). Projectile with splash (speed/radius not listed): precision demand low (no headshot multiplier role; aim at feet/near target). No zoom.",
+     "source": "https://wiki.playvalorant.com/en-us/Raze"
+    }
+   ],
+   "engagement": {
+    "style": "Entry/explosive space-taker, aggressive close-mid swings",
+    "weapons": [
+     "Vandal/Phantom",
+     "SMGs/Judge on aggressive rounds (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Reyna",
+   "role": "Duelist",
+   "release": 2020,
+   "release_note": "2020-06-02 (v1.0, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Leer",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Nearsight eye thrown forward.",
+     "source": "https://wiki.playvalorant.com/en-us/Reyna"
+    },
+    {
+     "key": "Q",
+     "name": "Devour",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Heal on soul orb (3 s).",
+     "source": "https://wiki.playvalorant.com/en-us/Reyna"
+    },
+    {
+     "key": "E",
+     "name": "Dismiss",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      90
+     ],
+     "zoom": null,
+     "notes": "1.5 s intangible burst; historical top speed 12 m/s (raised from 9.1 in v8.11, Riot wiki). Camera preserved; used to reposition after a kill then re-peek or escape. ESTIMATE 0-90.",
+     "source": "https://wiki.playvalorant.com/en-us/Reyna"
+    },
+    {
+     "key": "X",
+     "name": "Empress",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "+10% fire rate/equip/reload; rewards multi-kill target switching (flick-heavy). No aim mechanic itself.",
+     "source": "https://wiki.playvalorant.com/en-us/Reyna"
+    }
+   ],
+   "engagement": {
+    "style": "Kill-dependent fragger; isolated duels, chained target switches",
+    "weapons": [
+     "Vandal/Phantom",
+     "Sheriff"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Waylay",
+   "role": "Duelist",
+   "release": 2025,
+   "release_note": "2025-03-05 (v10.04, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Saturate",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown hinder zone, 6 m radius, 0.6 s windup.",
+     "source": "https://wiki.playvalorant.com/en-us/Waylay"
+    },
+    {
+     "key": "Q",
+     "name": "Lightspeed",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      90
+     ],
+     "zoom": null,
+     "notes": "FIRE = two forward dashes, ALT = one; each dash 0.45 s, only first can launch upward (Riot wiki). Distance/speed not documented. Camera preserved; ESTIMATE: camera direction preserved through the dash (you dash where you look/move); after landing a correction toward the contested angle of ~0-90 deg is typical. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Waylay"
+    },
+    {
+     "key": "E",
+     "name": "Refract",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      90,
+      180
+     ],
+     "zoom": null,
+     "notes": "Place marker at own location, reactivate to travel back to it (0.35-2 s travel, immune but blind during travel); 8 s window, resets every 2 kills. Used as swing-and-return: after travel you face away from where you came or need to re-acquire the angle you left. ESTIMATE: teleports place you at a spot whose threats rarely lie along your pre-teleport view; players typically snap 45-180 deg to the expected angle. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Waylay"
+    },
+    {
+     "key": "X",
+     "name": "Convergent Paths",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Haste +10% for 7 s and a 13.5 m wide hinder zone; cast briefly restricts aim rotation and movement (Riot wiki).",
+     "source": "https://wiki.playvalorant.com/en-us/Waylay"
+    }
+   ],
+   "engagement": {
+    "style": "Entry with escape; swing, trade, refract back",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Yoru",
+   "role": "Duelist",
+   "release": 2021,
+   "release_note": "2021-01-12 (v2.0, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Fakeout",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Clone walks forward; flashes those looking at it when shot. Not aimed.",
+     "source": "https://wiki.playvalorant.com/en-us/Yoru"
+    },
+    {
+     "key": "Q",
+     "name": "Blindside",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown, flashes after bouncing off a surface (0.6 s windup): bounce-angle lineups.",
+     "source": "https://wiki.playvalorant.com/en-us/Yoru"
+    },
+    {
+     "key": "E",
+     "name": "Gatecrash",
+     "mechanics": [
+      "reposition",
+      "placement"
+     ],
+     "reorient_deg": [
+      90,
+      180
+     ],
+     "zoom": null,
+     "notes": "Beacon sent forward (speed 800, units unstated) or placed; reactivate to teleport. 2 uses. Classic use: teleport behind/flank of enemies -> large turn needed. ESTIMATE: teleports place you at a spot whose threats rarely lie along your pre-teleport view; players typically snap 45-180 deg to the expected angle. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Yoru"
+    },
+    {
+     "key": "X",
+     "name": "Dimensional Drift",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      0,
+      180
+     ],
+     "zoom": null,
+     "notes": "10 s intangible/invisible, can still Gatecrash; exiting places you among enemies who may be at any bearing. ESTIMATE.",
+     "source": "https://wiki.playvalorant.com/en-us/Yoru"
+    }
+   ],
+   "engagement": {
+    "style": "Flank/lurk entry; teleport then fight from unexpected angle",
+    "weapons": [
+     "Vandal/Phantom",
+     "Sheriff",
+     "Judge/Bucky (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Breach",
+   "role": "Initiator",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Aftershock",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Through-wall damage zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Breach"
+    },
+    {
+     "key": "Q",
+     "name": "Flashpoint",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Through-wall flash.",
+     "source": "https://wiki.playvalorant.com/en-us/Breach"
+    },
+    {
+     "key": "E",
+     "name": "Fault Line",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold to extend distance, release to concuss zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Breach"
+    },
+    {
+     "key": "X",
+     "name": "Rolling Thunder",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Forward cone concuss/knock-up. Aim restriction on cast not documented on Riot wiki (Waylay page compares its ult to it).",
+     "source": "https://wiki.playvalorant.com/en-us/Breach"
+    }
+   ],
+   "engagement": {
+    "style": "Utility-first initiator; flashes/stuns for teammates' entry",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Fade",
+   "role": "Initiator",
+   "release": 2022,
+   "release_note": "2022-04-27 (v4.08, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Prowler",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold fire to steer toward crosshair; chases first enemy/trail seen. Normal look sensitivity; moderately time-critical.",
+     "source": "https://wiki.playvalorant.com/en-us/Fade"
+    },
+    {
+     "key": "Q",
+     "name": "Seize",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown, reactivate to drop early.",
+     "source": "https://wiki.playvalorant.com/en-us/Fade"
+    },
+    {
+     "key": "E",
+     "name": "Haunt",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown reveal eye; reactivate to drop.",
+     "source": "https://wiki.playvalorant.com/en-us/Fade"
+    },
+    {
+     "key": "X",
+     "name": "Nightfall",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Forward wave: deafen/decay/mark.",
+     "source": "https://wiki.playvalorant.com/en-us/Fade"
+    }
+   ],
+   "engagement": {
+    "style": "Info initiator",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Gekko",
+   "role": "Initiator",
+   "release": 2023,
+   "release_note": "2023-03-07 (v6.04, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Mosh Pit",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown/lobbed damage zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Gekko"
+    },
+    {
+     "key": "Q",
+     "name": "Wingman",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Sent forward, chases first enemy (concuss) or plants/defuses; NOT steered (Riot wiki).",
+     "source": "https://wiki.playvalorant.com/en-us/Gekko"
+    },
+    {
+     "key": "E",
+     "name": "Dizzy",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Sent forward, auto-fires blinding plasma; not steered.",
+     "source": "https://wiki.playvalorant.com/en-us/Gekko"
+    },
+    {
+     "key": "X",
+     "name": "Thrash",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Piloted first-person, lunge to detain. Normal look sensitivity; time-critical steering.",
+     "source": "https://wiki.playvalorant.com/en-us/Gekko"
+    }
+   ],
+   "engagement": {
+    "style": "Initiator; utility then trade",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "KAY/O",
+   "role": "Initiator",
+   "release": 2021,
+   "release_note": "2021-06-22 (v3.0, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "FRAG/ment",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Molly, lineup-able.",
+     "source": "https://wiki.playvalorant.com/en-us/KAY/O"
+    },
+    {
+     "key": "Q",
+     "name": "FLASH/drive",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Throw (1.6 s) or alt-fire pop flash (1 s).",
+     "source": "https://wiki.playvalorant.com/en-us/KAY/O"
+    },
+    {
+     "key": "E",
+     "name": "ZERO/point",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Suppress knife, lineups common.",
+     "source": "https://wiki.playvalorant.com/en-us/KAY/O"
+    },
+    {
+     "key": "X",
+     "name": "NULL/cmd",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Suppress pulses + combat buffs; promotes aggressive swings.",
+     "source": "https://wiki.playvalorant.com/en-us/KAY/O"
+    }
+   ],
+   "engagement": {
+    "style": "Initiator; flash-and-swing with suppression",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Skye",
+   "role": "Initiator",
+   "release": 2020,
+   "release_note": "2020-10-27 (v1.11, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Regrowth",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold to heal allies in range/LoS.",
+     "source": "https://wiki.playvalorant.com/en-us/Skye"
+    },
+    {
+     "key": "Q",
+     "name": "Trailblazer",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Piloted first-person creature, fire to lunge/concuss. Normal look sensitivity; time-critical steering around corners.",
+     "source": "https://wiki.playvalorant.com/en-us/Skye"
+    },
+    {
+     "key": "E",
+     "name": "Guiding Light",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold fire to steer toward crosshair, reactivate to flash. Console toggle option (v9.02). Time-critical: steer then pop at the right moment.",
+     "source": "https://wiki.playvalorant.com/en-us/Skye"
+    },
+    {
+     "key": "X",
+     "name": "Seekers",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Auto-chase 3 nearest enemies; not steered.",
+     "source": "https://wiki.playvalorant.com/en-us/Skye"
+    }
+   ],
+   "engagement": {
+    "style": "Initiator; flash-and-follow entry support",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Sova",
+   "role": "Initiator",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Owl Drone",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Piloted first-person drone, 7 s, 100 HP; fire a reveal dart (5 s cd). Flown with normal look sensitivity (no drone sens setting found). Dart tagging is moderately time-critical aim.",
+     "source": "https://wiki.playvalorant.com/en-us/Sova"
+    },
+    {
+     "key": "Q",
+     "name": "Shock Bolt",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold fire for velocity, alt fire up to 2 bounces; 1-75 dmg. Lineup-heavy.",
+     "source": "https://wiki.playvalorant.com/en-us/Sova"
+    },
+    {
+     "key": "E",
+     "name": "Recon Bolt",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Same charge/bounce system; lineups are core to Sova play.",
+     "source": "https://wiki.playvalorant.com/en-us/Sova"
+    },
+    {
+     "key": "X",
+     "name": "Hunter's Fury",
+     "mechanics": [
+      "weapon_ability",
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Up to 3 wall-piercing blasts, 80 dmg each, 6 s (Riot wiki). Hitscan/range not stated on wiki (community: near-instant long beam through walls, ESTIMATE). No zoom. Precision demand: aim at revealed/predicted positions, no headshot multiplier. v9.02 reduced control drag.",
+     "source": "https://wiki.playvalorant.com/en-us/Sova"
+    }
+   ],
+   "engagement": {
+    "style": "Info/recon initiator; lineups then trade/hold",
+    "weapons": [
+     "Vandal/Phantom",
+     "Operator occasionally (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Tejo",
+   "role": "Initiator",
+   "release": 2025,
+   "release_note": "2025-01-08 (v10.00, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Stealth Drone",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Piloted drone (fire to take control), fire again to reveal+suppress. Normal look sensitivity.",
+     "source": "https://wiki.playvalorant.com/en-us/Tejo"
+    },
+    {
+     "key": "Q",
+     "name": "Special Delivery",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Launched concuss grenade, alt fire bounce.",
+     "source": "https://wiki.playvalorant.com/en-us/Tejo"
+    },
+    {
+     "key": "E",
+     "name": "Guided Salvo",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Tactical MAP targeting (set locations, alt fire launch) - map cursor, not look sensitivity (see sensitivity_settings_notes).",
+     "source": "https://wiki.playvalorant.com/en-us/Tejo"
+    },
+    {
+     "key": "X",
+     "name": "Armageddon",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Tactical MAP targeting: set + pivot, then cast wave.",
+     "source": "https://wiki.playvalorant.com/en-us/Tejo"
+    }
+   ],
+   "engagement": {
+    "style": "Initiator; area denial/post-plant",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Astra",
+   "role": "Controller",
+   "release": 2021,
+   "release_note": "2021-03-02 (v2.04, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Gravity Well",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Activates a placed Star.",
+     "source": "https://wiki.playvalorant.com/en-us/Astra"
+    },
+    {
+     "key": "Q",
+     "name": "Nova Pulse",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Activates a placed Star.",
+     "source": "https://wiki.playvalorant.com/en-us/Astra"
+    },
+    {
+     "key": "E",
+     "name": "Nebula/Dissipate",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Activates a placed Star.",
+     "source": "https://wiki.playvalorant.com/en-us/Astra"
+    },
+    {
+     "key": "X",
+     "name": "Astral Form / Cosmic Divide",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Stars placed in Astral Form (overhead view with a cursor - Riot wiki does not specify cursor vs map; community: map-like overhead view, ESTIMATE whether look sens applies). Cosmic Divide set + pivot.",
+     "source": "https://wiki.playvalorant.com/en-us/Astra"
+    }
+   ],
+   "engagement": {
+    "style": "Controller; global utility, plays passive/anchor while placing stars",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Brimstone",
+   "role": "Controller",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Stim Beacon",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown buff beacon.",
+     "source": "https://wiki.playvalorant.com/en-us/Brimstone"
+    },
+    {
+     "key": "Q",
+     "name": "Incendiary",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Launched molly; lineups.",
+     "source": "https://wiki.playvalorant.com/en-us/Brimstone"
+    },
+    {
+     "key": "E",
+     "name": "Sky Smoke",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Tactical MAP targeting.",
+     "source": "https://wiki.playvalorant.com/en-us/Brimstone"
+    },
+    {
+     "key": "X",
+     "name": "Orbital Strike",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Tactical MAP targeting.",
+     "source": "https://wiki.playvalorant.com/en-us/Brimstone"
+    }
+   ],
+   "engagement": {
+    "style": "Controller; smoke then trade/hold post-plant",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Clove",
+   "role": "Controller",
+   "release": 2024,
+   "release_note": "2024-03-26 (v8.05, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Pick-me-up",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Haste + overheal after damaging/killing; rewards aggression.",
+     "source": "https://wiki.playvalorant.com/en-us/Clove"
+    },
+    {
+     "key": "Q",
+     "name": "Meddle",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown decay.",
+     "source": "https://wiki.playvalorant.com/en-us/Clove"
+    },
+    {
+     "key": "E",
+     "name": "Ruse",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Tactical MAP targeting; can cast while dead.",
+     "source": "https://wiki.playvalorant.com/en-us/Clove"
+    },
+    {
+     "key": "X",
+     "name": "Not Dead Yet",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Self-res; must get a kill/assist - aim duel under time pressure.",
+     "source": "https://wiki.playvalorant.com/en-us/Clove"
+    }
+   ],
+   "engagement": {
+    "style": "Aggressive controller; often fights first",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Harbor",
+   "role": "Controller",
+   "release": 2022,
+   "release_note": "2022-10-18 (v5.08, Riot wiki); kit reworked v11.10",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Storm Surge",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Added v11.10; not steered (Riot wiki).",
+     "source": "https://wiki.playvalorant.com/en-us/Harbor"
+    },
+    {
+     "key": "Q",
+     "name": "High Tide",
+     "mechanics": [
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold fire to steer wall toward crosshair; console toggle (v9.02). Normal look sensitivity; moderately time-critical.",
+     "source": "https://wiki.playvalorant.com/en-us/Harbor"
+    },
+    {
+     "key": "E",
+     "name": "Cove",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Hold fire to adjust placement distance.",
+     "source": "https://wiki.playvalorant.com/en-us/Harbor"
+    },
+    {
+     "key": "X",
+     "name": "Reckoning",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Reworked v11.10; not steered.",
+     "source": "https://wiki.playvalorant.com/en-us/Harbor"
+    }
+   ],
+   "engagement": {
+    "style": "Controller; aggressive wall-supported pushes",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Miks",
+   "role": "Controller",
+   "release": 2026,
+   "release_note": "2026-03-18 (v12.05, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "M-Pulse",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown pulse device, toggle concuss/heal.",
+     "source": "https://wiki.playvalorant.com/en-us/Miks"
+    },
+    {
+     "key": "Q",
+     "name": "Harmonize",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Fire on a targeted ally (crosshair targeting) for combat stim + haste.",
+     "source": "https://wiki.playvalorant.com/en-us/Miks"
+    },
+    {
+     "key": "E",
+     "name": "Waveform",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Tactical MAP smoke targeting.",
+     "source": "https://wiki.playvalorant.com/en-us/Miks"
+    },
+    {
+     "key": "X",
+     "name": "Bassquake",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Forward zone: deafen/knockback/slow.",
+     "source": "https://wiki.playvalorant.com/en-us/Miks"
+    }
+   ],
+   "engagement": {
+    "style": "Controller; too new for documented engagement data",
+    "weapons": [],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Omen",
+   "role": "Controller",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Shrouded Step",
+     "mechanics": [
+      "reposition"
+     ],
+     "reorient_deg": [
+      45,
+      180
+     ],
+     "zoom": null,
+     "notes": "Channel 0.7 s (v4.04) then teleport to targeted location (range not on Riot wiki). Used to reach off-angles/high ground; usually the threat is not along the pre-teleport view. ESTIMATE: teleports place you at a spot whose threats rarely lie along your pre-teleport view; players typically snap 45-180 deg to the expected angle. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Omen"
+    },
+    {
+     "key": "Q",
+     "name": "Paranoia",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Projectile 20 m/s, 25 m travel (v11.08): nearsight/deafen.",
+     "source": "https://wiki.playvalorant.com/en-us/Omen"
+    },
+    {
+     "key": "E",
+     "name": "Dark Cover",
+     "mechanics": [
+      "placement",
+      "guided"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed from first-person Shadow Vision using crosshair aim (hold fire/alt to adjust distance; reload toggles phased view) - uses look sensitivity, NOT a map. Precision placement, not time-critical.",
+     "source": "https://wiki.playvalorant.com/en-us/Omen"
+    },
+    {
+     "key": "X",
+     "name": "From the Shadows",
+     "mechanics": [
+      "reposition",
+      "placement"
+     ],
+     "reorient_deg": [
+      0,
+      180
+     ],
+     "zoom": null,
+     "notes": "Tactical MAP target, 4 s then appear at location; orientation on arrival not documented; full reorientation possible. ESTIMATE.",
+     "source": "https://wiki.playvalorant.com/en-us/Omen"
+    }
+   ],
+   "engagement": {
+    "style": "Controller; smokes + teleport off-angles, lurk",
+    "weapons": [
+     "Vandal/Phantom",
+     "Operator occasionally (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Viper",
+   "role": "Controller",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Snake Bite",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Molly; post-plant lineups.",
+     "source": "https://wiki.playvalorant.com/en-us/Viper"
+    },
+    {
+     "key": "Q",
+     "name": "Poison Cloud",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Throw/lob, reactivate to toggle; one-ways & lineups.",
+     "source": "https://wiki.playvalorant.com/en-us/Viper"
+    },
+    {
+     "key": "E",
+     "name": "Toxic Screen",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Emitter line sent forward along aim direction - long precise wall placement.",
+     "source": "https://wiki.playvalorant.com/en-us/Viper"
+    },
+    {
+     "key": "X",
+     "name": "Viper's Pit",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Large cloud around Viper (6 s windup); anchoring/lurk in pit.",
+     "source": "https://wiki.playvalorant.com/en-us/Viper"
+    }
+   ],
+   "engagement": {
+    "style": "Controller; often anchors/lurks, holds angles from utility",
+    "weapons": [
+     "Vandal/Phantom",
+     "Operator occasionally (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Chamber",
+   "role": "Sentinel",
+   "release": 2021,
+   "release_note": "2021-11-16 (v3.10, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Trademark",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed slow trap, recallable.",
+     "source": "https://wiki.playvalorant.com/en-us/Chamber"
+    },
+    {
+     "key": "Q",
+     "name": "Headhunter",
+     "mechanics": [
+      "weapon_ability"
+     ],
+     "reorient_deg": null,
+     "zoom": 1.5,
+     "notes": "Heavy pistol, 8 bullets at 100 cr each; dmg 159 head / 55 body / 46 legs (Riot wiki) -> one-tap headshot, very high precision demand. ADS zoom x1.5 (reduced from x1.75, undocumented change per Riot wiki). Hitscan (Valorant guns are hitscan, ESTIMATE wording).",
+     "source": "https://wiki.playvalorant.com/en-us/Chamber"
+    },
+    {
+     "key": "E",
+     "name": "Rendezvous",
+     "mechanics": [
+      "reposition",
+      "hold"
+     ],
+     "reorient_deg": [
+      0,
+      180
+     ],
+     "zoom": null,
+     "notes": "Instant teleport to placed anchor within 18 m (v9.05). Typical pattern: take shot (often Op/TdF), teleport out, re-peek from anchor which faces a different angle. ESTIMATE: teleports place you at a spot whose threats rarely lie along your pre-teleport view; players typically snap 45-180 deg to the expected angle. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Chamber"
+    },
+    {
+     "key": "X",
+     "name": "Tour De Force",
+     "mechanics": [
+      "weapon_ability"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Sniper, 5 ammo, dmg 255 head / 150 body / 127 legs (body kill), fire rate 0.9 (v8.03), slows zone on kill. Has a scope (community knowledge) but zoom factor NOT documented on Riot wiki -> zoom null. Low headshot dependency (body one-shots), flick/hold demand.",
+     "source": "https://wiki.playvalorant.com/en-us/Chamber"
+    }
+   ],
+   "engagement": {
+    "style": "Sniper sentinel; holds long angles with Op/TdF and teleport escape",
+    "weapons": [
+     "Operator",
+     "Headhunter",
+     "Vandal"
+    ],
+    "source_or_ESTIMATE": "https://www.dodge.gg/en-US/valorant/news/operator-weapon-guide-2026 ('arguably the best Operator user... Rendezvous'; guide opinion)"
+   }
+  },
+  {
+   "name": "Cypher",
+   "role": "Sentinel",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Trapwire",
+     "mechanics": [
+      "placement",
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Wire between surfaces; tether+reveal.",
+     "source": "https://wiki.playvalorant.com/en-us/Cypher"
+    },
+    {
+     "key": "Q",
+     "name": "Cyber Cage",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown, interact to smoke.",
+     "source": "https://wiki.playvalorant.com/en-us/Cypher"
+    },
+    {
+     "key": "E",
+     "name": "Spycam",
+     "mechanics": [
+      "guided",
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Reactivate to control (look through camera, fire reveal dart). Camera look uses normal mouse look (no separate setting found); dart is a moderately time-critical shot.",
+     "source": "https://wiki.playvalorant.com/en-us/Cypher"
+    },
+    {
+     "key": "X",
+     "name": "Neural Theft",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Use on dead enemy.",
+     "source": "https://wiki.playvalorant.com/en-us/Cypher"
+    }
+   ],
+   "engagement": {
+    "style": "Anchor/flank watch; info-driven holds",
+    "weapons": [
+     "Vandal/Phantom",
+     "Operator occasionally (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Deadlock",
+   "role": "Sentinel",
+   "release": 2023,
+   "release_note": "2023-06-27 (v7.0, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Barrier Mesh",
+     "mechanics": [
+      "placement",
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed barrier.",
+     "source": "https://wiki.playvalorant.com/en-us/Deadlock"
+    },
+    {
+     "key": "Q",
+     "name": "Sonic Sensor",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed sound trap.",
+     "source": "https://wiki.playvalorant.com/en-us/Deadlock"
+    },
+    {
+     "key": "E",
+     "name": "GravNet",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown net.",
+     "source": "https://wiki.playvalorant.com/en-us/Deadlock"
+    },
+    {
+     "key": "X",
+     "name": "Annihilation",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "'Fire to launch a zone' that cocoons first enemy hit; Riot wiki does not say projectile/aim - aim-directed line (ESTIMATE).",
+     "source": "https://wiki.playvalorant.com/en-us/Deadlock"
+    }
+   ],
+   "engagement": {
+    "style": "Anchor/site hold",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Killjoy",
+   "role": "Sentinel",
+   "release": 2020,
+   "release_note": "2020-08-04 (v1.05, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Nanoswarm",
+     "mechanics": [
+      "placement",
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Stealth molly, lineups.",
+     "source": "https://wiki.playvalorant.com/en-us/Killjoy"
+    },
+    {
+     "key": "Q",
+     "name": "Alarmbot",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed, stealthed; 40 m leash.",
+     "source": "https://wiki.playvalorant.com/en-us/Killjoy"
+    },
+    {
+     "key": "E",
+     "name": "Turret",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed with rotate/flip; 40 m leash.",
+     "source": "https://wiki.playvalorant.com/en-us/Killjoy"
+    },
+    {
+     "key": "X",
+     "name": "Lockdown",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "13 s windup detain zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Killjoy"
+    }
+   ],
+   "engagement": {
+    "style": "Anchor/site hold; static angle holding with setup info",
+    "weapons": [
+     "Vandal/Phantom",
+     "Operator occasionally (ESTIMATE)"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE (role: https://www.vstats.gg/blog/valorant_agent_roles)"
+   }
+  },
+  {
+   "name": "Sage",
+   "role": "Sentinel",
+   "release": 2020,
+   "release_note": "Closed Beta agent; live at game launch 2020-06-02 (v1.0). Riot wiki gives no exact date.",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Barrier Orb",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed wall; pivot/rotate; boost spots.",
+     "source": "https://wiki.playvalorant.com/en-us/Sage"
+    },
+    {
+     "key": "Q",
+     "name": "Slow Orb",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Thrown slow zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Sage"
+    },
+    {
+     "key": "E",
+     "name": "Healing Orb",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Target ally with crosshair.",
+     "source": "https://wiki.playvalorant.com/en-us/Sage"
+    },
+    {
+     "key": "X",
+     "name": "Resurrection",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Target dead ally.",
+     "source": "https://wiki.playvalorant.com/en-us/Sage"
+    }
+   ],
+   "engagement": {
+    "style": "Support/anchor, holds angles",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Veto",
+   "role": "Sentinel",
+   "release": 2025,
+   "release_note": "2025-10-07 (v11.07b, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Crosscut",
+     "mechanics": [
+      "reposition",
+      "hold"
+     ],
+     "reorient_deg": [
+      45,
+      180
+     ],
+     "zoom": null,
+     "notes": "Place device, interact while in range (30 m since v13.00) to teleport to it. Like Chamber Rendezvous: repeek/retreat to a pre-set spot facing a different angle. ESTIMATE: teleports place you at a spot whose threats rarely lie along your pre-teleport view; players typically snap 45-180 deg to the expected angle. Not quantified by any source.",
+     "source": "https://wiki.playvalorant.com/en-us/Veto"
+    },
+    {
+     "key": "Q",
+     "name": "Chokehold",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Stealthed trap: deafen/decay/tether.",
+     "source": "https://wiki.playvalorant.com/en-us/Veto"
+    },
+    {
+     "key": "E",
+     "name": "Interceptor",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed utility-destroying device, 9 s.",
+     "source": "https://wiki.playvalorant.com/en-us/Veto"
+    },
+    {
+     "key": "X",
+     "name": "Evolution",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Combat stim, healing, +10% fire rate etc., debuff immunity: aggressive aim-duel ult.",
+     "source": "https://wiki.playvalorant.com/en-us/Veto"
+    }
+   ],
+   "engagement": {
+    "style": "Anchor/sentinel with teleport repositioning",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  },
+  {
+   "name": "Vyse",
+   "role": "Sentinel",
+   "release": 2024,
+   "release_note": "2024-08-28 (v9.04, Riot wiki)",
+   "abilities": [
+    {
+     "key": "C",
+     "name": "Razorvine",
+     "mechanics": [
+      "placement",
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Stealth slow/damage zone.",
+     "source": "https://wiki.playvalorant.com/en-us/Vyse"
+    },
+    {
+     "key": "Q",
+     "name": "Shear",
+     "mechanics": [
+      "hold"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Stealth trap wall.",
+     "source": "https://wiki.playvalorant.com/en-us/Vyse"
+    },
+    {
+     "key": "E",
+     "name": "Arc Rose",
+     "mechanics": [
+      "placement"
+     ],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Placed (or through wall) flash.",
+     "source": "https://wiki.playvalorant.com/en-us/Vyse"
+    },
+    {
+     "key": "X",
+     "name": "Steel Garden",
+     "mechanics": [],
+     "reorient_deg": null,
+     "zoom": null,
+     "notes": "Jams enemy primaries in range.",
+     "source": "https://wiki.playvalorant.com/en-us/Vyse"
+    }
+   ],
+   "engagement": {
+    "style": "Anchor/site hold",
+    "weapons": [
+     "Vandal/Phantom"
+    ],
+    "source_or_ESTIMATE": "ESTIMATE"
+   }
+  }
+ ],
+ "sensitivity_settings_notes": {
+  "settings_found": [
+   "Sensitivity: Aim (base look sens)",
+   "Scoped Sensitivity Multiplier (snipers)",
+   "ADS Sensitivity Multiplier (non-sniper ADS; per third-party guides, Riot introduction patch not located)"
+  ],
+  "per_ability_sensitivity": "None found. No Riot patch note, the Riot wiki, or settings guides (prosettings.net Oct 2026, setup.gg, edpi-calculator.org) mention a drone/ability-specific sensitivity. Guided abilities are documented as 'steer toward your crosshair' and piloted drones/cameras are first-person, so they use the normal look sensitivity (inference; no Riot doc states it explicitly).",
+  "ability_steering_toggle": "Patch 9.02 (2024-07-30), CONSOLE only: High Tide, Fire Wall (Blaze), Guiding Light can be set to Toggle steering in Agent Profile Settings. This changes button behavior, not sensitivity.",
+  "zoomed_abilities": "Chamber Headhunter ADS x1.5 and Tour de Force scope: which multiplier (ADS vs Scoped) applies is not documented - verify in client.",
+  "map_based_abilities": "Brimstone Sky Smoke/Orbital Strike, Omen From the Shadows, Clove Ruse, Tejo Guided Salvo/Armageddon, Miks Waveform use a 'tactical map' with a cursor (Riot wiki). Look sensitivity is not the relevant control for precise map clicks (inference; cursor speed handling not documented by Riot). Omen Dark Cover is NOT map-based (first-person Shadow Vision aim).",
+  "sources": [
+   "https://playvalorant.com/en-gb/news/game-updates/valorant-patch-notes-902/",
+   "https://prosettings.net/guides/valorant-options/",
+   "https://www.setup.gg/game/valorant/best-sens/",
+   "https://edpi-calculator.org/tools/valorant-scoped-sensitivity"
+  ]
+ },
+ "recommender_implications_ESTIMATE": [
+  "Teleport-heavy kits (Yoru, Omen, Chamber, Veto, Waylay Refract) imply frequent large (90-180 deg) post-reposition turns -> favors sens with comfortable 180 within one swipe.",
+  "Precision weapon abilities (Chamber Headhunter/TdF, Jett Blade Storm) and Operator-centric agents (Jett, Chamber) favor lower/stable sens for micro-adjustment.",
+  "Neon Overdrive is a continuous tracking weapon -> tracking demand.",
+  "Guided/piloted abilities use normal look sens, so they add no separate sens requirement beyond comfortable steering."
+ ]
+}

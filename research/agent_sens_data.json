@@ -1,0 +1,7400 @@
+{
+ "generated": "2026-11-01",
+ "question": "Is there real data linking Valorant agents played to mouse sensitivity (eDPI / cm/360)?",
+ "notes": [
+  "28 non-creator players from pro_data_audit.json (SirMaza, Shanks, PROD, Lothar excluded as creator_or_streamer).",
+  "VLR timespan=all is the longest window (all VLR-tracked matches, incl. tier-2/older seasons, back to ~2020); it does NOT match the time the current sens was used. timespan=90d also recorded.",
+  "DPI/sens taken as-is from pro_data_audit.json (ProSettings values); settings history over the all-time window is unknown."
+ ],
+ "players": [
+  {
+   "name": "ZmjjKK",
+   "vlr_id": 3520,
+   "dpi": 800,
+   "sens": 0.395,
+   "edpi": 316.0,
+   "cm360": 41.34,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.43,
+     "rounds_or_maps": {
+      "maps": 290,
+      "rounds": 6109
+     },
+     "round_share": 0.4308
+    },
+    {
+     "agent": "raze",
+     "share": 0.18,
+     "rounds_or_maps": {
+      "maps": 119,
+      "rounds": 2522
+     },
+     "round_share": 0.1779
+    },
+    {
+     "agent": "chamber",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 108,
+      "rounds": 2198
+     },
+     "round_share": 0.155
+    },
+    {
+     "agent": "neon",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 86,
+      "rounds": 1803
+     },
+     "round_share": 0.1272
+    },
+    {
+     "agent": "yoru",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 23,
+      "rounds": 520
+     },
+     "round_share": 0.0367
+    },
+    {
+     "agent": "waylay",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 12,
+      "rounds": 250
+     },
+     "round_share": 0.0176
+    },
+    {
+     "agent": "iso",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 156
+     },
+     "round_share": 0.011
+    },
+    {
+     "agent": "gekko",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 125
+     },
+     "round_share": 0.0088
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 104
+     },
+     "round_share": 0.0073
+    },
+    {
+     "agent": "omen",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 93
+     },
+     "round_share": 0.0066
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 75
+     },
+     "round_share": 0.0053
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 50
+     },
+     "round_share": 0.0035
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 42
+     },
+     "round_share": 0.003
+    },
+    {
+     "agent": "astra",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "sova",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "clove",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "breach",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0015
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0014
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 674,
+    "total_rounds": 14180,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "jett",
+     "share": 0.33,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 89
+     },
+     "round_share": 0.3574
+    },
+    {
+     "agent": "neon",
+     "share": 0.33,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 80
+     },
+     "round_share": 0.3213
+    },
+    {
+     "agent": "chamber",
+     "share": 0.17,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.1606
+    },
+    {
+     "agent": "yoru",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0884
+    },
+    {
+     "agent": "waylay",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0723
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 12,
+    "total_rounds": 249,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/3520/?timespan=all",
+    "90d": "https://www.vlr.gg/player/3520/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.7901,
+    "jett_chamber_round_share": 0.5858,
+    "role_round_shares": {
+     "duelist": 0.81,
+     "sentinel": 0.161,
+     "initiator": 0.019,
+     "controller": 0.01
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Smoggy",
+   "vlr_id": 4742,
+   "dpi": 800,
+   "sens": 0.31,
+   "edpi": 248.0,
+   "cm360": 52.67,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.2,
+     "rounds_or_maps": {
+      "maps": 124,
+      "rounds": 2676
+     },
+     "round_share": 0.2077
+    },
+    {
+     "agent": "omen",
+     "share": 0.2,
+     "rounds_or_maps": {
+      "maps": 124,
+      "rounds": 2595
+     },
+     "round_share": 0.2015
+    },
+    {
+     "agent": "raze",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 53,
+      "rounds": 1111
+     },
+     "round_share": 0.0863
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 42,
+      "rounds": 882
+     },
+     "round_share": 0.0685
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 39,
+      "rounds": 858
+     },
+     "round_share": 0.0666
+    },
+    {
+     "agent": "breach",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 36,
+      "rounds": 753
+     },
+     "round_share": 0.0585
+    },
+    {
+     "agent": "fade",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 33,
+      "rounds": 679
+     },
+     "round_share": 0.0527
+    },
+    {
+     "agent": "astra",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 435
+     },
+     "round_share": 0.0338
+    },
+    {
+     "agent": "viper",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 19,
+      "rounds": 410
+     },
+     "round_share": 0.0318
+    },
+    {
+     "agent": "kayo",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 375
+     },
+     "round_share": 0.0291
+    },
+    {
+     "agent": "harbor",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 359
+     },
+     "round_share": 0.0279
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 16,
+      "rounds": 337
+     },
+     "round_share": 0.0262
+    },
+    {
+     "agent": "clove",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 283
+     },
+     "round_share": 0.022
+    },
+    {
+     "agent": "gekko",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 271
+     },
+     "round_share": 0.021
+    },
+    {
+     "agent": "sova",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 196
+     },
+     "round_share": 0.0152
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 146
+     },
+     "round_share": 0.0113
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 132
+     },
+     "round_share": 0.0102
+    },
+    {
+     "agent": "chamber",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 116
+     },
+     "round_share": 0.009
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 71
+     },
+     "round_share": 0.0055
+    },
+    {
+     "agent": "skye",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 63
+     },
+     "round_share": 0.0049
+    },
+    {
+     "agent": "yoru",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 51
+     },
+     "round_share": 0.004
+    },
+    {
+     "agent": "waylay",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.0032
+    },
+    {
+     "agent": "neon",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.0032
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 607,
+    "total_rounds": 12881,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "omen",
+     "share": 0.67,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 165
+     },
+     "round_share": 0.6627
+    },
+    {
+     "agent": "neon",
+     "share": 0.17,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.1647
+    },
+    {
+     "agent": "raze",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0964
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0763
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 12,
+    "total_rounds": 249,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/4742/?timespan=all",
+    "90d": "https://www.vlr.gg/player/4742/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.3043,
+    "jett_chamber_round_share": 0.2168,
+    "role_round_shares": {
+     "duelist": 0.341,
+     "controller": 0.385,
+     "sentinel": 0.092,
+     "initiator": 0.181
+    },
+    "primary_role_by_rounds": "controller"
+   }
+  },
+  {
+   "name": "CHICHOO",
+   "vlr_id": 15559,
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "viper",
+     "share": 0.27,
+     "rounds_or_maps": {
+      "maps": 172,
+      "rounds": 3695
+     },
+     "round_share": 0.2792
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.2,
+     "rounds_or_maps": {
+      "maps": 125,
+      "rounds": 2579
+     },
+     "round_share": 0.1949
+    },
+    {
+     "agent": "cypher",
+     "share": 0.19,
+     "rounds_or_maps": {
+      "maps": 122,
+      "rounds": 2564
+     },
+     "round_share": 0.1938
+    },
+    {
+     "agent": "omen",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 68,
+      "rounds": 1400
+     },
+     "round_share": 0.1058
+    },
+    {
+     "agent": "sage",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 32,
+      "rounds": 649
+     },
+     "round_share": 0.049
+    },
+    {
+     "agent": "vyse",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 28,
+      "rounds": 608
+     },
+     "round_share": 0.0459
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 28,
+      "rounds": 567
+     },
+     "round_share": 0.0428
+    },
+    {
+     "agent": "astra",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 27,
+      "rounds": 604
+     },
+     "round_share": 0.0456
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 131
+     },
+     "round_share": 0.0099
+    },
+    {
+     "agent": "kayo",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 68
+     },
+     "round_share": 0.0051
+    },
+    {
+     "agent": "clove",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 67
+     },
+     "round_share": 0.0051
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 65
+     },
+     "round_share": 0.0049
+    },
+    {
+     "agent": "harbor",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 62
+     },
+     "round_share": 0.0047
+    },
+    {
+     "agent": "breach",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.003
+    },
+    {
+     "agent": "jett",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 28
+     },
+     "round_share": 0.0021
+    },
+    {
+     "agent": "raze",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0018
+    },
+    {
+     "agent": "iso",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 23
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "sova",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "chamber",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0014
+    },
+    {
+     "agent": "skye",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0014
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 628,
+    "total_rounds": 13233,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "cypher",
+     "share": 0.5,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 126
+     },
+     "round_share": 0.506
+    },
+    {
+     "agent": "viper",
+     "share": 0.33,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 86
+     },
+     "round_share": 0.3454
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0763
+    },
+    {
+     "agent": "sage",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0723
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 12,
+    "total_rounds": 249,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/15559/?timespan=all",
+    "90d": "https://www.vlr.gg/player/15559/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0039,
+    "jett_chamber_round_share": 0.0036,
+    "role_round_shares": {
+     "controller": 0.483,
+     "sentinel": 0.485,
+     "duelist": 0.02,
+     "initiator": 0.011
+    },
+    "primary_role_by_rounds": "sentinel"
+   }
+  },
+  {
+   "name": "nobody",
+   "vlr_id": 3017,
+   "dpi": 800,
+   "sens": 0.26,
+   "edpi": 208.0,
+   "cm360": 62.8,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.41,
+     "rounds_or_maps": {
+      "maps": 266,
+      "rounds": 5553
+     },
+     "round_share": 0.4019
+    },
+    {
+     "agent": "skye",
+     "share": 0.17,
+     "rounds_or_maps": {
+      "maps": 114,
+      "rounds": 2443
+     },
+     "round_share": 0.1768
+    },
+    {
+     "agent": "fade",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 108,
+      "rounds": 2294
+     },
+     "round_share": 0.166
+    },
+    {
+     "agent": "tejo",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 29,
+      "rounds": 625
+     },
+     "round_share": 0.0452
+    },
+    {
+     "agent": "cypher",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 27,
+      "rounds": 535
+     },
+     "round_share": 0.0387
+    },
+    {
+     "agent": "breach",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 26,
+      "rounds": 527
+     },
+     "round_share": 0.0381
+    },
+    {
+     "agent": "gekko",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 361
+     },
+     "round_share": 0.0261
+    },
+    {
+     "agent": "omen",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 347
+     },
+     "round_share": 0.0251
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 242
+     },
+     "round_share": 0.0175
+    },
+    {
+     "agent": "viper",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 10,
+      "rounds": 208
+     },
+     "round_share": 0.0151
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 207
+     },
+     "round_share": 0.015
+    },
+    {
+     "agent": "yoru",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 174
+     },
+     "round_share": 0.0126
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 140
+     },
+     "round_share": 0.0101
+    },
+    {
+     "agent": "vyse",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "jett",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "chamber",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0015
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0014
+    },
+    {
+     "agent": "raze",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0014
+    },
+    {
+     "agent": "clove",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0014
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0014
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0013
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 656,
+    "total_rounds": 13818,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "sova",
+     "share": 0.58,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 146
+     },
+     "round_share": 0.5863
+    },
+    {
+     "agent": "fade",
+     "share": 0.25,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 61
+     },
+     "round_share": 0.245
+    },
+    {
+     "agent": "skye",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0964
+    },
+    {
+     "agent": "tejo",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0723
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 12,
+    "total_rounds": 249,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/3017/?timespan=all",
+    "90d": "https://www.vlr.gg/player/3017/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0156,
+    "jett_chamber_round_share": 0.0031,
+    "role_round_shares": {
+     "initiator": 0.864,
+     "sentinel": 0.045,
+     "controller": 0.057,
+     "duelist": 0.034
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "benjyfishy",
+   "vlr_id": 29873,
+   "dpi": 800,
+   "sens": 0.27,
+   "edpi": 216.0,
+   "cm360": 60.48,
+   "agents": [
+    {
+     "agent": "cypher",
+     "share": 0.36,
+     "rounds_or_maps": {
+      "maps": 143,
+      "rounds": 2968
+     },
+     "round_share": 0.3563
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.29,
+     "rounds_or_maps": {
+      "maps": 114,
+      "rounds": 2419
+     },
+     "round_share": 0.2904
+    },
+    {
+     "agent": "viper",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 51,
+      "rounds": 1089
+     },
+     "round_share": 0.1307
+    },
+    {
+     "agent": "vyse",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 35,
+      "rounds": 713
+     },
+     "round_share": 0.0856
+    },
+    {
+     "agent": "jett",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 30,
+      "rounds": 603
+     },
+     "round_share": 0.0724
+    },
+    {
+     "agent": "raze",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 122
+     },
+     "round_share": 0.0146
+    },
+    {
+     "agent": "chamber",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 97
+     },
+     "round_share": 0.0116
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 79
+     },
+     "round_share": 0.0095
+    },
+    {
+     "agent": "harbor",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 67
+     },
+     "round_share": 0.008
+    },
+    {
+     "agent": "breach",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 48
+     },
+     "round_share": 0.0058
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 43
+     },
+     "round_share": 0.0052
+    },
+    {
+     "agent": "tejo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 31
+     },
+     "round_share": 0.0037
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 28
+     },
+     "round_share": 0.0034
+    },
+    {
+     "agent": "veto",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0029
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 399,
+    "total_rounds": 8331,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "vyse",
+     "share": 0.38,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 68
+     },
+     "round_share": 0.3886
+    },
+    {
+     "agent": "cypher",
+     "share": 0.38,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 64
+     },
+     "round_share": 0.3657
+    },
+    {
+     "agent": "sage",
+     "share": 0.25,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 43
+     },
+     "round_share": 0.2457
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 8,
+    "total_rounds": 175,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/29873/?timespan=all",
+    "90d": "https://www.vlr.gg/player/29873/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.087,
+    "jett_chamber_round_share": 0.084,
+    "role_round_shares": {
+     "sentinel": 0.761,
+     "controller": 0.139,
+     "duelist": 0.09,
+     "initiator": 0.009
+    },
+    "primary_role_by_rounds": "sentinel"
+   }
+  },
+  {
+   "name": "RieNs",
+   "vlr_id": 10971,
+   "dpi": 800,
+   "sens": 0.27,
+   "edpi": 216.0,
+   "cm360": 60.48,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.37,
+     "rounds_or_maps": {
+      "maps": 196,
+      "rounds": 4183
+     },
+     "round_share": 0.3764
+    },
+    {
+     "agent": "breach",
+     "share": 0.15,
+     "rounds_or_maps": {
+      "maps": 77,
+      "rounds": 1648
+     },
+     "round_share": 0.1483
+    },
+    {
+     "agent": "fade",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 64,
+      "rounds": 1311
+     },
+     "round_share": 0.118
+    },
+    {
+     "agent": "skye",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 47,
+      "rounds": 1026
+     },
+     "round_share": 0.0923
+    },
+    {
+     "agent": "jett",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 32,
+      "rounds": 687
+     },
+     "round_share": 0.0618
+    },
+    {
+     "agent": "sage",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 31,
+      "rounds": 674
+     },
+     "round_share": 0.0606
+    },
+    {
+     "agent": "gekko",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 25,
+      "rounds": 537
+     },
+     "round_share": 0.0483
+    },
+    {
+     "agent": "viper",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 349
+     },
+     "round_share": 0.0314
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 298
+     },
+     "round_share": 0.0268
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 125
+     },
+     "round_share": 0.0112
+    },
+    {
+     "agent": "chamber",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 98
+     },
+     "round_share": 0.0088
+    },
+    {
+     "agent": "yoru",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 58
+     },
+     "round_share": 0.0052
+    },
+    {
+     "agent": "tejo",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 45
+     },
+     "round_share": 0.004
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 23
+     },
+     "round_share": 0.0021
+    },
+    {
+     "agent": "raze",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "astra",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 17
+     },
+     "round_share": 0.0015
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0014
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 524,
+    "total_rounds": 11113,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "sova",
+     "share": 0.5,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 92
+     },
+     "round_share": 0.5257
+    },
+    {
+     "agent": "fade",
+     "share": 0.38,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 59
+     },
+     "round_share": 0.3371
+    },
+    {
+     "agent": "viper",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.1371
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 8,
+    "total_rounds": 175,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/10971/?timespan=all",
+    "90d": "https://www.vlr.gg/player/10971/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0687,
+    "jett_chamber_round_share": 0.0706,
+    "role_round_shares": {
+     "initiator": 0.799,
+     "duelist": 0.07,
+     "sentinel": 0.098,
+     "controller": 0.033
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "t3xture",
+   "vlr_id": 9196,
+   "dpi": 800,
+   "sens": 0.43,
+   "edpi": 344.0,
+   "cm360": 37.97,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.5,
+     "rounds_or_maps": {
+      "maps": 241,
+      "rounds": 5075
+     },
+     "round_share": 0.4933
+    },
+    {
+     "agent": "raze",
+     "share": 0.24,
+     "rounds_or_maps": {
+      "maps": 114,
+      "rounds": 2488
+     },
+     "round_share": 0.2419
+    },
+    {
+     "agent": "neon",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 55,
+      "rounds": 1164
+     },
+     "round_share": 0.1132
+    },
+    {
+     "agent": "chamber",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 28,
+      "rounds": 600
+     },
+     "round_share": 0.0583
+    },
+    {
+     "agent": "yoru",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 285
+     },
+     "round_share": 0.0277
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 10,
+      "rounds": 217
+     },
+     "round_share": 0.0211
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 203
+     },
+     "round_share": 0.0197
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 85
+     },
+     "round_share": 0.0083
+    },
+    {
+     "agent": "waylay",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 61
+     },
+     "round_share": 0.0059
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 38
+     },
+     "round_share": 0.0037
+    },
+    {
+     "agent": "sova",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 28
+     },
+     "round_share": 0.0027
+    },
+    {
+     "agent": "omen",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0023
+    },
+    {
+     "agent": "iso",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0018
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 483,
+    "total_rounds": 10287,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "raze",
+     "share": 0.5,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 87
+     },
+     "round_share": 0.4915
+    },
+    {
+     "agent": "chamber",
+     "share": 0.38,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 69
+     },
+     "round_share": 0.3898
+    },
+    {
+     "agent": "yoru",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.1186
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 8,
+    "total_rounds": 177,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/9196/?timespan=all",
+    "90d": "https://www.vlr.gg/player/9196/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.882,
+    "jett_chamber_round_share": 0.5517,
+    "role_round_shares": {
+     "duelist": 0.912,
+     "sentinel": 0.083,
+     "initiator": 0.003,
+     "controller": 0.002
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Lakia",
+   "vlr_id": 773,
+   "dpi": 800,
+   "sens": 0.3,
+   "edpi": 240.0,
+   "cm360": 54.43,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.47,
+     "rounds_or_maps": {
+      "maps": 187,
+      "rounds": 3853
+     },
+     "round_share": 0.4691
+    },
+    {
+     "agent": "fade",
+     "share": 0.2,
+     "rounds_or_maps": {
+      "maps": 77,
+      "rounds": 1644
+     },
+     "round_share": 0.2001
+    },
+    {
+     "agent": "skye",
+     "share": 0.15,
+     "rounds_or_maps": {
+      "maps": 60,
+      "rounds": 1251
+     },
+     "round_share": 0.1523
+    },
+    {
+     "agent": "raze",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 29,
+      "rounds": 590
+     },
+     "round_share": 0.0718
+    },
+    {
+     "agent": "gekko",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 376
+     },
+     "round_share": 0.0458
+    },
+    {
+     "agent": "tejo",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 184
+     },
+     "round_share": 0.0224
+    },
+    {
+     "agent": "jett",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 63
+     },
+     "round_share": 0.0077
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 62
+     },
+     "round_share": 0.0075
+    },
+    {
+     "agent": "breach",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 58
+     },
+     "round_share": 0.0071
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 47
+     },
+     "round_share": 0.0057
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 47
+     },
+     "round_share": 0.0057
+    },
+    {
+     "agent": "viper",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0026
+    },
+    {
+     "agent": "omen",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0022
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 394,
+    "total_rounds": 8214,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": null,
+   "window_90d": {
+    "timespan": "90d",
+    "note": "VLR shows \"No agent data available for this period\""
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/773/?timespan=all",
+    "90d": "https://www.vlr.gg/player/773/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0795,
+    "jett_chamber_round_share": 0.0077,
+    "role_round_shares": {
+     "initiator": 0.902,
+     "duelist": 0.085,
+     "sentinel": 0.008,
+     "controller": 0.005
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "Karon",
+   "vlr_id": 34974,
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "omen",
+     "share": 0.57,
+     "rounds_or_maps": {
+      "maps": 183,
+      "rounds": 3894
+     },
+     "round_share": 0.564
+    },
+    {
+     "agent": "astra",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 37,
+      "rounds": 795
+     },
+     "round_share": 0.1152
+    },
+    {
+     "agent": "viper",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 35,
+      "rounds": 736
+     },
+     "round_share": 0.1066
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 530
+     },
+     "round_share": 0.0768
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 286
+     },
+     "round_share": 0.0414
+    },
+    {
+     "agent": "cypher",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 137
+     },
+     "round_share": 0.0198
+    },
+    {
+     "agent": "jett",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 137
+     },
+     "round_share": 0.0198
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 110
+     },
+     "round_share": 0.0159
+    },
+    {
+     "agent": "veto",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 106
+     },
+     "round_share": 0.0154
+    },
+    {
+     "agent": "vyse",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 100
+     },
+     "round_share": 0.0145
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 30
+     },
+     "round_share": 0.0043
+    },
+    {
+     "agent": "raze",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0032
+    },
+    {
+     "agent": "harbor",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.003
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 322,
+    "total_rounds": 6904,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "omen",
+     "share": 0.75,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 129
+     },
+     "round_share": 0.7288
+    },
+    {
+     "agent": "astra",
+     "share": 0.25,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 48
+     },
+     "round_share": 0.2712
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 8,
+    "total_rounds": 177,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/34974/?timespan=all",
+    "90d": "https://www.vlr.gg/player/34974/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.023,
+    "jett_chamber_round_share": 0.0198,
+    "role_round_shares": {
+     "controller": 0.866,
+     "sentinel": 0.095,
+     "duelist": 0.039
+    },
+    "primary_role_by_rounds": "controller"
+   }
+  },
+  {
+   "name": "ZynX",
+   "vlr_id": 51099,
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "cypher",
+     "share": 0.32,
+     "rounds_or_maps": {
+      "maps": 45,
+      "rounds": 945
+     },
+     "round_share": 0.3105
+    },
+    {
+     "agent": "viper",
+     "share": 0.18,
+     "rounds_or_maps": {
+      "maps": 26,
+      "rounds": 593
+     },
+     "round_share": 0.1949
+    },
+    {
+     "agent": "vyse",
+     "share": 0.15,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 471
+     },
+     "round_share": 0.1548
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 16,
+      "rounds": 325
+     },
+     "round_share": 0.1068
+    },
+    {
+     "agent": "yoru",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 12,
+      "rounds": 289
+     },
+     "round_share": 0.095
+    },
+    {
+     "agent": "waylay",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 215
+     },
+     "round_share": 0.0707
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 119
+     },
+     "round_share": 0.0391
+    },
+    {
+     "agent": "neon",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 48
+     },
+     "round_share": 0.0158
+    },
+    {
+     "agent": "skye",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0072
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0053
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 141,
+    "total_rounds": 3043,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": null,
+   "window_90d": {
+    "timespan": "90d",
+    "note": "VLR shows \"No agent data available for this period\""
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/51099/?timespan=all",
+    "90d": "https://www.vlr.gg/player/51099/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.1814,
+    "jett_chamber_round_share": 0,
+    "role_round_shares": {
+     "sentinel": 0.572,
+     "controller": 0.195,
+     "duelist": 0.221,
+     "initiator": 0.012
+    },
+    "primary_role_by_rounds": "sentinel"
+   }
+  },
+  {
+   "name": "kiNgg",
+   "vlr_id": 8549,
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "viper",
+     "share": 0.34,
+     "rounds_or_maps": {
+      "maps": 167,
+      "rounds": 3511
+     },
+     "round_share": 0.3379
+    },
+    {
+     "agent": "raze",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 81,
+      "rounds": 1698
+     },
+     "round_share": 0.1634
+    },
+    {
+     "agent": "omen",
+     "share": 0.15,
+     "rounds_or_maps": {
+      "maps": 77,
+      "rounds": 1648
+     },
+     "round_share": 0.1586
+    },
+    {
+     "agent": "kayo",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 32,
+      "rounds": 668
+     },
+     "round_share": 0.0643
+    },
+    {
+     "agent": "astra",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 31,
+      "rounds": 645
+     },
+     "round_share": 0.0621
+    },
+    {
+     "agent": "breach",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 501
+     },
+     "round_share": 0.0482
+    },
+    {
+     "agent": "sage",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 406
+     },
+     "round_share": 0.0391
+    },
+    {
+     "agent": "neon",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 16,
+      "rounds": 339
+     },
+     "round_share": 0.0326
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 303
+     },
+     "round_share": 0.0292
+    },
+    {
+     "agent": "vyse",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 163
+     },
+     "round_share": 0.0157
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 176
+     },
+     "round_share": 0.0169
+    },
+    {
+     "agent": "harbor",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 138
+     },
+     "round_share": 0.0133
+    },
+    {
+     "agent": "yoru",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 96
+     },
+     "round_share": 0.0092
+    },
+    {
+     "agent": "skye",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 39
+     },
+     "round_share": 0.0038
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 26
+     },
+     "round_share": 0.0025
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 17
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "waylay",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 17
+     },
+     "round_share": 0.0016
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 497,
+    "total_rounds": 10391,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "viper",
+     "share": 0.44,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 87
+     },
+     "round_share": 0.4807
+    },
+    {
+     "agent": "astra",
+     "share": 0.33,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 58
+     },
+     "round_share": 0.3204
+    },
+    {
+     "agent": "omen",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.116
+    },
+    {
+     "agent": "vyse",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 15
+     },
+     "round_share": 0.0829
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 9,
+    "total_rounds": 181,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/8549/?timespan=all",
+    "90d": "https://www.vlr.gg/player/8549/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.2069,
+    "jett_chamber_round_share": 0,
+    "role_round_shares": {
+     "controller": 0.589,
+     "duelist": 0.238,
+     "initiator": 0.116,
+     "sentinel": 0.057
+    },
+    "primary_role_by_rounds": "controller"
+   }
+  },
+  {
+   "name": "spikeziN",
+   "vlr_id": 21661,
+   "dpi": 800,
+   "sens": 0.23,
+   "edpi": 184.0,
+   "cm360": 70.99,
+   "agents": [
+    {
+     "agent": "neon",
+     "share": 0.45,
+     "rounds_or_maps": {
+      "maps": 103,
+      "rounds": 2170
+     },
+     "round_share": 0.4566
+    },
+    {
+     "agent": "kayo",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 30,
+      "rounds": 579
+     },
+     "round_share": 0.1218
+    },
+    {
+     "agent": "gekko",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 29,
+      "rounds": 623
+     },
+     "round_share": 0.1311
+    },
+    {
+     "agent": "viper",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 22,
+      "rounds": 490
+     },
+     "round_share": 0.1031
+    },
+    {
+     "agent": "yoru",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 303
+     },
+     "round_share": 0.0638
+    },
+    {
+     "agent": "omen",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 169
+     },
+     "round_share": 0.0356
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 129
+     },
+     "round_share": 0.0271
+    },
+    {
+     "agent": "waylay",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 65
+     },
+     "round_share": 0.0137
+    },
+    {
+     "agent": "vyse",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 61
+     },
+     "round_share": 0.0128
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 45
+     },
+     "round_share": 0.0095
+    },
+    {
+     "agent": "astra",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0051
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0051
+    },
+    {
+     "agent": "raze",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.004
+    },
+    {
+     "agent": "sova",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0038
+    },
+    {
+     "agent": "breach",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 17
+     },
+     "round_share": 0.0036
+    },
+    {
+     "agent": "skye",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0034
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 228,
+    "total_rounds": 4752,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "neon",
+     "share": 0.89,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 166
+     },
+     "round_share": 0.9171
+    },
+    {
+     "agent": "omen",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 15
+     },
+     "round_share": 0.0829
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 9,
+    "total_rounds": 181,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/21661/?timespan=all",
+    "90d": "https://www.vlr.gg/player/21661/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.5381,
+    "jett_chamber_round_share": 0,
+    "role_round_shares": {
+     "duelist": 0.543,
+     "initiator": 0.264,
+     "controller": 0.144,
+     "sentinel": 0.049
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Sato",
+   "vlr_id": 21659,
+   "dpi": 800,
+   "sens": 0.35,
+   "edpi": 280.0,
+   "cm360": 46.65,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.44,
+     "rounds_or_maps": {
+      "maps": 179,
+      "rounds": 3833
+     },
+     "round_share": 0.4377
+    },
+    {
+     "agent": "raze",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 65,
+      "rounds": 1398
+     },
+     "round_share": 0.1596
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 52,
+      "rounds": 1062
+     },
+     "round_share": 0.1213
+    },
+    {
+     "agent": "yoru",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 39,
+      "rounds": 838
+     },
+     "round_share": 0.0957
+    },
+    {
+     "agent": "neon",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 33,
+      "rounds": 691
+     },
+     "round_share": 0.0789
+    },
+    {
+     "agent": "waylay",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 372
+     },
+     "round_share": 0.0425
+    },
+    {
+     "agent": "chamber",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 12,
+      "rounds": 264
+     },
+     "round_share": 0.0301
+    },
+    {
+     "agent": "omen",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 10,
+      "rounds": 228
+     },
+     "round_share": 0.026
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0027
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0027
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 23
+     },
+     "round_share": 0.0026
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 411,
+    "total_rounds": 8757,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "phoenix",
+     "share": 0.56,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 109
+     },
+     "round_share": 0.6022
+    },
+    {
+     "agent": "omen",
+     "share": 0.22,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.2265
+    },
+    {
+     "agent": "yoru",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0884
+    },
+    {
+     "agent": "raze",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 15
+     },
+     "round_share": 0.0829
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 9,
+    "total_rounds": 181,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/21659/?timespan=all",
+    "90d": "https://www.vlr.gg/player/21659/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.8144,
+    "jett_chamber_round_share": 0.4679,
+    "role_round_shares": {
+     "duelist": 0.938,
+     "sentinel": 0.033,
+     "controller": 0.029
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Neon",
+   "vlr_id": 29243,
+   "dpi": 800,
+   "sens": 0.21,
+   "edpi": 168.0,
+   "cm360": 77.76,
+   "agents": [
+    {
+     "agent": "yoru",
+     "share": 0.3,
+     "rounds_or_maps": {
+      "maps": 75,
+      "rounds": 1545
+     },
+     "round_share": 0.2987
+    },
+    {
+     "agent": "jett",
+     "share": 0.25,
+     "rounds_or_maps": {
+      "maps": 64,
+      "rounds": 1336
+     },
+     "round_share": 0.2583
+    },
+    {
+     "agent": "chamber",
+     "share": 0.18,
+     "rounds_or_maps": {
+      "maps": 44,
+      "rounds": 887
+     },
+     "round_share": 0.1715
+    },
+    {
+     "agent": "raze",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 379
+     },
+     "round_share": 0.0733
+    },
+    {
+     "agent": "omen",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 346
+     },
+     "round_share": 0.0669
+    },
+    {
+     "agent": "neon",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 329
+     },
+     "round_share": 0.0636
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 158
+     },
+     "round_share": 0.0305
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 62
+     },
+     "round_share": 0.012
+    },
+    {
+     "agent": "iso",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 39
+     },
+     "round_share": 0.0075
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 23
+     },
+     "round_share": 0.0044
+    },
+    {
+     "agent": "veto",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0041
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0035
+    },
+    {
+     "agent": "gekko",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0031
+    },
+    {
+     "agent": "breach",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 14
+     },
+     "round_share": 0.0027
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 251,
+    "total_rounds": 5173,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "chamber",
+     "share": 0.44,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 79
+     },
+     "round_share": 0.4365
+    },
+    {
+     "agent": "omen",
+     "share": 0.22,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 46
+     },
+     "round_share": 0.2541
+    },
+    {
+     "agent": "yoru",
+     "share": 0.22,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.2265
+    },
+    {
+     "agent": "jett",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 15
+     },
+     "round_share": 0.0829
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 9,
+    "total_rounds": 181,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/29243/?timespan=all",
+    "90d": "https://www.vlr.gg/player/29243/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.6938,
+    "jett_chamber_round_share": 0.4297,
+    "role_round_shares": {
+     "duelist": 0.701,
+     "sentinel": 0.195,
+     "controller": 0.097,
+     "initiator": 0.006
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Blowz",
+   "vlr_id": 21251,
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.31,
+     "rounds_or_maps": {
+      "maps": 82,
+      "rounds": 1701
+     },
+     "round_share": 0.3095
+    },
+    {
+     "agent": "fade",
+     "share": 0.21,
+     "rounds_or_maps": {
+      "maps": 56,
+      "rounds": 1193
+     },
+     "round_share": 0.2171
+    },
+    {
+     "agent": "skye",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 29,
+      "rounds": 585
+     },
+     "round_share": 0.1064
+    },
+    {
+     "agent": "tejo",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 26,
+      "rounds": 513
+     },
+     "round_share": 0.0933
+    },
+    {
+     "agent": "gekko",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 344
+     },
+     "round_share": 0.0626
+    },
+    {
+     "agent": "raze",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 269
+     },
+     "round_share": 0.0489
+    },
+    {
+     "agent": "kayo",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 167
+     },
+     "round_share": 0.0304
+    },
+    {
+     "agent": "neon",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 165
+     },
+     "round_share": 0.03
+    },
+    {
+     "agent": "jett",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 153
+     },
+     "round_share": 0.0278
+    },
+    {
+     "agent": "breach",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 93
+     },
+     "round_share": 0.0169
+    },
+    {
+     "agent": "viper",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 68
+     },
+     "round_share": 0.0124
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 59
+     },
+     "round_share": 0.0107
+    },
+    {
+     "agent": "yoru",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 58
+     },
+     "round_share": 0.0106
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 49
+     },
+     "round_share": 0.0089
+    },
+    {
+     "agent": "omen",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 45
+     },
+     "round_share": 0.0082
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0036
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 14
+     },
+     "round_share": 0.0025
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 265,
+    "total_rounds": 5496,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "fade",
+     "share": 0.56,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 108
+     },
+     "round_share": 0.5967
+    },
+    {
+     "agent": "sova",
+     "share": 0.33,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 58
+     },
+     "round_share": 0.3204
+    },
+    {
+     "agent": "skye",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 15
+     },
+     "round_share": 0.0829
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 9,
+    "total_rounds": 181,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/21251/?timespan=all",
+    "90d": "https://www.vlr.gg/player/21251/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.1174,
+    "jett_chamber_round_share": 0.0278,
+    "role_round_shares": {
+     "initiator": 0.836,
+     "duelist": 0.126,
+     "controller": 0.031,
+     "sentinel": 0.006
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "trent",
+   "vlr_id": 15500,
+   "dpi": 1600,
+   "sens": 0.16,
+   "edpi": 256.0,
+   "cm360": 51.03,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.37,
+     "rounds_or_maps": {
+      "maps": 227,
+      "rounds": 4785
+     },
+     "round_share": 0.3633
+    },
+    {
+     "agent": "fade",
+     "share": 0.19,
+     "rounds_or_maps": {
+      "maps": 119,
+      "rounds": 2506
+     },
+     "round_share": 0.1903
+    },
+    {
+     "agent": "skye",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 74,
+      "rounds": 1572
+     },
+     "round_share": 0.1194
+    },
+    {
+     "agent": "tejo",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 73,
+      "rounds": 1579
+     },
+     "round_share": 0.1199
+    },
+    {
+     "agent": "viper",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 61,
+      "rounds": 1340
+     },
+     "round_share": 0.1017
+    },
+    {
+     "agent": "gekko",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 350
+     },
+     "round_share": 0.0266
+    },
+    {
+     "agent": "raze",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 253
+     },
+     "round_share": 0.0192
+    },
+    {
+     "agent": "breach",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 199
+     },
+     "round_share": 0.0151
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 186
+     },
+     "round_share": 0.0141
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 119
+     },
+     "round_share": 0.009
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 86
+     },
+     "round_share": 0.0065
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 83
+     },
+     "round_share": 0.0063
+    },
+    {
+     "agent": "astra",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 77
+     },
+     "round_share": 0.0058
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 15
+     },
+     "round_share": 0.0011
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 619,
+    "total_rounds": 13171,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "sova",
+     "share": 0.41,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 320
+     },
+     "round_share": 0.4061
+    },
+    {
+     "agent": "skye",
+     "share": 0.41,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 319
+     },
+     "round_share": 0.4048
+    },
+    {
+     "agent": "fade",
+     "share": 0.19,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 149
+     },
+     "round_share": 0.1891
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 37,
+    "total_rounds": 788,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/15500/?timespan=all",
+    "90d": "https://www.vlr.gg/player/15500/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0192,
+    "jett_chamber_round_share": 0,
+    "role_round_shares": {
+     "initiator": 0.849,
+     "controller": 0.108,
+     "duelist": 0.035,
+     "sentinel": 0.009
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "babybay",
+   "vlr_id": 2170,
+   "dpi": 1600,
+   "sens": 0.11,
+   "edpi": 176.0,
+   "cm360": 74.22,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.52,
+     "rounds_or_maps": {
+      "maps": 266,
+      "rounds": 5447
+     },
+     "round_share": 0.5171
+    },
+    {
+     "agent": "chamber",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 63,
+      "rounds": 1371
+     },
+     "round_share": 0.1302
+    },
+    {
+     "agent": "vyse",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 44,
+      "rounds": 918
+     },
+     "round_share": 0.0872
+    },
+    {
+     "agent": "neon",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 29,
+      "rounds": 633
+     },
+     "round_share": 0.0601
+    },
+    {
+     "agent": "raze",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 25,
+      "rounds": 544
+     },
+     "round_share": 0.0516
+    },
+    {
+     "agent": "waylay",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 364
+     },
+     "round_share": 0.0346
+    },
+    {
+     "agent": "cypher",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 285
+     },
+     "round_share": 0.0271
+    },
+    {
+     "agent": "viper",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 278
+     },
+     "round_share": 0.0264
+    },
+    {
+     "agent": "breach",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 160
+     },
+     "round_share": 0.0152
+    },
+    {
+     "agent": "yoru",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 134
+     },
+     "round_share": 0.0127
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 129
+     },
+     "round_share": 0.0122
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 64
+     },
+     "round_share": 0.0061
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 55
+     },
+     "round_share": 0.0052
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 37
+     },
+     "round_share": 0.0035
+    },
+    {
+     "agent": "veto",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 28
+     },
+     "round_share": 0.0027
+    },
+    {
+     "agent": "iso",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0023
+    },
+    {
+     "agent": "skye",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 23
+     },
+     "round_share": 0.0022
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0019
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0018
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 507,
+    "total_rounds": 10533,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "chamber",
+     "share": 0.59,
+     "rounds_or_maps": {
+      "maps": 22,
+      "rounds": 486
+     },
+     "round_share": 0.6168
+    },
+    {
+     "agent": "vyse",
+     "share": 0.22,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 161
+     },
+     "round_share": 0.2043
+    },
+    {
+     "agent": "waylay",
+     "share": 0.19,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 141
+     },
+     "round_share": 0.1789
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 37,
+    "total_rounds": 788,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/2170/?timespan=all",
+    "90d": "https://www.vlr.gg/player/2170/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.6762,
+    "jett_chamber_round_share": 0.6473,
+    "role_round_shares": {
+     "duelist": 0.688,
+     "sentinel": 0.263,
+     "controller": 0.026,
+     "initiator": 0.023
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "leaf",
+   "vlr_id": 7873,
+   "dpi": 1600,
+   "sens": 0.08,
+   "edpi": 128.0,
+   "cm360": 102.05,
+   "agents": [
+    {
+     "agent": "viper",
+     "share": 0.2,
+     "rounds_or_maps": {
+      "maps": 126,
+      "rounds": 2674
+     },
+     "round_share": 0.1996
+    },
+    {
+     "agent": "jett",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 82,
+      "rounds": 1715
+     },
+     "round_share": 0.128
+    },
+    {
+     "agent": "raze",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 72,
+      "rounds": 1508
+     },
+     "round_share": 0.1126
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 64,
+      "rounds": 1347
+     },
+     "round_share": 0.1006
+    },
+    {
+     "agent": "omen",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 35,
+      "rounds": 691
+     },
+     "round_share": 0.0516
+    },
+    {
+     "agent": "vyse",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 33,
+      "rounds": 718
+     },
+     "round_share": 0.0536
+    },
+    {
+     "agent": "chamber",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 30,
+      "rounds": 648
+     },
+     "round_share": 0.0484
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 26,
+      "rounds": 551
+     },
+     "round_share": 0.0411
+    },
+    {
+     "agent": "neon",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 25,
+      "rounds": 513
+     },
+     "round_share": 0.0383
+    },
+    {
+     "agent": "skye",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 499
+     },
+     "round_share": 0.0372
+    },
+    {
+     "agent": "cypher",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 435
+     },
+     "round_share": 0.0325
+    },
+    {
+     "agent": "reyna",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 20,
+      "rounds": 424
+     },
+     "round_share": 0.0317
+    },
+    {
+     "agent": "astra",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 19,
+      "rounds": 401
+     },
+     "round_share": 0.0299
+    },
+    {
+     "agent": "sage",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 19,
+      "rounds": 394
+     },
+     "round_share": 0.0294
+    },
+    {
+     "agent": "yoru",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 16,
+      "rounds": 366
+     },
+     "round_share": 0.0273
+    },
+    {
+     "agent": "breach",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 10,
+      "rounds": 201
+     },
+     "round_share": 0.015
+    },
+    {
+     "agent": "fade",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 122
+     },
+     "round_share": 0.0091
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 85
+     },
+     "round_share": 0.0063
+    },
+    {
+     "agent": "kayo",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 64
+     },
+     "round_share": 0.0048
+    },
+    {
+     "agent": "sova",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0018
+    },
+    {
+     "agent": "veto",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0012
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 637,
+    "total_rounds": 13396,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "viper",
+     "share": 0.43,
+     "rounds_or_maps": {
+      "maps": 16,
+      "rounds": 341
+     },
+     "round_share": 0.4327
+    },
+    {
+     "agent": "astra",
+     "share": 0.19,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 141
+     },
+     "round_share": 0.1789
+    },
+    {
+     "agent": "vyse",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 130
+     },
+     "round_share": 0.165
+    },
+    {
+     "agent": "yoru",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 89
+     },
+     "round_share": 0.1129
+    },
+    {
+     "agent": "sage",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 87
+     },
+     "round_share": 0.1104
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 37,
+    "total_rounds": 788,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/7873/?timespan=all",
+    "90d": "https://www.vlr.gg/player/7873/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.3062,
+    "jett_chamber_round_share": 0.1764,
+    "role_round_shares": {
+     "controller": 0.281,
+     "duelist": 0.379,
+     "sentinel": 0.272,
+     "initiator": 0.068
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "valyn",
+   "vlr_id": 3885,
+   "dpi": 1600,
+   "sens": 0.15,
+   "edpi": 240.0,
+   "cm360": 54.43,
+   "agents": [
+    {
+     "agent": "omen",
+     "share": 0.38,
+     "rounds_or_maps": {
+      "maps": 313,
+      "rounds": 6553
+     },
+     "round_share": 0.3778
+    },
+    {
+     "agent": "astra",
+     "share": 0.32,
+     "rounds_or_maps": {
+      "maps": 270,
+      "rounds": 5640
+     },
+     "round_share": 0.3251
+    },
+    {
+     "agent": "viper",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 83,
+      "rounds": 1695
+     },
+     "round_share": 0.0977
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 79,
+      "rounds": 1684
+     },
+     "round_share": 0.0971
+    },
+    {
+     "agent": "harbor",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 54,
+      "rounds": 1122
+     },
+     "round_share": 0.0647
+    },
+    {
+     "agent": "cypher",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 261
+     },
+     "round_share": 0.015
+    },
+    {
+     "agent": "kayo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 127
+     },
+     "round_share": 0.0073
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 125
+     },
+     "round_share": 0.0072
+    },
+    {
+     "agent": "skye",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 98
+     },
+     "round_share": 0.0056
+    },
+    {
+     "agent": "chamber",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0013
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0012
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 831,
+    "total_rounds": 17347,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "omen",
+     "share": 0.62,
+     "rounds_or_maps": {
+      "maps": 23,
+      "rounds": 495
+     },
+     "round_share": 0.6282
+    },
+    {
+     "agent": "harbor",
+     "share": 0.32,
+     "rounds_or_maps": {
+      "maps": 12,
+      "rounds": 248
+     },
+     "round_share": 0.3147
+    },
+    {
+     "agent": "astra",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 45
+     },
+     "round_share": 0.0571
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 37,
+    "total_rounds": 788,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/3885/?timespan=all",
+    "90d": "https://www.vlr.gg/player/3885/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0,
+    "jett_chamber_round_share": 0.0013,
+    "role_round_shares": {
+     "controller": 0.962,
+     "sentinel": 0.017,
+     "initiator": 0.013,
+     "duelist": 0.007
+    },
+    "primary_role_by_rounds": "controller"
+   }
+  },
+  {
+   "name": "jawgemo",
+   "vlr_id": 3993,
+   "dpi": 1600,
+   "sens": 0.157,
+   "edpi": 251.2,
+   "cm360": 52.0,
+   "agents": [
+    {
+     "agent": "raze",
+     "share": 0.28,
+     "rounds_or_maps": {
+      "maps": 191,
+      "rounds": 3995
+     },
+     "round_share": 0.2779
+    },
+    {
+     "agent": "yoru",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 94,
+      "rounds": 2032
+     },
+     "round_share": 0.1413
+    },
+    {
+     "agent": "jett",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 94,
+      "rounds": 2016
+     },
+     "round_share": 0.1402
+    },
+    {
+     "agent": "neon",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 93,
+      "rounds": 1965
+     },
+     "round_share": 0.1367
+    },
+    {
+     "agent": "omen",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 35,
+      "rounds": 737
+     },
+     "round_share": 0.0513
+    },
+    {
+     "agent": "astra",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 26,
+      "rounds": 569
+     },
+     "round_share": 0.0396
+    },
+    {
+     "agent": "kayo",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 25,
+      "rounds": 544
+     },
+     "round_share": 0.0378
+    },
+    {
+     "agent": "sage",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 25,
+      "rounds": 499
+     },
+     "round_share": 0.0347
+    },
+    {
+     "agent": "waylay",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 432
+     },
+     "round_share": 0.0301
+    },
+    {
+     "agent": "reyna",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 20,
+      "rounds": 425
+     },
+     "round_share": 0.0296
+    },
+    {
+     "agent": "skye",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 287
+     },
+     "round_share": 0.02
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 224
+     },
+     "round_share": 0.0156
+    },
+    {
+     "agent": "harbor",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 139
+     },
+     "round_share": 0.0097
+    },
+    {
+     "agent": "chamber",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 109
+     },
+     "round_share": 0.0076
+    },
+    {
+     "agent": "iso",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 102
+     },
+     "round_share": 0.0071
+    },
+    {
+     "agent": "gekko",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 80
+     },
+     "round_share": 0.0056
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 63
+     },
+     "round_share": 0.0044
+    },
+    {
+     "agent": "viper",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 55
+     },
+     "round_share": 0.0038
+    },
+    {
+     "agent": "fade",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 59
+     },
+     "round_share": 0.0041
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 44
+     },
+     "round_share": 0.0031
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 680,
+    "total_rounds": 14376,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "neon",
+     "share": 0.76,
+     "rounds_or_maps": {
+      "maps": 28,
+      "rounds": 600
+     },
+     "round_share": 0.7614
+    },
+    {
+     "agent": "raze",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 121
+     },
+     "round_share": 0.1536
+    },
+    {
+     "agent": "yoru",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 44
+     },
+     "round_share": 0.0558
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 23
+     },
+     "round_share": 0.0292
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 37,
+    "total_rounds": 788,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/3993/?timespan=all",
+    "90d": "https://www.vlr.gg/player/3993/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.7262,
+    "jett_chamber_round_share": 0.1478,
+    "role_round_shares": {
+     "duelist": 0.778,
+     "controller": 0.109,
+     "initiator": 0.067,
+     "sentinel": 0.045
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Alfajer",
+   "vlr_id": 9810,
+   "dpi": 400,
+   "sens": 0.45,
+   "edpi": 180.0,
+   "cm360": 72.57,
+   "agents": [
+    {
+     "agent": "killjoy",
+     "share": 0.34,
+     "rounds_or_maps": {
+      "maps": 184,
+      "rounds": 3859
+     },
+     "round_share": 0.3326
+    },
+    {
+     "agent": "raze",
+     "share": 0.15,
+     "rounds_or_maps": {
+      "maps": 81,
+      "rounds": 1754
+     },
+     "round_share": 0.1512
+    },
+    {
+     "agent": "cypher",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 68,
+      "rounds": 1453
+     },
+     "round_share": 0.1252
+    },
+    {
+     "agent": "chamber",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 51,
+      "rounds": 1127
+     },
+     "round_share": 0.0971
+    },
+    {
+     "agent": "viper",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 30,
+      "rounds": 653
+     },
+     "round_share": 0.0563
+    },
+    {
+     "agent": "iso",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 22,
+      "rounds": 468
+     },
+     "round_share": 0.0403
+    },
+    {
+     "agent": "vyse",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 414
+     },
+     "round_share": 0.0357
+    },
+    {
+     "agent": "neon",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 391
+     },
+     "round_share": 0.0337
+    },
+    {
+     "agent": "jett",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 297
+     },
+     "round_share": 0.0256
+    },
+    {
+     "agent": "sage",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 285
+     },
+     "round_share": 0.0246
+    },
+    {
+     "agent": "waylay",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 253
+     },
+     "round_share": 0.0218
+    },
+    {
+     "agent": "tejo",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 9,
+      "rounds": 191
+     },
+     "round_share": 0.0165
+    },
+    {
+     "agent": "breach",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 123
+     },
+     "round_share": 0.0106
+    },
+    {
+     "agent": "gekko",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 68
+     },
+     "round_share": 0.0059
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 57
+     },
+     "round_share": 0.0049
+    },
+    {
+     "agent": "skye",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 52
+     },
+     "round_share": 0.0045
+    },
+    {
+     "agent": "kayo",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 46
+     },
+     "round_share": 0.004
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 35
+     },
+     "round_share": 0.003
+    },
+    {
+     "agent": "omen",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0018
+    },
+    {
+     "agent": "veto",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "clove",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 16
+     },
+     "round_share": 0.0014
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 541,
+    "total_rounds": 11603,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "neon",
+     "share": 0.57,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 87
+     },
+     "round_share": 0.5959
+    },
+    {
+     "agent": "chamber",
+     "share": 0.29,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.274
+    },
+    {
+     "agent": "waylay",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.1301
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 7,
+    "total_rounds": 146,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/9810/?timespan=all",
+    "90d": "https://www.vlr.gg/player/9810/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.2323,
+    "jett_chamber_round_share": 0.1227,
+    "role_round_shares": {
+     "sentinel": 0.619,
+     "duelist": 0.281,
+     "controller": 0.059,
+     "initiator": 0.041
+    },
+    "primary_role_by_rounds": "sentinel"
+   }
+  },
+  {
+   "name": "crashies",
+   "vlr_id": 4,
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.51,
+     "rounds_or_maps": {
+      "maps": 317,
+      "rounds": 6709
+     },
+     "round_share": 0.5085
+    },
+    {
+     "agent": "skye",
+     "share": 0.16,
+     "rounds_or_maps": {
+      "maps": 102,
+      "rounds": 2152
+     },
+     "round_share": 0.1631
+    },
+    {
+     "agent": "fade",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 84,
+      "rounds": 1819
+     },
+     "round_share": 0.1379
+    },
+    {
+     "agent": "cypher",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 36,
+      "rounds": 721
+     },
+     "round_share": 0.0546
+    },
+    {
+     "agent": "kayo",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 518
+     },
+     "round_share": 0.0393
+    },
+    {
+     "agent": "viper",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 294
+     },
+     "round_share": 0.0223
+    },
+    {
+     "agent": "breach",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 224
+     },
+     "round_share": 0.017
+    },
+    {
+     "agent": "tejo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 185
+     },
+     "round_share": 0.014
+    },
+    {
+     "agent": "gekko",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 144
+     },
+     "round_share": 0.0109
+    },
+    {
+     "agent": "omen",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 128
+     },
+     "round_share": 0.0097
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 120
+     },
+     "round_share": 0.0091
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 115
+     },
+     "round_share": 0.0087
+    },
+    {
+     "agent": "raze",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 29
+     },
+     "round_share": 0.0022
+    },
+    {
+     "agent": "sage",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0017
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 14
+     },
+     "round_share": 0.0011
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 623,
+    "total_rounds": 13194,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "viper",
+     "share": 0.57,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 82
+     },
+     "round_share": 0.5616
+    },
+    {
+     "agent": "cypher",
+     "share": 0.43,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 64
+     },
+     "round_share": 0.4384
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 7,
+    "total_rounds": 146,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/4/?timespan=all",
+    "90d": "https://www.vlr.gg/player/4/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0022,
+    "jett_chamber_round_share": 0,
+    "role_round_shares": {
+     "initiator": 0.891,
+     "sentinel": 0.065,
+     "controller": 0.032,
+     "duelist": 0.012
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "Boaster",
+   "vlr_id": 438,
+   "dpi": 800,
+   "sens": 0.2,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "omen",
+     "share": 0.27,
+     "rounds_or_maps": {
+      "maps": 173,
+      "rounds": 3705
+     },
+     "round_share": 0.2772
+    },
+    {
+     "agent": "astra",
+     "share": 0.23,
+     "rounds_or_maps": {
+      "maps": 146,
+      "rounds": 3144
+     },
+     "round_share": 0.2352
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 78,
+      "rounds": 1657
+     },
+     "round_share": 0.124
+    },
+    {
+     "agent": "breach",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 73,
+      "rounds": 1487
+     },
+     "round_share": 0.1113
+    },
+    {
+     "agent": "sova",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 59,
+      "rounds": 1263
+     },
+     "round_share": 0.0945
+    },
+    {
+     "agent": "viper",
+     "share": 0.09,
+     "rounds_or_maps": {
+      "maps": 58,
+      "rounds": 1184
+     },
+     "round_share": 0.0886
+    },
+    {
+     "agent": "kayo",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 250
+     },
+     "round_share": 0.0187
+    },
+    {
+     "agent": "harbor",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 169
+     },
+     "round_share": 0.0126
+    },
+    {
+     "agent": "skye",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 145
+     },
+     "round_share": 0.0108
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 136
+     },
+     "round_share": 0.0102
+    },
+    {
+     "agent": "jett",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 112
+     },
+     "round_share": 0.0084
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.0031
+    },
+    {
+     "agent": "reyna",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 37
+     },
+     "round_share": 0.0028
+    },
+    {
+     "agent": "yoru",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0016
+    },
+    {
+     "agent": "fade",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 14
+     },
+     "round_share": 0.001
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 631,
+    "total_rounds": 13366,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "omen",
+     "share": 0.86,
+     "rounds_or_maps": {
+      "maps": 6,
+      "rounds": 125
+     },
+     "round_share": 0.8562
+    },
+    {
+     "agent": "harbor",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.1438
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 7,
+    "total_rounds": 146,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/438/?timespan=all",
+    "90d": "https://www.vlr.gg/player/438/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.01,
+    "jett_chamber_round_share": 0.0084,
+    "role_round_shares": {
+     "controller": 0.738,
+     "initiator": 0.236,
+     "sentinel": 0.013,
+     "duelist": 0.013
+    },
+    "primary_role_by_rounds": "controller"
+   }
+  },
+  {
+   "name": "Cloud",
+   "vlr_id": 4181,
+   "dpi": 800,
+   "sens": 0.4,
+   "edpi": 320.0,
+   "cm360": 40.82,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.4,
+     "rounds_or_maps": {
+      "maps": 195,
+      "rounds": 4034
+     },
+     "round_share": 0.3958
+    },
+    {
+     "agent": "skye",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 63,
+      "rounds": 1356
+     },
+     "round_share": 0.1331
+    },
+    {
+     "agent": "fade",
+     "share": 0.08,
+     "rounds_or_maps": {
+      "maps": 38,
+      "rounds": 808
+     },
+     "round_share": 0.0793
+    },
+    {
+     "agent": "raze",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 36,
+      "rounds": 771
+     },
+     "round_share": 0.0757
+    },
+    {
+     "agent": "breach",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 29,
+      "rounds": 617
+     },
+     "round_share": 0.0605
+    },
+    {
+     "agent": "sage",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 538
+     },
+     "round_share": 0.0528
+    },
+    {
+     "agent": "tejo",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 22,
+      "rounds": 446
+     },
+     "round_share": 0.0438
+    },
+    {
+     "agent": "gekko",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 18,
+      "rounds": 386
+     },
+     "round_share": 0.0379
+    },
+    {
+     "agent": "kayo",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 16,
+      "rounds": 351
+     },
+     "round_share": 0.0344
+    },
+    {
+     "agent": "reyna",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 295
+     },
+     "round_share": 0.0289
+    },
+    {
+     "agent": "viper",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 283
+     },
+     "round_share": 0.0278
+    },
+    {
+     "agent": "jett",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 103
+     },
+     "round_share": 0.0101
+    },
+    {
+     "agent": "omen",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 46
+     },
+     "round_share": 0.0045
+    },
+    {
+     "agent": "yoru",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.0039
+    },
+    {
+     "agent": "neon",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 39
+     },
+     "round_share": 0.0038
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 24
+     },
+     "round_share": 0.0024
+    },
+    {
+     "agent": "astra",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0022
+    },
+    {
+     "agent": "vyse",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0019
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 13
+     },
+     "round_share": 0.0013
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 483,
+    "total_rounds": 10191,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "sova",
+     "share": 0.43,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 64
+     },
+     "round_share": 0.4384
+    },
+    {
+     "agent": "fade",
+     "share": 0.43,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 63
+     },
+     "round_share": 0.4315
+    },
+    {
+     "agent": "skye",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.1301
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 7,
+    "total_rounds": 146,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/4181/?timespan=all",
+    "90d": "https://www.vlr.gg/player/4181/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0935,
+    "jett_chamber_round_share": 0.0101,
+    "role_round_shares": {
+     "initiator": 0.785,
+     "duelist": 0.124,
+     "sentinel": 0.057,
+     "controller": 0.034
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  },
+  {
+   "name": "kaajak",
+   "vlr_id": 9554,
+   "dpi": 1600,
+   "sens": 0.1,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.3,
+     "rounds_or_maps": {
+      "maps": 146,
+      "rounds": 3072
+     },
+     "round_share": 0.2986
+    },
+    {
+     "agent": "yoru",
+     "share": 0.23,
+     "rounds_or_maps": {
+      "maps": 111,
+      "rounds": 2369
+     },
+     "round_share": 0.2302
+    },
+    {
+     "agent": "raze",
+     "share": 0.2,
+     "rounds_or_maps": {
+      "maps": 98,
+      "rounds": 2061
+     },
+     "round_share": 0.2003
+    },
+    {
+     "agent": "neon",
+     "share": 0.11,
+     "rounds_or_maps": {
+      "maps": 53,
+      "rounds": 1152
+     },
+     "round_share": 0.112
+    },
+    {
+     "agent": "omen",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 505
+     },
+     "round_share": 0.0491
+    },
+    {
+     "agent": "waylay",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 275
+     },
+     "round_share": 0.0267
+    },
+    {
+     "agent": "gekko",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 11,
+      "rounds": 201
+     },
+     "round_share": 0.0195
+    },
+    {
+     "agent": "chamber",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 154
+     },
+     "round_share": 0.015
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 113
+     },
+     "round_share": 0.011
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 89
+     },
+     "round_share": 0.0087
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 81
+     },
+     "round_share": 0.0079
+    },
+    {
+     "agent": "astra",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 80
+     },
+     "round_share": 0.0078
+    },
+    {
+     "agent": "kayo",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 41
+     },
+     "round_share": 0.004
+    },
+    {
+     "agent": "sova",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 39
+     },
+     "round_share": 0.0038
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 38
+     },
+     "round_share": 0.0037
+    },
+    {
+     "agent": "viper",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0018
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 487,
+    "total_rounds": 10289,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "phoenix",
+     "share": 0.43,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 68
+     },
+     "round_share": 0.4658
+    },
+    {
+     "agent": "raze",
+     "share": 0.29,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.274
+    },
+    {
+     "agent": "yoru",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.1301
+    },
+    {
+     "agent": "waylay",
+     "share": 0.14,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.1301
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 7,
+    "total_rounds": 146,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/9554/?timespan=all",
+    "90d": "https://www.vlr.gg/player/9554/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.8678,
+    "jett_chamber_round_share": 0.3135,
+    "role_round_shares": {
+     "duelist": 0.884,
+     "controller": 0.062,
+     "initiator": 0.027,
+     "sentinel": 0.026
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "Veqaj",
+   "vlr_id": 12928,
+   "dpi": 1600,
+   "sens": 0.125,
+   "edpi": 200.0,
+   "cm360": 65.31,
+   "agents": [
+    {
+     "agent": "jett",
+     "share": 0.22,
+     "rounds_or_maps": {
+      "maps": 68,
+      "rounds": 1414
+     },
+     "round_share": 0.2127
+    },
+    {
+     "agent": "skye",
+     "share": 0.13,
+     "rounds_or_maps": {
+      "maps": 42,
+      "rounds": 870
+     },
+     "round_share": 0.1309
+    },
+    {
+     "agent": "raze",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 38,
+      "rounds": 826
+     },
+     "round_share": 0.1243
+    },
+    {
+     "agent": "viper",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 36,
+      "rounds": 792
+     },
+     "round_share": 0.1192
+    },
+    {
+     "agent": "breach",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 449
+     },
+     "round_share": 0.0675
+    },
+    {
+     "agent": "yoru",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 20,
+      "rounds": 456
+     },
+     "round_share": 0.0686
+    },
+    {
+     "agent": "kayo",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 19,
+      "rounds": 433
+     },
+     "round_share": 0.0651
+    },
+    {
+     "agent": "sova",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 17,
+      "rounds": 371
+     },
+     "round_share": 0.0558
+    },
+    {
+     "agent": "neon",
+     "share": 0.05,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 294
+     },
+     "round_share": 0.0442
+    },
+    {
+     "agent": "chamber",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 8,
+      "rounds": 169
+     },
+     "round_share": 0.0254
+    },
+    {
+     "agent": "omen",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 106
+     },
+     "round_share": 0.0159
+    },
+    {
+     "agent": "fade",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 102
+     },
+     "round_share": 0.0153
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 76
+     },
+     "round_share": 0.0114
+    },
+    {
+     "agent": "harbor",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 76
+     },
+     "round_share": 0.0114
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 62
+     },
+     "round_share": 0.0093
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 54
+     },
+     "round_share": 0.0081
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.006
+    },
+    {
+     "agent": "waylay",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 20
+     },
+     "round_share": 0.003
+    },
+    {
+     "agent": "iso",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 19
+     },
+     "round_share": 0.0029
+    },
+    {
+     "agent": "cypher",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0027
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 312,
+    "total_rounds": 6647,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": null,
+   "window_90d": {
+    "timespan": "90d",
+    "note": "VLR shows \"No agent data available for this period\""
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/12928/?timespan=all",
+    "90d": "https://www.vlr.gg/player/12928/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.4528,
+    "jett_chamber_round_share": 0.2382,
+    "role_round_shares": {
+     "duelist": 0.47,
+     "initiator": 0.335,
+     "controller": 0.147,
+     "sentinel": 0.049
+    },
+    "primary_role_by_rounds": "duelist"
+   }
+  },
+  {
+   "name": "MaKo",
+   "vlr_id": 4462,
+   "dpi": 400,
+   "sens": 0.45,
+   "edpi": 180.0,
+   "cm360": 72.57,
+   "agents": [
+    {
+     "agent": "omen",
+     "share": 0.4,
+     "rounds_or_maps": {
+      "maps": 236,
+      "rounds": 5027
+     },
+     "round_share": 0.4129
+    },
+    {
+     "agent": "viper",
+     "share": 0.25,
+     "rounds_or_maps": {
+      "maps": 144,
+      "rounds": 2879
+     },
+     "round_share": 0.2364
+    },
+    {
+     "agent": "astra",
+     "share": 0.12,
+     "rounds_or_maps": {
+      "maps": 70,
+      "rounds": 1412
+     },
+     "round_share": 0.116
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 60,
+      "rounds": 1303
+     },
+     "round_share": 0.107
+    },
+    {
+     "agent": "jett",
+     "share": 0.1,
+     "rounds_or_maps": {
+      "maps": 56,
+      "rounds": 1109
+     },
+     "round_share": 0.0911
+    },
+    {
+     "agent": "sage",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 149
+     },
+     "round_share": 0.0122
+    },
+    {
+     "agent": "raze",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 80
+     },
+     "round_share": 0.0066
+    },
+    {
+     "agent": "harbor",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 64
+     },
+     "round_share": 0.0053
+    },
+    {
+     "agent": "reyna",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 57
+     },
+     "round_share": 0.0047
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 48
+     },
+     "round_share": 0.0039
+    },
+    {
+     "agent": "breach",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 26
+     },
+     "round_share": 0.0021
+    },
+    {
+     "agent": "phoenix",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 22
+     },
+     "round_share": 0.0018
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 587,
+    "total_rounds": 12176,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "omen",
+     "share": 0.93,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 310
+     },
+     "round_share": 0.9451
+    },
+    {
+     "agent": "viper",
+     "share": 0.07,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 18
+     },
+     "round_share": 0.0549
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 15,
+    "total_rounds": 328,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/4462/?timespan=all",
+    "90d": "https://www.vlr.gg/player/4462/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.0977,
+    "jett_chamber_round_share": 0.0911,
+    "role_round_shares": {
+     "controller": 0.878,
+     "duelist": 0.104,
+     "sentinel": 0.016,
+     "initiator": 0.002
+    },
+    "primary_role_by_rounds": "controller"
+   }
+  },
+  {
+   "name": "BeYN",
+   "vlr_id": 4678,
+   "dpi": 400,
+   "sens": 0.4,
+   "edpi": 160.0,
+   "cm360": 81.64,
+   "agents": [
+    {
+     "agent": "sova",
+     "share": 0.28,
+     "rounds_or_maps": {
+      "maps": 105,
+      "rounds": 2213
+     },
+     "round_share": 0.2832
+    },
+    {
+     "agent": "fade",
+     "share": 0.18,
+     "rounds_or_maps": {
+      "maps": 66,
+      "rounds": 1420
+     },
+     "round_share": 0.1817
+    },
+    {
+     "agent": "jett",
+     "share": 0.17,
+     "rounds_or_maps": {
+      "maps": 63,
+      "rounds": 1339
+     },
+     "round_share": 0.1714
+    },
+    {
+     "agent": "raze",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 24,
+      "rounds": 474
+     },
+     "round_share": 0.0607
+    },
+    {
+     "agent": "breach",
+     "share": 0.06,
+     "rounds_or_maps": {
+      "maps": 21,
+      "rounds": 453
+     },
+     "round_share": 0.058
+    },
+    {
+     "agent": "kayo",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 15,
+      "rounds": 303
+     },
+     "round_share": 0.0388
+    },
+    {
+     "agent": "skye",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 14,
+      "rounds": 286
+     },
+     "round_share": 0.0366
+    },
+    {
+     "agent": "omen",
+     "share": 0.04,
+     "rounds_or_maps": {
+      "maps": 13,
+      "rounds": 274
+     },
+     "round_share": 0.0351
+    },
+    {
+     "agent": "deadlock",
+     "share": 0.03,
+     "rounds_or_maps": {
+      "maps": 12,
+      "rounds": 255
+     },
+     "round_share": 0.0326
+    },
+    {
+     "agent": "cypher",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 160
+     },
+     "round_share": 0.0205
+    },
+    {
+     "agent": "killjoy",
+     "share": 0.02,
+     "rounds_or_maps": {
+      "maps": 7,
+      "rounds": 145
+     },
+     "round_share": 0.0186
+    },
+    {
+     "agent": "brimstone",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 104
+     },
+     "round_share": 0.0133
+    },
+    {
+     "agent": "yoru",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 4,
+      "rounds": 85
+     },
+     "round_share": 0.0109
+    },
+    {
+     "agent": "chamber",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 70
+     },
+     "round_share": 0.009
+    },
+    {
+     "agent": "tejo",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 3,
+      "rounds": 68
+     },
+     "round_share": 0.0087
+    },
+    {
+     "agent": "gekko",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 48
+     },
+     "round_share": 0.0061
+    },
+    {
+     "agent": "neon",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 40
+     },
+     "round_share": 0.0051
+    },
+    {
+     "agent": "vyse",
+     "share": 0.01,
+     "rounds_or_maps": {
+      "maps": 2,
+      "rounds": 39
+     },
+     "round_share": 0.005
+    },
+    {
+     "agent": "waylay",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 21
+     },
+     "round_share": 0.0027
+    },
+    {
+     "agent": "astra",
+     "share": 0.0,
+     "rounds_or_maps": {
+      "maps": 1,
+      "rounds": 17
+     },
+     "round_share": 0.0022
+    }
+   ],
+   "window": {
+    "timespan": "all",
+    "total_maps": 370,
+    "total_rounds": 7814,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "agents_90d": [
+    {
+     "agent": "sova",
+     "share": 0.67,
+     "rounds_or_maps": {
+      "maps": 10,
+      "rounds": 212
+     },
+     "round_share": 0.6463
+    },
+    {
+     "agent": "fade",
+     "share": 0.33,
+     "rounds_or_maps": {
+      "maps": 5,
+      "rounds": 116
+     },
+     "round_share": 0.3537
+    }
+   ],
+   "window_90d": {
+    "timespan": "90d",
+    "total_maps": 15,
+    "total_rounds": 328,
+    "share_definition": "VLR \"Use\" column = maps played on agent / total maps in window (pick rate), as displayed (integer %); round_share computed by us from Rnd column"
+   },
+   "source": {
+    "all": "https://www.vlr.gg/player/4678/?timespan=all",
+    "90d": "https://www.vlr.gg/player/4678/?timespan=90d",
+    "accessed": "2026-11-01"
+   },
+   "derived_all_window": {
+    "mobility_duelist_round_share": 0.2507,
+    "jett_chamber_round_share": 0.1803,
+    "role_round_shares": {
+     "initiator": 0.613,
+     "duelist": 0.251,
+     "controller": 0.051,
+     "sentinel": 0.086
+    },
+    "primary_role_by_rounds": "initiator"
+   }
+  }
+ ],
+ "external_datasets": [
+  {
+   "name": "BattlePooja - Average eDPI of Valorant Pro Players 2026",
+   "url": "https://battlepooja.com/average-edpi-valorant-pros/",
+   "date": "last updated Feb 2026",
+   "n": "9 'verified' pros total; per-role n not stated",
+   "method": "Settings 'gathered from publicly available information including pro player streams, interviews, and community records'; role assignment method not stated",
+   "numbers": {
+    "overall_avg_edpi": 259,
+    "duelist_avg_edpi": 266,
+    "initiator_avg_edpi": 286,
+    "controller_avg_edpi": 216,
+    "sentinel": "card says no verified data; body text says 248"
+   },
+   "reliability": "very low - n<=9, self-contradictory (Sentinel 248 with 0 sentinels), mislabels MaKo (a controller) as initiator; averages are of a handful of named players"
+  },
+  {
+   "name": "edpicalculator.net - How to Calculate eDPI in Valorant",
+   "url": "https://edpicalculator.net/how-to-calculate-edpi-valorant/",
+   "date": "data 'as of February to April 2026'",
+   "n": "10-row table: 6 duelists, 0 sentinels, 3 controllers, 1 initiator",
+   "method": "'cross-referenced data from ProSettings, RaidGG, GamerHardware and BattlePooja'; role assignment not described",
+   "numbers": {
+    "duelist_avg_edpi": 266,
+    "sentinel_avg_edpi": 248,
+    "controller_avg_edpi": 217,
+    "initiator_avg_edpi": 260
+   },
+   "reliability": "very low - appears to copy BattlePooja; stated averages not reproducible from its own table (duelist recomputes to 278, initiator is 1 player at 352), sentinel figure has no players"
+  },
+  {
+   "name": "proconfig.net - eDPI distribution across 121 pros",
+   "url": "https://proconfig.net/stats/valorant-edpi-distribution/",
+   "date": "2026-06-03",
+   "n": 121,
+   "method": "histogram of 'verified pros', 50-eDPI bins; source unspecified",
+   "numbers": {
+    "overall_median_edpi": 240,
+    "overall_mean_edpi": 259,
+    "role_breakdown": null
+   },
+   "reliability": "no agent/role data; role statements ('Sentinel / Operator main: 180-280', '100-149 almost exclusively Operator mains') are qualitative assertions with no counts"
+  },
+  {
+   "name": "esportsettings.com - Valorant pro sensitivity guide",
+   "url": "https://esportsettings.com/blog/valorant-pro-sensitivity-guide/",
+   "date": "2026-09-20",
+   "n": "435 pros overall; per-role n not given",
+   "method": "'tracked pro setups'",
+   "numbers": {
+    "role_breakdown": null,
+    "recommendations": "duelists 'often 180 to 300', sentinels '200 to 350' eDPI; sentinel/controller try 55-75 cm/360, duelist 40-60 cm/360"
+   },
+   "reliability": "no measured role data; recommendations only; its own examples contradict its text"
+  },
+  {
+   "name": "sensconverter.app - Valorant pro settings",
+   "url": "https://sensconverter.app/valorant-pro-settings/",
+   "date": "undated (title 2025, footer 2026)",
+   "n": "'50+' total; 11 named examples",
+   "method": "streams/VODs/interviews/community DBs; has role filter buttons but role assignment not explained",
+   "numbers": {
+    "role_ranges_edpi": {
+     "duelist": "~160-280",
+     "initiator": "200-264 or 200-280 (conflicting)",
+     "controller": "~224-320",
+     "sentinel": "~212-300"
+    },
+    "medians_by_role": null
+   },
+   "reliability": "low - ranges are hand-picked from examples, opposite direction to BattlePooja (duelists lower here); no medians/n"
+  },
+  {
+   "name": "ProSettings.net VALORANT options guide",
+   "url": "https://prosettings.net/guides/valorant-options/",
+   "date": "header Oct 2026 (byline 'last modified May 18, 2026')",
+   "n": 705,
+   "method": "aggregate of ProSettings player database",
+   "numbers": {
+    "overall_avg_edpi": 267,
+    "overall_median_edpi": 240,
+    "role_breakdown": null
+   },
+   "reliability": "best overall source, but no per-agent/role breakdown; list page has no agent/role column"
+  },
+  {
+   "name": "setup.gg - Best Valorant sensitivity",
+   "url": "https://www.setup.gg/game/valorant/best-sens/",
+   "date": "2026-09-19",
+   "n": 668,
+   "method": "derived from ProSettings list",
+   "numbers": {
+    "overall_avg_edpi": 248.3,
+    "overall_median_edpi": 231.2,
+    "role_breakdown": null
+   },
+   "reliability": "overall only"
+  },
+  {
+   "name": "valorantscout.com - pro sensitivity database",
+   "url": "https://valorantscout.com/valorant-sensitivity",
+   "date": "data from 2026-07-27",
+   "n": 647,
+   "method": "ProSettings list snapshot (pros, creators, free agents, retired)",
+   "numbers": {
+    "overall_median_edpi": 232,
+    "overall_avg_edpi": 254,
+    "role_breakdown": null
+   },
+   "reliability": "overall only; no role/agent column"
+  },
+  {
+   "name": "VLR.gg thread 'Rank and Sensitivity Survey'",
+   "url": "https://www.vlr.gg/245704/rank-and-sensitivity-survey",
+   "date": "~3 years before access (~2023)",
+   "n": "~19 self-reported replies",
+   "method": "informal forum replies; agent/role not asked",
+   "numbers": null,
+   "reliability": "no agent data"
+  },
+  {
+   "name": "VLR.gg thread 'The Holy Grail of VALORANT Sens'",
+   "url": "https://www.vlr.gg/358356/the-holy-grail-of-valorant-sens-myth-or-reality",
+   "date": "~2 years before access (~2024)",
+   "n": 20,
+   "method": "mean of 20 pros' eDPI from prosettings.net",
+   "numbers": {
+    "overall_avg_edpi": "~310"
+   },
+   "reliability": "no agent/role data"
+  },
+  {
+   "name": "tracker.gg / blitz.gg / mobalytics",
+   "url": "https://tracker.gg/valorant/insights/agents",
+   "date": "2026-11-01 search",
+   "n": null,
+   "method": "searched; these sites publish agent pick/win rates and per-pro settings lists but nothing joining sensitivity to agent was found",
+   "numbers": null,
+   "reliability": "not found"
+  },
+  {
+   "name": "specs.gg / settings.gg",
+   "url": "https://specs.gg/Valorant",
+   "date": "2026-11-01 search",
+   "n": null,
+   "method": "no main-agent or role filter found",
+   "numbers": null,
+   "reliability": "not found"
+  },
+  {
+   "name": "Reddit r/VALORANT surveys by role/main",
+   "url": null,
+   "date": "2026-11-01 search",
+   "n": null,
+   "method": "web searches returned no survey broken down by role/main agent",
+   "numbers": null,
+   "reliability": "not found"
+  },
+  {
+   "name": "Academic / peer-reviewed",
+   "url": null,
+   "date": "2026-11-01 search",
+   "n": null,
+   "method": "web search found no paper relating FPS mouse sensitivity to Valorant agent/role",
+   "numbers": null,
+   "reliability": "not found (Google Scholar/ACM not searched directly)"
+  }
+ ],
+ "analysis": {
+  "method": {
+   "cm360": "914.4/(DPI*sens*0.07) using DPI/sens from pro_data_audit.json",
+   "agent_shares": "round share per agent = agent rounds / total rounds in VLR table (Rnd column); primary analysis on timespan=all (n=28), sensitivity re-run on timespan=90d (n=25; Lakia, ZynX, Veqaj have no 90d data)",
+   "high_mobility_duelists": [
+    "jett",
+    "raze",
+    "neon",
+    "yoru",
+    "waylay"
+   ],
+   "reyna": "excluded (not a movement-ability duelist); max Reyna all-time round share in the sample is small, so including it would not change group membership",
+   "operator_capable": [
+    "jett",
+    "chamber"
+   ],
+   "op_thresholds": [
+    "jett+chamber round share >=30%",
+    "jett+chamber round share >=50%"
+   ],
+   "roles": {
+    "controller": [
+     "omen",
+     "viper",
+     "astra",
+     "brimstone",
+     "harbor",
+     "clove"
+    ],
+    "sentinel": [
+     "killjoy",
+     "cypher",
+     "sage",
+     "chamber",
+     "deadlock",
+     "vyse",
+     "veto"
+    ],
+    "initiator": [
+     "sova",
+     "skye",
+     "fade",
+     "breach",
+     "kayo",
+     "gekko",
+     "tejo"
+    ],
+    "duelist": [
+     "jett",
+     "raze",
+     "reyna",
+     "phoenix",
+     "yoru",
+     "neon",
+     "iso",
+     "waylay"
+    ]
+   },
+   "primary_role": "role with largest summed round share",
+   "test": "two-sided permutation test on difference in mean ln(cm/360) between groups; exact enumeration when C(n,k)<=300000 else 200000 random permutations (seed 1)",
+   "script": "scratch only (not saved in repo)"
+  },
+  "caveats": [
+   "n is tiny (28; subgroups 3-10) - power to detect anything but a large effect is very low",
+   "about 10 tests were run; with Bonferroni the threshold would be ~0.005, so no result is significant",
+   "all-time agent pools span 2020-2026 while sens is a single current snapshot; players' agent pools shifted a lot (e.g. Alfajer killjoy all-time vs neon 90d, crashies sova all-time vs viper/cypher 90d)",
+   "cm/360 values are discrete (9 of 28 players at 81.6 = 800x0.2 or 1600x0.1), producing ties",
+   "agent choice is driven by team needs, not sens; this is observational"
+  ],
+  "per_player": {
+   "all": [
+    {
+     "name": "ZmjjKK",
+     "cm": 41.3382,
+     "edpi": 316.0,
+     "mob": 0.7901,
+     "op": 0.5858,
+     "role_shares": {
+      "duelist": 0.81,
+      "sentinel": 0.161,
+      "initiator": 0.019,
+      "controller": 0.01
+     },
+     "primary": "duelist",
+     "rounds": 14180
+    },
+    {
+     "name": "Smoggy",
+     "cm": 52.6728,
+     "edpi": 248.0,
+     "mob": 0.3043,
+     "op": 0.2168,
+     "role_shares": {
+      "duelist": 0.341,
+      "controller": 0.385,
+      "sentinel": 0.092,
+      "initiator": 0.181
+     },
+     "primary": "controller",
+     "rounds": 12881
+    },
+    {
+     "name": "CHICHOO",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.0039,
+     "op": 0.0036,
+     "role_shares": {
+      "controller": 0.483,
+      "sentinel": 0.485,
+      "duelist": 0.02,
+      "initiator": 0.011
+     },
+     "primary": "sentinel",
+     "rounds": 13233
+    },
+    {
+     "name": "nobody",
+     "cm": 62.8022,
+     "edpi": 208.0,
+     "mob": 0.0156,
+     "op": 0.0031,
+     "role_shares": {
+      "initiator": 0.864,
+      "sentinel": 0.045,
+      "controller": 0.057,
+      "duelist": 0.034
+     },
+     "primary": "initiator",
+     "rounds": 13818
+    },
+    {
+     "name": "benjyfishy",
+     "cm": 60.4762,
+     "edpi": 216.0,
+     "mob": 0.087,
+     "op": 0.084,
+     "role_shares": {
+      "sentinel": 0.761,
+      "controller": 0.139,
+      "duelist": 0.09,
+      "initiator": 0.009
+     },
+     "primary": "sentinel",
+     "rounds": 8331
+    },
+    {
+     "name": "RieNs",
+     "cm": 60.4762,
+     "edpi": 216.0,
+     "mob": 0.0687,
+     "op": 0.0706,
+     "role_shares": {
+      "initiator": 0.799,
+      "duelist": 0.07,
+      "sentinel": 0.098,
+      "controller": 0.033
+     },
+     "primary": "initiator",
+     "rounds": 11113
+    },
+    {
+     "name": "t3xture",
+     "cm": 37.9734,
+     "edpi": 344.0,
+     "mob": 0.882,
+     "op": 0.5517,
+     "role_shares": {
+      "duelist": 0.912,
+      "sentinel": 0.083,
+      "initiator": 0.003,
+      "controller": 0.002
+     },
+     "primary": "duelist",
+     "rounds": 10287
+    },
+    {
+     "name": "Lakia",
+     "cm": 54.4286,
+     "edpi": 240.0,
+     "mob": 0.0795,
+     "op": 0.0077,
+     "role_shares": {
+      "initiator": 0.902,
+      "duelist": 0.085,
+      "sentinel": 0.008,
+      "controller": 0.005
+     },
+     "primary": "initiator",
+     "rounds": 8214
+    },
+    {
+     "name": "Karon",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.023,
+     "op": 0.0198,
+     "role_shares": {
+      "controller": 0.866,
+      "sentinel": 0.095,
+      "duelist": 0.039
+     },
+     "primary": "controller",
+     "rounds": 6904
+    },
+    {
+     "name": "ZynX",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.1814,
+     "op": 0,
+     "role_shares": {
+      "sentinel": 0.572,
+      "controller": 0.195,
+      "duelist": 0.221,
+      "initiator": 0.012
+     },
+     "primary": "sentinel",
+     "rounds": 3043
+    },
+    {
+     "name": "kiNgg",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.2069,
+     "op": 0,
+     "role_shares": {
+      "controller": 0.589,
+      "duelist": 0.238,
+      "initiator": 0.116,
+      "sentinel": 0.057
+     },
+     "primary": "controller",
+     "rounds": 10391
+    },
+    {
+     "name": "spikeziN",
+     "cm": 70.9938,
+     "edpi": 184.0,
+     "mob": 0.5381,
+     "op": 0,
+     "role_shares": {
+      "duelist": 0.543,
+      "initiator": 0.264,
+      "controller": 0.144,
+      "sentinel": 0.049
+     },
+     "primary": "duelist",
+     "rounds": 4752
+    },
+    {
+     "name": "Sato",
+     "cm": 46.6531,
+     "edpi": 280.0,
+     "mob": 0.8144,
+     "op": 0.4679,
+     "role_shares": {
+      "duelist": 0.938,
+      "sentinel": 0.033,
+      "controller": 0.029
+     },
+     "primary": "duelist",
+     "rounds": 8757
+    },
+    {
+     "name": "Neon",
+     "cm": 77.7551,
+     "edpi": 168.0,
+     "mob": 0.6938,
+     "op": 0.4297,
+     "role_shares": {
+      "duelist": 0.701,
+      "sentinel": 0.195,
+      "controller": 0.097,
+      "initiator": 0.006
+     },
+     "primary": "duelist",
+     "rounds": 5173
+    },
+    {
+     "name": "Blowz",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.1174,
+     "op": 0.0278,
+     "role_shares": {
+      "initiator": 0.836,
+      "duelist": 0.126,
+      "controller": 0.031,
+      "sentinel": 0.006
+     },
+     "primary": "initiator",
+     "rounds": 5496
+    },
+    {
+     "name": "trent",
+     "cm": 51.0268,
+     "edpi": 256.0,
+     "mob": 0.0192,
+     "op": 0,
+     "role_shares": {
+      "initiator": 0.849,
+      "controller": 0.108,
+      "duelist": 0.035,
+      "sentinel": 0.009
+     },
+     "primary": "initiator",
+     "rounds": 13171
+    },
+    {
+     "name": "babybay",
+     "cm": 74.2208,
+     "edpi": 176.0,
+     "mob": 0.6762,
+     "op": 0.6473,
+     "role_shares": {
+      "duelist": 0.688,
+      "sentinel": 0.263,
+      "controller": 0.026,
+      "initiator": 0.023
+     },
+     "primary": "duelist",
+     "rounds": 10533
+    },
+    {
+     "name": "leaf",
+     "cm": 102.0536,
+     "edpi": 128.0,
+     "mob": 0.3062,
+     "op": 0.1764,
+     "role_shares": {
+      "controller": 0.281,
+      "duelist": 0.379,
+      "sentinel": 0.272,
+      "initiator": 0.068
+     },
+     "primary": "duelist",
+     "rounds": 13396
+    },
+    {
+     "name": "valyn",
+     "cm": 54.4286,
+     "edpi": 240.0,
+     "mob": 0,
+     "op": 0.0013,
+     "role_shares": {
+      "controller": 0.962,
+      "sentinel": 0.017,
+      "initiator": 0.013,
+      "duelist": 0.007
+     },
+     "primary": "controller",
+     "rounds": 17347
+    },
+    {
+     "name": "jawgemo",
+     "cm": 52.0018,
+     "edpi": 251.2,
+     "mob": 0.7262,
+     "op": 0.1478,
+     "role_shares": {
+      "duelist": 0.778,
+      "controller": 0.109,
+      "initiator": 0.067,
+      "sentinel": 0.045
+     },
+     "primary": "duelist",
+     "rounds": 14376
+    },
+    {
+     "name": "Alfajer",
+     "cm": 72.5714,
+     "edpi": 180.0,
+     "mob": 0.2323,
+     "op": 0.1227,
+     "role_shares": {
+      "sentinel": 0.619,
+      "duelist": 0.281,
+      "controller": 0.059,
+      "initiator": 0.041
+     },
+     "primary": "sentinel",
+     "rounds": 11603
+    },
+    {
+     "name": "crashies",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.0022,
+     "op": 0,
+     "role_shares": {
+      "initiator": 0.891,
+      "sentinel": 0.065,
+      "controller": 0.032,
+      "duelist": 0.012
+     },
+     "primary": "initiator",
+     "rounds": 13194
+    },
+    {
+     "name": "Boaster",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.01,
+     "op": 0.0084,
+     "role_shares": {
+      "controller": 0.738,
+      "initiator": 0.236,
+      "sentinel": 0.013,
+      "duelist": 0.013
+     },
+     "primary": "controller",
+     "rounds": 13366
+    },
+    {
+     "name": "Cloud",
+     "cm": 40.8214,
+     "edpi": 320.0,
+     "mob": 0.0935,
+     "op": 0.0101,
+     "role_shares": {
+      "initiator": 0.785,
+      "duelist": 0.124,
+      "sentinel": 0.057,
+      "controller": 0.034
+     },
+     "primary": "initiator",
+     "rounds": 10191
+    },
+    {
+     "name": "kaajak",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.8678,
+     "op": 0.3135,
+     "role_shares": {
+      "duelist": 0.884,
+      "controller": 0.062,
+      "initiator": 0.027,
+      "sentinel": 0.026
+     },
+     "primary": "duelist",
+     "rounds": 10289
+    },
+    {
+     "name": "Veqaj",
+     "cm": 65.3143,
+     "edpi": 200.0,
+     "mob": 0.4528,
+     "op": 0.2382,
+     "role_shares": {
+      "duelist": 0.47,
+      "initiator": 0.335,
+      "controller": 0.147,
+      "sentinel": 0.049
+     },
+     "primary": "duelist",
+     "rounds": 6647
+    },
+    {
+     "name": "MaKo",
+     "cm": 72.5714,
+     "edpi": 180.0,
+     "mob": 0.0977,
+     "op": 0.0911,
+     "role_shares": {
+      "controller": 0.878,
+      "duelist": 0.104,
+      "sentinel": 0.016,
+      "initiator": 0.002
+     },
+     "primary": "controller",
+     "rounds": 12176
+    },
+    {
+     "name": "BeYN",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.2507,
+     "op": 0.1803,
+     "role_shares": {
+      "initiator": 0.613,
+      "duelist": 0.251,
+      "controller": 0.051,
+      "sentinel": 0.086
+     },
+     "primary": "initiator",
+     "rounds": 7814
+    }
+   ],
+   "90d": [
+    {
+     "name": "ZmjjKK",
+     "cm": 41.3382,
+     "edpi": 316.0,
+     "mob": 0.8394,
+     "op": 0.5181,
+     "role_shares": {
+      "duelist": 0.839,
+      "sentinel": 0.161
+     },
+     "primary": "duelist",
+     "rounds": 249
+    },
+    {
+     "name": "Smoggy",
+     "cm": 52.6728,
+     "edpi": 248.0,
+     "mob": 0.261,
+     "op": 0,
+     "role_shares": {
+      "controller": 0.663,
+      "duelist": 0.337
+     },
+     "primary": "controller",
+     "rounds": 249
+    },
+    {
+     "name": "CHICHOO",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "sentinel": 0.578,
+      "controller": 0.345,
+      "duelist": 0.076
+     },
+     "primary": "sentinel",
+     "rounds": 249
+    },
+    {
+     "name": "nobody",
+     "cm": 62.8022,
+     "edpi": 208.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "initiator": 1.0
+     },
+     "primary": "initiator",
+     "rounds": 249
+    },
+    {
+     "name": "benjyfishy",
+     "cm": 60.4762,
+     "edpi": 216.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "sentinel": 1.0
+     },
+     "primary": "sentinel",
+     "rounds": 175
+    },
+    {
+     "name": "RieNs",
+     "cm": 60.4762,
+     "edpi": 216.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "initiator": 0.863,
+      "controller": 0.137
+     },
+     "primary": "initiator",
+     "rounds": 175
+    },
+    {
+     "name": "t3xture",
+     "cm": 37.9734,
+     "edpi": 344.0,
+     "mob": 0.6102,
+     "op": 0.3898,
+     "role_shares": {
+      "duelist": 0.61,
+      "sentinel": 0.39
+     },
+     "primary": "duelist",
+     "rounds": 177
+    },
+    {
+     "name": "Karon",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "controller": 1.0
+     },
+     "primary": "controller",
+     "rounds": 177
+    },
+    {
+     "name": "kiNgg",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "controller": 0.917,
+      "sentinel": 0.083
+     },
+     "primary": "controller",
+     "rounds": 181
+    },
+    {
+     "name": "spikeziN",
+     "cm": 70.9938,
+     "edpi": 184.0,
+     "mob": 0.9171,
+     "op": 0,
+     "role_shares": {
+      "duelist": 0.917,
+      "controller": 0.083
+     },
+     "primary": "duelist",
+     "rounds": 181
+    },
+    {
+     "name": "Sato",
+     "cm": 46.6531,
+     "edpi": 280.0,
+     "mob": 0.1713,
+     "op": 0,
+     "role_shares": {
+      "duelist": 0.773,
+      "controller": 0.227
+     },
+     "primary": "duelist",
+     "rounds": 181
+    },
+    {
+     "name": "Neon",
+     "cm": 77.7551,
+     "edpi": 168.0,
+     "mob": 0.3094,
+     "op": 0.5193,
+     "role_shares": {
+      "sentinel": 0.436,
+      "controller": 0.254,
+      "duelist": 0.309
+     },
+     "primary": "sentinel",
+     "rounds": 181
+    },
+    {
+     "name": "Blowz",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "initiator": 1.0
+     },
+     "primary": "initiator",
+     "rounds": 181
+    },
+    {
+     "name": "trent",
+     "cm": 51.0268,
+     "edpi": 256.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "initiator": 1.0
+     },
+     "primary": "initiator",
+     "rounds": 788
+    },
+    {
+     "name": "babybay",
+     "cm": 74.2208,
+     "edpi": 176.0,
+     "mob": 0.1789,
+     "op": 0.6168,
+     "role_shares": {
+      "sentinel": 0.821,
+      "duelist": 0.179
+     },
+     "primary": "sentinel",
+     "rounds": 788
+    },
+    {
+     "name": "leaf",
+     "cm": 102.0536,
+     "edpi": 128.0,
+     "mob": 0.1129,
+     "op": 0,
+     "role_shares": {
+      "controller": 0.612,
+      "sentinel": 0.275,
+      "duelist": 0.113
+     },
+     "primary": "controller",
+     "rounds": 788
+    },
+    {
+     "name": "valyn",
+     "cm": 54.4286,
+     "edpi": 240.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "controller": 1.0
+     },
+     "primary": "controller",
+     "rounds": 788
+    },
+    {
+     "name": "jawgemo",
+     "cm": 52.0018,
+     "edpi": 251.2,
+     "mob": 0.9708,
+     "op": 0,
+     "role_shares": {
+      "duelist": 1.0
+     },
+     "primary": "duelist",
+     "rounds": 788
+    },
+    {
+     "name": "Alfajer",
+     "cm": 72.5714,
+     "edpi": 180.0,
+     "mob": 0.726,
+     "op": 0.274,
+     "role_shares": {
+      "duelist": 0.726,
+      "sentinel": 0.274
+     },
+     "primary": "duelist",
+     "rounds": 146
+    },
+    {
+     "name": "crashies",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "controller": 0.562,
+      "sentinel": 0.438
+     },
+     "primary": "controller",
+     "rounds": 146
+    },
+    {
+     "name": "Boaster",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "controller": 1.0
+     },
+     "primary": "controller",
+     "rounds": 146
+    },
+    {
+     "name": "Cloud",
+     "cm": 40.8214,
+     "edpi": 320.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "initiator": 1.0
+     },
+     "primary": "initiator",
+     "rounds": 146
+    },
+    {
+     "name": "kaajak",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0.5342,
+     "op": 0,
+     "role_shares": {
+      "duelist": 1.0
+     },
+     "primary": "duelist",
+     "rounds": 146
+    },
+    {
+     "name": "MaKo",
+     "cm": 72.5714,
+     "edpi": 180.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "controller": 1.0
+     },
+     "primary": "controller",
+     "rounds": 328
+    },
+    {
+     "name": "BeYN",
+     "cm": 81.6429,
+     "edpi": 160.0,
+     "mob": 0,
+     "op": 0,
+     "role_shares": {
+      "initiator": 1.0
+     },
+     "primary": "initiator",
+     "rounds": 328
+    }
+   ]
+  },
+  "tests": {
+   "all:mobility_duelist>=50%_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "spikeziN",
+     "Sato",
+     "Neon",
+     "babybay",
+     "jawgemo",
+     "kaajak"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Lakia",
+     "Karon",
+     "ZynX",
+     "kiNgg",
+     "Blowz",
+     "trent",
+     "leaf",
+     "valyn",
+     "Alfajer",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "Veqaj",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 8,
+    "n_b": 20,
+    "median_cm_a": 61.5,
+    "median_cm_b": 72.57,
+    "median_edpi_a": 217.6,
+    "median_edpi_b": 180.0,
+    "diff_mean_log_cm": -0.167,
+    "ratio_geomean": 0.846,
+    "p_two_sided": 0.1234,
+    "perm_method": "monte_carlo",
+    "perm_count": 200000
+   },
+   "all:jett+chamber>=30%_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "Sato",
+     "Neon",
+     "babybay",
+     "kaajak"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Lakia",
+     "Karon",
+     "ZynX",
+     "kiNgg",
+     "spikeziN",
+     "Blowz",
+     "trent",
+     "leaf",
+     "valyn",
+     "jawgemo",
+     "Alfajer",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "Veqaj",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 6,
+    "n_b": 22,
+    "median_cm_a": 60.44,
+    "median_cm_b": 71.78,
+    "median_edpi_a": 228.0,
+    "median_edpi_b": 182.0,
+    "diff_mean_log_cm": -0.1719,
+    "ratio_geomean": 0.842,
+    "p_two_sided": 0.1521,
+    "perm_method": "monte_carlo",
+    "perm_count": 200000
+   },
+   "all:jett+chamber>=50%_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "babybay"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Lakia",
+     "Karon",
+     "ZynX",
+     "kiNgg",
+     "spikeziN",
+     "Sato",
+     "Neon",
+     "Blowz",
+     "trent",
+     "leaf",
+     "valyn",
+     "jawgemo",
+     "Alfajer",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "kaajak",
+     "Veqaj",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 3,
+    "n_b": 25,
+    "median_cm_a": 41.34,
+    "median_cm_b": 72.57,
+    "median_edpi_a": 316.0,
+    "median_edpi_b": 180.0,
+    "diff_mean_log_cm": -0.3254,
+    "ratio_geomean": 0.722,
+    "p_two_sided": 0.036,
+    "perm_method": "exact",
+    "perm_count": 3276
+   },
+   "all:primary_controller_vs_primary_sentinel": {
+    "group_a": [
+     "Smoggy",
+     "Karon",
+     "kiNgg",
+     "valyn",
+     "Boaster",
+     "MaKo"
+    ],
+    "group_b": [
+     "CHICHOO",
+     "benjyfishy",
+     "ZynX",
+     "Alfajer"
+    ],
+    "n_a": 6,
+    "n_b": 4,
+    "median_cm_a": 77.11,
+    "median_cm_b": 77.11,
+    "median_edpi_a": 170.0,
+    "median_edpi_b": 170.0,
+    "diff_mean_log_cm": -0.0558,
+    "ratio_geomean": 0.946,
+    "p_two_sided": 0.6905,
+    "perm_method": "exact",
+    "perm_count": 210
+   },
+   "all:primary_duelist_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "spikeziN",
+     "Sato",
+     "Neon",
+     "babybay",
+     "leaf",
+     "jawgemo",
+     "kaajak",
+     "Veqaj"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Lakia",
+     "Karon",
+     "ZynX",
+     "kiNgg",
+     "Blowz",
+     "trent",
+     "valyn",
+     "Alfajer",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 10,
+    "n_b": 18,
+    "median_cm_a": 68.15,
+    "median_cm_b": 72.57,
+    "median_edpi_a": 192.0,
+    "median_edpi_b": 180.0,
+    "diff_mean_log_cm": -0.079,
+    "ratio_geomean": 0.924,
+    "p_two_sided": 0.4479,
+    "perm_method": "monte_carlo",
+    "perm_count": 200000
+   },
+   "90d:mobility_duelist>=50%_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "spikeziN",
+     "jawgemo",
+     "Alfajer",
+     "kaajak"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Karon",
+     "kiNgg",
+     "Sato",
+     "Neon",
+     "Blowz",
+     "trent",
+     "babybay",
+     "leaf",
+     "valyn",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 6,
+    "n_b": 19,
+    "median_cm_a": 61.5,
+    "median_cm_b": 74.22,
+    "median_edpi_a": 217.6,
+    "median_edpi_b": 176.0,
+    "diff_mean_log_cm": -0.1766,
+    "ratio_geomean": 0.838,
+    "p_two_sided": 0.1612,
+    "perm_method": "exact",
+    "perm_count": 177100
+   },
+   "90d:jett+chamber>=30%_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "Neon",
+     "babybay"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Karon",
+     "kiNgg",
+     "spikeziN",
+     "Sato",
+     "Blowz",
+     "trent",
+     "leaf",
+     "valyn",
+     "jawgemo",
+     "Alfajer",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "kaajak",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 4,
+    "n_b": 21,
+    "median_cm_a": 57.78,
+    "median_cm_b": 72.57,
+    "median_edpi_a": 246.0,
+    "median_edpi_b": 180.0,
+    "diff_mean_log_cm": -0.2055,
+    "ratio_geomean": 0.814,
+    "p_two_sided": 0.1618,
+    "perm_method": "exact",
+    "perm_count": 12650
+   },
+   "90d:jett+chamber>=50%_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "Neon",
+     "babybay"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "t3xture",
+     "Karon",
+     "kiNgg",
+     "spikeziN",
+     "Sato",
+     "Blowz",
+     "trent",
+     "leaf",
+     "valyn",
+     "jawgemo",
+     "Alfajer",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "kaajak",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 3,
+    "n_b": 22,
+    "median_cm_a": 74.22,
+    "median_cm_b": 71.78,
+    "median_edpi_a": 176.0,
+    "median_edpi_b": 182.0,
+    "diff_mean_log_cm": -0.0568,
+    "ratio_geomean": 0.945,
+    "p_two_sided": 0.7357,
+    "perm_method": "exact",
+    "perm_count": 2300
+   },
+   "90d:primary_controller_vs_primary_sentinel": {
+    "group_a": [
+     "Smoggy",
+     "Karon",
+     "kiNgg",
+     "leaf",
+     "valyn",
+     "crashies",
+     "Boaster",
+     "MaKo"
+    ],
+    "group_b": [
+     "CHICHOO",
+     "benjyfishy",
+     "Neon",
+     "babybay"
+    ],
+    "n_a": 8,
+    "n_b": 4,
+    "median_cm_a": 81.64,
+    "median_cm_b": 75.99,
+    "median_edpi_a": 160.0,
+    "median_edpi_b": 172.0,
+    "diff_mean_log_cm": 0.0188,
+    "ratio_geomean": 1.019,
+    "p_two_sided": 0.8889,
+    "perm_method": "exact",
+    "perm_count": 495
+   },
+   "90d:primary_duelist_vs_rest": {
+    "group_a": [
+     "ZmjjKK",
+     "t3xture",
+     "spikeziN",
+     "Sato",
+     "jawgemo",
+     "Alfajer",
+     "kaajak"
+    ],
+    "group_b": [
+     "Smoggy",
+     "CHICHOO",
+     "nobody",
+     "benjyfishy",
+     "RieNs",
+     "Karon",
+     "kiNgg",
+     "Neon",
+     "Blowz",
+     "trent",
+     "babybay",
+     "leaf",
+     "valyn",
+     "crashies",
+     "Boaster",
+     "Cloud",
+     "MaKo",
+     "BeYN"
+    ],
+    "n_a": 7,
+    "n_b": 18,
+    "median_cm_a": 52.0,
+    "median_cm_b": 75.99,
+    "median_edpi_a": 251.2,
+    "median_edpi_b": 172.0,
+    "diff_mean_log_cm": -0.2262,
+    "ratio_geomean": 0.798,
+    "p_two_sided": 0.0549,
+    "perm_method": "monte_carlo",
+    "perm_count": 200000
+   }
+  }
+ }
+}
