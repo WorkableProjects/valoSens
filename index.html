@@ -68,9 +68,9 @@
 
   label.f { display: block; font: 600 13px/1 var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
   label.f small { font: 400 12px var(--body); letter-spacing: 0; text-transform: none; color: var(--dim); }
-  input[type="number"], select, textarea { background: var(--panel-solid); border: 1px solid var(--line); border-bottom-color: var(--line2);
+  input[type="number"], input[type="text"], select, textarea { background: var(--panel-solid); border: 1px solid var(--line); border-bottom-color: var(--line2);
     padding: 11px 12px; width: 100%; max-width: 280px; min-height: 46px; border-radius: 0; transition: border-color .2s; }
-  input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--teal); outline: none; }
+  input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--teal); outline: none; }
   textarea { max-width: 100%; min-height: 90px; resize: vertical; }
   .row { display: flex; gap: 14px; flex-wrap: wrap; }
   .row > div { flex: 1 1 170px; min-width: 0; }
@@ -344,6 +344,7 @@
   .imp-t { font-size: 14px; } .imp-t b { font: 700 14px var(--head); letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-right: 4px; }
   .imp-s { color: var(--muted); font-size: 13px; margin: 6px 0 10px; }
   .imp-b { display: flex; gap: 8px; flex-wrap: wrap; } .imp-b label.btn { display: inline-flex; align-items: center; }
+  .imp-man input[type="text"] { max-width: 100%; font-family: ui-monospace, monospace; }
   .imp-msg { font-size: 13px; color: var(--teal); margin: 8px 0 0; min-height: 1em; } .imp-msg.bad { color: var(--yellow); }
   .btn.dl { width: 100%; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); background: var(--red); border-color: var(--red); color: #fff; }
   .btn.dl svg { width: 16px; height: 16px; }
@@ -364,12 +365,18 @@
   <main id="app" aria-live="polite"></main>
 </div>
 
-<script src="model.js"></script>
-<script src="xhair.js"></script>
-<script src="session.js"></script>
+<script src="model.js?v=3.1.1"></script>
+<script src="xhair.js?v=3.1.1"></script>
+<script src="session.js?v=3.1.1"></script>
 <script>
 "use strict";
 var M = window.ValoModel, X = window.ValoXhair, V = window.ValoSession;
+// A stale cached script (older than this page) would break the tests partway through; say so up front.
+if (!M || !X || !V || typeof X.xSession !== "function" || typeof V.manual !== "function") {
+  document.addEventListener("DOMContentLoaded", function () {
+    document.body.insertAdjacentHTML("afterbegin", '<div style="padding:16px;background:#3a2a00;color:#ffd75e;font:15px sans-serif">Part of this page loaded from an old cached copy. Press <b>Ctrl+Shift+R</b> (Cmd+Shift+R on Mac) to reload it.</div>');
+  });
+}
 
 /* ---------- State ---------- */
 function freshState() {
@@ -1095,8 +1102,9 @@ function importCard() {
     card.innerHTML = "";
     if (S.prior) {
       var n = S.prior.length, last = S.prior[n - 1];
-      card.appendChild(el("div", { "class": "imp-t" }, '<b>Calibration run ' + (n + 1) + "</b> · " + n + " earlier session" + (n > 1 ? "s" : "") + " loaded (latest " + esc(fmtDate(last.date)) + ")"));
-      card.appendChild(el("p", { "class": "imp-s" }, "Your answers are filled in from the latest session. Picks from the visibility test and rounds from the vision test will be pooled with this run's, and the vision test starts near your earlier thresholds." +
+      card.appendChild(el("div", { "class": "imp-t" }, '<b>Calibration run ' + (n + 1) + "</b> · " + (last.manual && n === 1 ? "last results entered by hand" : n + " earlier session" + (n > 1 ? "s" : "") + " loaded (latest " + esc(last.manual ? "entered by hand" : fmtDate(last.date)) + ")")));
+      card.appendChild(el("p", { "class": "imp-s" }, (last.manual ? "Your current sensitivity and highlight are filled in from what you entered. The results screen compares this run with your last one." :
+        "Your answers are filled in from the latest session. Picks from the visibility test and rounds from the vision test will be pooled with this run's, and the vision test starts near your earlier thresholds.") +
         (last.result && last.result.cm ? " Last result: " + last.result.cm.toFixed(1) + " cm/360" + (last.result.sens ? " (sens " + last.result.sens.toFixed(3) + ")" : "") + "." : "")));
       var row = el("div", { "class": "imp-b" });
       if (canSkipToTests()) {
@@ -1108,12 +1116,16 @@ function importCard() {
       clr.addEventListener("click", function () { S = freshState(); renderQ(); });
       row.appendChild(clr); card.appendChild(row);
     } else {
-      card.appendChild(el("div", { "class": "imp-t" }, "<b>Doing a second test?</b> Import the results file you downloaded last time."));
-      card.appendChild(el("p", { "class": "imp-s" }, "It fills in your answers and pools your earlier test data with this run for a tighter calibration. The file stays on your device; nothing is saved in the browser."));
+      card.appendChild(el("div", { "class": "imp-t" }, "<b>Doing a second test?</b> Import the results file you downloaded last time, or type in what you got."));
+      card.appendChild(el("p", { "class": "imp-s" }, "A file fills in your answers and pools your earlier test data with this run for a tighter calibration. No file? Enter the results you remember and this run is compared with them. Nothing is saved in the browser."));
       var row2 = el("div", { "class": "imp-b" });
       var btn = el("label", { "class": "btn small", "for": "impFile", tabindex: "0", role: "button" }, "Import results file");
       btn.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
-      row2.appendChild(btn); card.appendChild(row2);
+      var man = el("button", { type: "button", "class": "btn small", id: "impManual", "aria-expanded": "false" }, "Enter last results");
+      row2.appendChild(btn); row2.appendChild(man); card.appendChild(row2);
+      var form = manualForm(function (sess) { S = freshState(); applyImport({ sessions: [sess], latest: sess }); renderQ(); var m = document.querySelector(".imp-msg"); if (m) m.textContent = "Last results added."; }, msg);
+      form.hidden = true; card.appendChild(form);
+      man.addEventListener("click", function () { form.hidden = !form.hidden; man.setAttribute("aria-expanded", String(!form.hidden)); if (!form.hidden) form.querySelector("input").focus(); });
     }
     card.appendChild(input); card.appendChild(msg);
     if (note) msg.textContent = note;
@@ -1128,6 +1140,25 @@ function importCard() {
   });
   draw();
   return card;
+}
+// Form for typing in the last results by hand (for players without the file).
+function manualForm(done, msg) {
+  var f = el("div", { "class": "imp-man", id: "impManForm" });
+  function num(label, id, ph) { var b = el("div"); b.appendChild(el("label", { "class": "f", "for": id }, label)); var i = el("input", { type: "number", id: id, inputmode: "decimal", step: "any", min: "0", placeholder: ph }); b.appendChild(i); return { box: b, i: i }; }
+  var row = el("div", { "class": "row" }), sens = num("Sensitivity", "manSens", "e.g. 0.35"), dpi = num("DPI", "manDpi", "e.g. 800"), cm = num("cm/360 <small>(optional)</small>", "manCm", "e.g. 32");
+  row.appendChild(sens.box); row.appendChild(dpi.box); row.appendChild(cm.box); f.appendChild(row);
+  var cb = el("div"); cb.appendChild(el("label", { "class": "f", "for": "manCode" }, "Crosshair code <small>(optional)</small>"));
+  var code = el("input", { type: "text", id: "manCode", placeholder: "0;P;c;5;h;0;...", autocomplete: "off", spellcheck: "false" }); cb.appendChild(code); f.appendChild(cb);
+  var hb = el("div"); hb.appendChild(el("label", { "class": "f", "for": "manHl" }, "Enemy highlight color <small>(optional)</small>"));
+  var hl = el("select", { id: "manHl" }); hl.appendChild(el("option", { value: "" }, "Don't remember"));
+  X.HCOLORS.forEach(function (c) { hl.appendChild(el("option", { value: c.key }, esc(c.name))); }); hb.appendChild(hl); f.appendChild(hb);
+  var go = el("button", { type: "button", "class": "btn primary small", id: "manSave", style: "margin-top:14px" }, "Use these results");
+  go.addEventListener("click", function () {
+    try { done(V.manual({ sens: sens.i.value, dpi: dpi.i.value, cm: cm.i.value, code: code.value, highlight: hl.value }, M.cmFrom)); }
+    catch (e) { msg.textContent = e.message; msg.classList.add("bad"); }
+  });
+  f.appendChild(go);
+  return f;
 }
 function downloadResults(R, XR, sens, dpi) {
   var b = V.build({ prior: S.prior, answers: S, xTest: answeredRounds(), hTest: S.hTest, frameMs: S.frameMs, version: X.VERSION, agentOk: agentOk,
@@ -1619,7 +1650,7 @@ function renderResult() {
           '<div class="acc-r" style="--i:2"><span class="ic">' + ICON.scope + '</span><span class="t">Scoped <b>1.00</b><small>' + scopedShort + "</small></span></div>" +
           '<div class="acc-r" style="--i:3"><span class="ic">' + ICON.scope + '</span><span class="t">ADS <b>1.00</b><small>' + adsShort + "</small></span></div>" +
           '<div class="acc-r" style="--i:4"><span class="ic">' + ICON.cross + '</span><span class="t">Crosshair <b>' + XR.crosshair.color.name + '</b><small>' + shapeName + ", code in the Crosshair tab</small></span></div>" +
-          (S.prior ? '<div class="acc-r" style="--i:6"><span class="ic">' + ICON.down2 + '</span><span class="t">Sessions <b>' + (S.prior.length + 1) + "</b><small>pooled test data, from " + esc(fmtDate(S.prior[0].date)) + "</small></span></div>" : "") +
+          (S.prior ? '<div class="acc-r" style="--i:6"><span class="ic">' + ICON.down2 + '</span><span class="t">Sessions <b>' + (S.prior.length + 1) + "</b><small>" + (S.prior[0].manual && S.prior.length === 1 ? "last results entered by hand" : "pooled test data, from " + esc(S.prior[0].manual ? "entered by hand" : fmtDate(S.prior[0].date))) + "</small></span></div>" : "") +
           '<div class="acc-r" style="--i:5"><span class="ic"><i class="sw" style="background:' + XR.highlight.color.hex + ';margin:0"></i></span><span class="t">Highlight <b>' + XR.highlight.color.short + '</b><small>' + esc(XR.highlight.color.name) + "</small></span></div>" +
         "</div>" +
         '<button type="button" class="btn primary dl" id="download">' + ICON.down2 + "Download results</button>" +
