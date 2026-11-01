@@ -63,3 +63,29 @@ Priority: H1 (CVD) > H2 (crosshair clash) > H3/H4 (scene conflicts) > H5 (prefer
 - Hansen et al. 2009: https://jov.arvojournals.org/article.aspx?articleid=2193447 · Wolfe & Horowitz 2017: https://www.nature.com/articles/s41562-017-0058 · Machado et al. 2009: https://doi.org/10.1109/tvcg.2009.113
 - CVD prevalence: https://en.wikipedia.org/wiki/Color_blindness · https://www.webexhibits.org/causesofcolor/2C.html · https://www.ncbi.nlm.nih.gov/books/NBK11538/table/ch28kallcolor.T1/
 - Community/editorial: https://www.vlr.gg/228771/enemy-highlight-color-settings · https://alviran.net/blog/valorant-enemy-highlight-color-2026/ · https://1v9.gg/blog/how-to-change-enemy-color-in-valorant · https://tier1settings.com/valorant-best-visibility-settings/ (unsupported claims, e.g. "purple most common", contradicted by our data)
+
+---
+
+## 7. v3.0 changes (2026-11-01)
+
+### Scoring is now computed
+- **What is compared:** each highlight option against 8 scenes (sand, concrete, shadow, cool blue, foliage, purple utility, fire, yellow utility) in CIELAB, after simulating the player's color vision (Machado et al. 2009).
+- **Peripheral weighting:** red-green (a\*) counts 0.4 and blue-yellow (b\*) counts 0.9, because enemies are first seen off-center:
+  - red-green sensitivity falls steeply with eccentricity (Mullen & Kingdom 2002, *Vis. Neurosci.* 19:109);
+  - red-green opponency is behaviourally absent by about 25–30° (Mullen, Sakurai & Chu 2005);
+  - see also Hansen et al. 2009.
+- **Answers become weights:** the map and utility answers raise the weight of the matching scene, so utility that shares a hue now lowers a color through contrast. The hand-set ±1.5 penalties are gone.
+- **Riot's color-blind labels:** the option Riot made for the player's type gets +2. This is less than before (+5), because the simulation already captures most of the effect.
+- **Tritanopia:** red can now outrank purple. Tritanopia leaves red-green vision intact, and red keeps its contrast in the simulation.
+- **The vision test can override the self-reported type:** it measures the player's own vision, and is capped at ±2.5.
+
+### Colors
+- **Values used:** community-posted, Yellow `#FFFF00` (both labels), Red `#FF0000`, Purple `#A907E4` [U].
+- **New options:** none found in 2024–2026 guides.
+
+### Test
+- **What replaced the reaction-time test:** a masked threshold test. See `research/vision_test_method.md`.
+
+### Real-world conspicuity, for context
+- Solomon & King 1995 (*J. Safety Res.* 26:41) found that lime-yellow fire engines had about a third of the visibility-related crash rate of red ones.
+- This is a field study with confounds. It is consistent with the luminance argument, but it is not evidence about games.

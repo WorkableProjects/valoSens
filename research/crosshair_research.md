@@ -207,3 +207,71 @@ Dot variant: `0;P;c;5;o;1;d;1;z;2;f;0;0b;0;1b;0`
 - Abrams & Christ 2003: https://pubmed.ncbi.nlm.nih.gov/12930472/ · Pelli & Tillman 2008: https://pubmed.ncbi.nlm.nih.gov/18828191/ · Wolfe & Horowitz 2017: https://www.nature.com/articles/s41562-017-0058 · Hansen et al. 2009: https://jov.arvojournals.org/article.aspx?articleid=2193447 · Machado et al. 2009: https://doi.org/10.1109/tvcg.2009.113
 - CVD prevalence: https://en.wikipedia.org/wiki/Color_blindness · https://www.webexhibits.org/causesofcolor/2C.html
 - Import troubleshooting/history: https://dotesports.com/valorant/news/how-to-export-and-import-crosshair-settings-in-valorant · https://clip.dor.gg/en/blog/valorant-crosshair-guide
+
+---
+
+## 7. v3.0 additions (2026-11-01)
+
+### 7a. No controlled crosshair study exists
+- **What was searched:** CHI, CHI PLAY, IEEE CoG and military reticle literature.
+- **Result:** no controlled study that varies crosshair size, gap or color and measures aiming.
+  - The closest work is Vicencio-Moreira, Mandryk & Gutwin, CHI 2014 (doi:10.1145/2556288.2557308), on aim assists, not visual crosshairs.
+- **Consequence:** every geometry rule below is an inference from vision science, and the app says so.
+
+### 7b. Color scoring is now computed
+For each crosshair color and each of 8 scenes (`SCENES` in `xhair.js`), the app computes a weighted CIELAB color difference against the scene's three representative surface colors.
+
+**How the score is built:**
+- **Color vision simulation:** applied first, using Machado, Oliveira & Fernandes 2009 at severity 1.0, in linear RGB.
+- **Chroma weight 0.25 (a\*, b\*):** thin 1–2 px lines sit near the resolution limit for pure color. That limit is about 11–12 c/deg, against about 60 c/deg for luminance (Mullen 1985, *J. Physiol.* 359:381). Luminance carries the detail.
+- **Saturation:** `1 − exp(−ΔE/50)`.
+- **Combining scenes:** `0.6 × weighted mean + 0.4 × worst scene`. This leans toward maximin: you lose the crosshair on its worst background.
+- **Scene weights:** follow the "when do you lose it" answer.
+- **Priors:** small, from pro use and the GameGrids community test (cyan 4.8, pink 3.8, white 3.4) [U: method not checked].
+- **Outline decision:** compares the worst-case visibility with and without a black outline. The outline wins when it lifts the worst scene enough (or the player reports bright maps).
+
+### 7c. Geometry from head size on screen
+- **Head size:**
+  - Pixel focal length = `(width / 2) / tan(51.5°)` (103° hFOV).
+  - Head width = focal length × 0.25 m / range, with range from the weapon answer: 10 m close range, 20 m rifle, 30 m sniper.
+  - At 1080p that gives about 19, 9.5 and 6.4 px.
+- **Size caps:**
+  - Dot size ≤ 0.35 × head.
+  - Line thickness ≤ 0.2 × head.
+- **Crowding:**
+  - Foveal contour interaction spans only a few arcminutes (Siderov, Waugh & Bedell 2013; "Foveal crowding resolved", *Sci. Rep.* 2018).
+  - Lines 3 px or longer therefore keep a gap of ≥ 2 px.
+  - Lateral masking (Polat & Sagi 1993) supports the same rule [M].
+- **Pixel angle:**
+  - On a 24″ 1080p screen at 60 cm, 1 px ≈ 1.6′. On a 27″ 4K screen at 70 cm, 1 px ≈ 0.76′, so thickness 2 is the safer minimum there.
+  - Resolution scaling (×1.33 at 1440p, ×2 at 4K) keeps the crosshair the same size relative to heads.
+
+### 7d. Rotating visibility test
+- **Pool:** 18 archetypes from the pro data (`POOL` in `xhair.js`).
+  - Covers white, cyan, green, yellow, pink and yellow-green.
+  - Shapes: cross, dot, cross + dot, micro cross and taller vertical lines.
+  - Includes a red control.
+- **Sessions:** each page load draws a new random seed (`crypto.getRandomValues`), so the subset changes.
+  - Each session is 8 rounds of 4 crosshairs.
+  - Exposure is balanced, least-shown first.
+  - Colors within a round are distinct where possible.
+  - Slot order is random every round, because position biases choice (Mantonakis et al. 2009, *Psych. Sci.* 20:1309).
+  - Scenes cycle through a shuffled list.
+- **Scoring:** a conditional-logit (Luce choice / Plackett–Luce) model on the crosshair's attributes.
+  - Attributes: color, outline, outline × bright scene, shape, thin lines.
+  - Ridge prior N(0, 1) on each coefficient; fitted by Newton's method.
+  - Background: Bradley & Terry 1952; Hunter 2004.
+  - Random incomplete blocks give near-optimal ranking estimates (Hajek, Oh & Xu 2014, arXiv:1406.5638).
+- **Effect on the result:**
+  - The color coefficient adds up to ±2 points.
+  - The outline coefficient feeds the outline decision.
+  - Shape coefficients are used only when the player chose "no preference".
+  - The best-scoring candidate the player saw is offered as "Your test favorite".
+
+### 7e. Pro data cross-check
+- **Valorant-Spind** (246 VCT codes, Sep/Oct 2026):
+  - Color: white 58%, cyan 21%, green 23/246.
+  - Outlines: 52%.
+  - Dot-only: 28%.
+  - No dot: 63%.
+- **Agreement:** these are within a few points of our ProSettings scrape.

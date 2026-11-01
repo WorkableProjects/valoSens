@@ -1,51 +1,121 @@
-# valoSens: Valorant settings finder
+# valoSens 3.1: Valorant settings finder
 
-The questionnaire has three parts: **1. Sensitivity**, **2. Crosshair** (with an in-browser visibility test), **3. Enemy highlight color** (with a timed detection test).
+Version 3.0 is a full release covering all three parts: **1. Sensitivity**, **2. Crosshair** (with a rotating visibility test), and **3. Enemy highlight color** (with a vision-threshold test).
 
 Open `index.html` in a browser. It needs no build step or server, and nothing leaves the page.
 
+**What's new in 3.0**
+- **Crosshair test rotates.** Each page load draws a fresh random set from an 18-crosshair pool of pro archetypes: 8 rounds of 4, random slot order, over 7 map and utility scenes. Picks are scored with a choice model.
+- **Highlight test measures vision, not reactions.**
+  - Four enemies flash for about 58 ms behind a mask, and you say which one was highlighted, with no time limit.
+  - A staircase finds the outline strength each color needs before you see it.
+  - Reaction time, click latency and input lag are never measured.
+- **Color logic is computed.** Crosshair and highlight colors are scored by contrast against map scenes, as your color vision sees them, instead of hand-set points.
+- **Sensitivity model:**
+  - big-turn share is now averaged over its uncertainty;
+  - wrist reach and hand speed are re-sourced;
+  - new DPI / pixel-skipping check.
+- **Animated results screen:**
+  - an "Analysis complete" reveal, with summary cards that rise in sequence and a sweeping top border;
+  - a count-up and glow on the sensitivity;
+  - crosshair previews that assemble from the center, and enemy outlines that rise and flare;
+  - score bars that grow;
+  - chart lines that draw in and pro dots that pop each time a tab opens;
+  - staggered rows and settings.
+  - All of it switches off under `prefers-reduced-motion`.
+
+**Results files and calibration runs (3.1)**
+- **Download.** The results screen has **Download results**, which saves `valosens-results-<date>-<n>-sessions.json` to your device. Nothing is kept in browser storage, so the file is the only copy.
+- **Import.** On the first screen, **Import results file** loads it, fills in your answers from the latest session, and offers **Skip to the tests**.
+- **Pooling.** In the next run:
+  - visibility-test picks and vision-test rounds from every session are combined in one fit;
+  - the vision test's staircases start near your earlier thresholds;
+  - the crosshair test shows crosshairs you haven't seen yet first.
+- **On the results screen:**
+  - a "Last session" row in the breakdown;
+  - a "Sessions" row in the settings card;
+  - per-session thresholds in the Highlight tab, so you can see whether runs agree.
+- **What a new download contains:** every imported session plus this one, up to the latest 12.
+- **Import safety.** `session.js` validates every imported value against the questionnaire's options:
+  - unknown answers, crosshair IDs and trial fields are dropped;
+  - files over 3 MB, files that aren't valid JSON, and files that aren't valoSens results are rejected with a readable message.
+
 **UI:**
 - Dark, minimal, game-client style. One question per screen, with staggered entrances and a thin progress line.
-- The results screen is laid out like a match-details page:
-  - full-width layout with three summary cards (sensitivity, crosshair, highlight);
-  - Sensitivity / Crosshair / Highlight / Model / Vs pros / Test plan tabs;
-  - a pro-distribution curve that draws in, with your near-optimal range and a result pin;
-  - a factor breakdown with impact chevrons (each factor's effect vs a neutral answer);
-  - a confidence badge and a settings card.
-- Animations switch off under `prefers-reduced-motion`.
+- The results screen is laid out like a match-details page: three summary cards, Sensitivity / Crosshair / Highlight / Model / Vs pros / Test plan tabs, a pro-distribution curve, a factor breakdown, a confidence badge and a settings card.
 - Fonts load from Google Fonts (Barlow / Barlow Condensed), with system fallbacks offline.
 
-- Model: `model.js` (sensitivity) and `xhair.js` (crosshair + highlight); both work in the browser and in Node
-- Tests: `node test/model.test.js`, `node test/xhair.test.js`, and `node test/ui.e2e.js` (browser smoke test, needs Playwright)
-- Pro data: regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`
-- Agent data: regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`
+**Files**
+- **Model:** `model.js` (sensitivity), `xhair.js` (crosshair + highlight) and `session.js` (results files); all work in the browser and in Node.
+- **Tests:**
+  - `node test/model.test.js` (48)
+  - `node test/xhair.test.js` (21, including simulated observers for the vision test)
+  - `node test/session.test.js` (8: file round trip, appending sessions, rejecting bad files, sanitising, pooling)
+  - `node test/ui.e2e.js` (browser test: both tests, the rotation, the animations, and download → import → second run; needs Playwright)
+- **Pro data:** regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`.
+- **Agent data:** regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`.
 - `Valorant sensitivity finder.html` is the original multiplier-based version, kept for reference.
 
-## Crosshair and enemy highlight (`xhair.js`)
+## Crosshair and enemy highlight (`xhair.js` 3.0)
 
-Research: `research/crosshair_research.md` and `research/highlight_color_research.md` (pro stats from a ProSettings.net scrape of 2026-11-01: 91 crosshair codes, 58 known highlight colors).
+Research: `research/crosshair_research.md` §7, `research/highlight_color_research.md` §7, `research/vision_test_method.md`.
 
-- **Colors are chosen as a pair.** Each crosshair color and each highlight option gets a score. Pairs that share a hue are not allowed: a yellow-family crosshair with a yellow highlight, a red or pink crosshair with red, or pink with purple. The best pair wins.
-- **Crosshair color score:**
-  - Base score from brightness, pro share and a community visibility test (cyan 3.2, white 3.0, green 1.6, …, red −1).
-  - Red-green color blindness rules out green, yellow green and red. Tritan lowers yellow.
-  - Each visibility-test pick adds +1.6.
-- **Highlight score:**
-  - Base score: Yellow (Deuteranopia) 3, Yellow (Protanopia) 2.7, Red 1.6, Purple 1.
-  - The option matching the user's color-blindness type gets +5.
-  - Map brightness adds or subtracts up to 1.5, and utility clutter subtracts up to 1.5.
-  - Keeping a familiar color adds +1.5.
-  - The detection test adds up to ±2.5, based on the inverse efficiency score (mean RT ÷ hit rate).
-- **Crosshair geometry:**
-  - Shape and aim style set the size: a small cross is 2–3 long, a bigger one 4–5.
-  - Values are scaled ×1.33 at 1440p and ×2 at 4K, because they are in screen pixels.
-  - Outlines go on for light colors, dots and bright-map complaints.
-  - Firing and movement error stay off, except movement error as a training aid for newer players who shoot while moving.
-  - Outer lines stay off.
-- The importable code is generated from the reverse-engineered code grammar. `decode()` is tested on real pro codes.
-- **Removed:** the mousepad surface question. It never changed the result.
+### Color scoring (both parts)
+- **Scenes:** every color is compared with 8 scenes: bright sand, concrete, shadow, cool blue, foliage, purple utility, fire and yellow utility. Each has three representative surface colors (estimates).
+- **Simulation:** the comparison is done after simulating your color vision (Machado, Oliveira & Fernandes 2009).
+- **Contrast:** a weighted CIELAB difference, saturated so very large differences stop adding.
+  - **Crosshair:** chroma counts a quarter. Thin lines are carried by luminance (Mullen 1985).
+  - **Highlight:** red-green counts 0.4 and blue-yellow 0.9. Enemies first appear in the periphery, where red-green sensitivity falls fastest (Mullen & Kingdom 2002; Hansen et al. 2009).
+- **Combining scenes:** 60% weighted mean plus 40% worst scene. Your answers set the weights:
+  - "lose the crosshair on bright maps";
+  - "lose enemies in shadows";
+  - "fire / purple / yellow utility clutters my screen".
+- **Small priors:** pro use, and a community visibility test.
+- **Pairing:** the crosshair and highlight are chosen as a pair. Pairs that share a hue, or look alike in your color vision (ΔE < 12), are not allowed.
+- **Color blindness:**
+  - Red-green rules out green, yellow green and red crosshairs.
+  - The highlight Riot made for your type gets +2.
+  - The vision test, which measures your actual vision, can outweigh that.
 
-## How the number is computed (model v2.1)
+### Crosshair
+- **Visibility test (rotating):**
+  - 18 pro archetypes; a new random subset every page load.
+  - 8 rounds × 4 crosshairs, balanced exposure, random slot order (position bias).
+  - Scored with a ridge-regularised conditional-logit model (Luce choice / Bradley–Terry) on color, outline, outline on bright scenes, shape and thin lines.
+  - The color effect adds up to ±2.
+  - Outline and shape effects feed those decisions; shape only when you chose "no preference".
+- **Outline:** on when it raises the worst-scene visibility enough, or when you report bright maps.
+- **Geometry:**
+  - Shape and aim style set the size.
+  - Head size on screen (from your weapon's fight distance and the 103° FOV) caps dot size and line thickness.
+  - Lines 3 px or longer keep a gap of at least 2 (foveal crowding).
+  - Values scale ×1.33 at 1440p and ×2 at 4K.
+- **Error lines:** firing and movement error stay off (motion onset captures attention). The exception is movement error as a training aid for newer players who shoot while moving.
+- **Three to try:** the recommendation, your test favorite (or the other shape), and a pro staple. Each comes with an importable code.
+
+### Enemy highlight vision test
+- **Trial:**
+  1. Fixation on your recommended crosshair.
+  2. Four identical dark figures, one with the outline, shown for `round(58 ms / frame)` frames.
+  3. A 350 ms mask of outline fragments in every test color.
+  4. You answer 1–4, with no time limit.
+- **Staircase:** a weighted up-down staircase per color on outline opacity (−0.05 / +0.15 log10, converging near 75% correct; Kaernbach 1991), interleaved, with the same scenes for every color.
+- **Length:** 20 trials per color plus 7 catch trials, about 2 minutes.
+- **Fit:** maximum-likelihood psychometric fit (guess rate 25%, lapse 3%, shared slope).
+  - The threshold is reported at 75% correct.
+  - Its uncertainty comes from the profile likelihood.
+  - The difference from the mean is shrunk by its uncertainty (τ = 0.25 log10).
+  - Bonus = −6 × shrunk difference, capped at ±2.5.
+- **Reliability:**
+  - Frames are pre-rendered and swapped on `requestAnimationFrame`.
+  - The refresh rate is measured first.
+  - Dropped-frame trials are repeated, and more than 5% dropped halves the weight.
+  - Missing more than 1 of 7 easy catch trials voids the result.
+- **Checked on simulated observers:**
+  - It finds the truly easiest color in ≥ 27 of 30 runs.
+  - With no real difference, it gives a bonus above 1.5 in ≤ 3 of 30 runs.
+
+## How the number is computed (model v3.0)
 
 The internal unit is **cm/360**: centimetres of mouse travel per full turn.
 
@@ -59,7 +129,13 @@ For each kind of movement in an explicit task mix, the model estimates the **ext
 | Target switch, 25° (40%) | NVIDIA's group flick curve: about +3.5% flick time per octave² away from ~40 cm/360. Smaller targets shift that optimum slightly slower, by one octave across a 16× size range. | Boudaoud et al. 2022/2023: N=13, static flicks only, weak evidence |
 | 90° and 180° turns (15% / 5%) | Expected mouse lifts (expected travel past the pad edge ÷ travel regained per lift), the cost of a bigger joint taking over past comfortable reach, and a peak-speed limit. | Lift time, switch time, start position and reach are estimates |
 
-The guessed constants that move the answer most (σ0, the flick optimum, head size, submovement time) are **averaged over their plausible low, central and high values** (81 combinations). No single guess decides the answer this way.
+The guessed constants that move the answer most (σ0, the flick optimum, head size, submovement time and, new in 3.0, **how many big turns the task mix contains**) are **averaged over their plausible low, central and high values** (243 combinations). No single guess decides the answer this way.
+
+**New in 3.0:**
+- Wrist-only reach is ±3 cm (30–40° comfortable wrist deviation, Ryu et al. 1991).
+- Peak hand speed of 150 cm/s is now sourced (Casiez et al. 2008: 1.5 m/s at the 97th percentile).
+- `dpiAdvice()` warns when one mouse count turns you further than one pixel at your resolution (pixel skipping), and suggests a DPI. Resolution comes from Part 2.
+- The test plan's adaptation advice follows Krakauer et al. 2000 and NVIDIA's adaptation data. The 5–10% step size is now labelled a heuristic.
 
 ### 2. Measured pathway (optional, `recommend({ …, calibration: { trials } })`)
 
@@ -144,24 +220,25 @@ All of these are labelled preferences: no study shows any matching method helps.
 
 ## Parameter-sensitivity check
 
-Example player: forearm aimer, 45 cm pad, flex role, rifle. The table shows the result with each constant at its low and high value, all others central. The central-only result is 40.9 cm; the uncertainty-averaged result is 46.0 cm.
+Example player: forearm aimer, 45 cm pad, flex role, rifle. The table shows the result with each constant at its low and high value, all others central. The central-only result is 40.5 cm; the uncertainty-averaged result is 45.7 cm.
 
 | Constant | Basis | Low → result | High → result | Swing |
 |---|---|---|---|---|
-| `sigma0` hand noise floor | research | 28.4 | 56.5 | 69% |
-| `cFlick` NVIDIA flick optimum | research | 36.4 | 45.7 | 23% |
-| `headM` head width | estimate | 45.8 | 37.1 | 21% |
-| `tSub` submovement time | research | 38.6 | 44.0 | 13% |
-| `vPeak` peak hand speed | estimate | 38.2 | 41.9 | 9% |
-| `tSwitch` joint-switch cost | estimate | 41.9 | 38.4 | 9% |
-| `tLift` lift cost | estimate | 41.9 | 39.5 | 6% |
+| `sigma0` hand noise floor | research | 28.3 | 56.4 | 69% |
+| `cFlick` NVIDIA flick optimum | research | 35.9 | 45.3 | 23% |
+| `headM` head width | estimate | 45.5 | 36.5 | 22% |
+| `turnScale` big-turn share (new) | estimate | 44.4 | 36.4 | 20% |
+| `tSub` submovement time | research | 38.0 | 43.7 | 14% |
+| `tSwitch` joint-switch cost | estimate | 41.7 | 37.3 | 11% |
+| `vPeak` peak hand speed | research | 37.9 | 41.4 | 9% |
+| `tLift` lift cost | estimate | 41.4 | 39.1 | 6% |
 | everything else | — | — | — | ≤ 2% |
 
 Toggles, for a duelist with a sniper:
 - Removing the role changes the result by 2.5%.
-- Removing the weapon changes it by 3.3%.
-- Dropping the NVIDIA flick term changes it by 3.4%.
-- Removing big turns from the task mix changes it by **23%**. The task mix is an important assumption with no direct data behind it.
+- Removing the weapon changes it by 3.4%.
+- Dropping the NVIDIA flick term changes it by 4.0%.
+- Removing big turns from the task mix changes it by **24%**. The task mix is an important assumption with no direct data behind it, which is why 3.0 averages over it.
 
 Run it yourself with `ValoModel.sensitivityAnalysis(input)`.
 
@@ -186,3 +263,5 @@ Run it yourself with `ValoModel.sensitivityAnalysis(input)`.
 - `research/agent_sens_data.json` and `.md`: pro agent pools and the agent-vs-sensitivity check
 - `research/scoped_ads_settings.md`: scoped/ADS multipliers, zoom levels, matching formulas, pro usage
 - `research/model_research.md`: earlier background notes (v1)
+- `research/vision_test_method.md`: design and validation of the highlight vision test (v3)
+- `research/crosshair_research.md` and `research/highlight_color_research.md`: crosshair and highlight evidence, with v3 additions in §7
