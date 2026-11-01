@@ -12,11 +12,13 @@ async function flow(b, vp, steps) {
   await steps(p, pick, next);
   await p.waitForSelector(".big");
   await p.waitForTimeout(1300);            // let the count-up finish
-  const out = { big: (await p.textContent(".big")).trim(), scroll: await p.evaluate(() => document.documentElement.scrollWidth), width: vp.size.width, errs };
+  const sumWidth = await p.evaluate(() => document.querySelector(".sum").getBoundingClientRect().width);
+  const out = { sumWidth, big: (await p.textContent(".big")).trim(), scroll: await p.evaluate(() => document.documentElement.scrollWidth), width: vp.size.width, errs };
   await p.getByRole("tab", { name: "Model" }).click();
   await p.hover("#costChart #hit", { position: { x: 200, y: 80 } });
   out.tooltip = await p.textContent("#costChart .tt");
   out.text = await p.textContent("#app");
+  out.code = await p.textContent("#xhCode");
   await p.close();
   return out;
 }
@@ -27,13 +29,22 @@ async function flow(b, vp, steps) {
     await pick("800"); await next();
     await pick("I know my Valorant sens"); await p.fill("#in-cur", "0.5"); await next();
     await next();
-    await pick("About 45 cm"); await next(); await pick("Speed"); await next(); await pick("Wrist + forearm"); await next();
+    await pick("About 45 cm"); await next(); await pick("Wrist + forearm"); await next();
     await pick("Duelist"); await next();
     await p.selectOption("#in-agent1", "Jett"); await p.selectOption("#in-agent2", "Omen");
     await next();
-    await pick("Rifles"); await next(); await pick("2+ years"); await next();
+    await pick("Rifles"); await next();
     await pick("Yes, add stats"); await next();
     await p.selectOption("#in-rank", "plat"); await p.fill("#in-stMatches", "60"); await p.fill("#in-stHs", "22"); await p.fill("#in-stKd", "1.05"); await p.fill("#in-stAdr", "130");
+    await next();
+    // Part 2: crosshair
+    await pick("Red-green: deutan"); await next(); await pick("2+ years"); await next();
+    await pick("Flicks and taps"); await next(); await pick("Small cross"); await next();
+    await pick("On bright maps"); await next(); await pick("2560×1440"); await next();
+    await p.getByRole("button", { name: "White + outline on Bright sand" }).click(); await next();
+    // Part 3: highlight
+    await pick("Red (Default)"); await next(); await pick("Dark corners and shadows"); await next();
+    await pick("Fire and orange"); await next();
     await next();
   }));
   results.push(await flow(b, { size: { width: 390, height: 900 }, scheme: "dark" }, async (p, pick, next) => {
@@ -41,10 +52,14 @@ async function flow(b, vp, steps) {
     await pick("I'll convert from another game"); await p.selectOption("#og", "ow2"); await p.fill("#in-otherSens", "5"); await next();
     await next();
     await pick("Enter exact width"); await p.fill("#in-padCustom", "90"); await next();
-    await pick("Glass or hard"); await next(); await pick("Not sure"); await next();
+    await pick("Not sure"); await next();
     await pick("Sentinel"); await next(); await next();
-    await pick("Operator"); await next(); await pick("Under 6 months"); await next();
+    await pick("Operator"); await next();
     await pick("Skip"); await next();
+    await pick("Blue-yellow: tritan"); await next(); await pick("Under 6 months"); await next(); await pick("Yes, often"); await next();
+    await pick("A mix / not sure"); await next(); await pick("Dot only"); await next(); await pick("Rarely or never"); await next();
+    await pick("1920×1080"); await next(); await next();
+    await pick("Not sure"); await next(); await pick("No pattern"); await next(); await next(); await next();
   }));
   await b.close();
   let ok = true;
@@ -56,6 +71,15 @@ async function flow(b, vp, steps) {
   const agentLine = /Agents:.*Jett.*Tailwind/.test(t0), scoped = /scoped multiplier of 0\.9/.test(t0);
   console.log("agent explanation shown:", agentLine, "| scoped advice for Jett shown:", scoped);
   if (!agentLine || !scoped) ok = false;
+  // Crosshair codes must decode, and the highlight must follow the colour-vision answer.
+  const X = require("../xhair.js");
+  results.forEach(r => { try { X.decode(r.code); } catch (e) { ok = false; console.log("bad code", r.code); } });
+  const deut = /Yellow \(Deuteranopia\)/.test(t0) && !/c;[127];/.test(results[0].code) && /;h;|o;1/.test(results[0].code);
+  const trit = /Purple \(Tritanopia\)/.test(results[1].text) && /0m;1/.test(results[1].code) && /d;1/.test(results[1].code);
+  console.log("codes:", results.map(r => r.code).join(" | "), "| deutan rules:", deut, "| tritan+dot+training:", trit);
+  if (!deut || !trit) ok = false;
+  const wide = results[0].sumWidth / results[0].width;
+  console.log("results width share at 1000px:", wide.toFixed(2));
   console.log(ok ? "UI smoke test passed" : "UI smoke test FAILED");
   process.exit(ok ? 0 : 1);
 })();

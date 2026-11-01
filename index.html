@@ -33,11 +33,18 @@
   .progress { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--teal); width: 0; transition: width .5s var(--ease); box-shadow: 0 0 12px rgba(42, 214, 176, .6); }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 36px 20px 64px; }
+  .wrap.wide { max-width: none; padding: 32px clamp(16px, 2.6vw, 56px) 64px; }
+  h2[tabindex="-1"]:focus { outline: none; }
 
   /* ---------- questionnaire ---------- */
   .q { max-width: 680px; margin: 4vh auto 0; }
   .q-sec { font: 600 13px/1 var(--head); letter-spacing: .2em; text-transform: uppercase; color: var(--teal); display: flex; gap: 10px; align-items: center; }
   .q-sec span { color: var(--dim); }
+  .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 26px; }
+  .part { font: 600 12px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); padding-top: 9px; border-top: 2px solid var(--line2); transition: color .3s, border-color .3s; }
+  .part b { color: inherit; margin-right: 6px; }
+  .part.done { color: var(--muted); border-top-color: rgba(42, 214, 176, .45); }
+  .part.on { color: var(--ink); border-top-color: var(--teal); }
   .q h2 { font: 700 clamp(30px, 5.4vw, 46px)/1.02 var(--head); text-transform: uppercase; letter-spacing: .01em; margin: 12px 0 10px; }
   .why { color: var(--muted); margin: 0 0 6px; max-width: 60ch; }
   .uses { color: var(--dim); font-size: 13px; margin: 0 0 22px; display: flex; gap: 8px; }
@@ -73,6 +80,27 @@
   summary { cursor: pointer; font: 600 14px var(--head); letter-spacing: .1em; text-transform: uppercase; }
   details p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
   .tip { color: var(--dim); font-size: 13px; margin: 10px 0 0; }
+  .chk { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; background: none; border: 0; padding: 6px 0; cursor: pointer; color: var(--muted); text-align: left; }
+  .chk i { flex: none; width: 18px; height: 18px; border: 1px solid var(--line2); display: grid; place-items: center; }
+  .chk[aria-pressed="true"] { color: var(--ink); } .chk[aria-pressed="true"] i { background: var(--teal); border-color: var(--teal); }
+  .chk[aria-pressed="true"] i::after { content: ""; width: 8px; height: 4px; border: solid #0f1923; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
+  .q-body > .choice + .choice { margin-top: 8px; }
+  .q.wideq { max-width: 980px; }
+  .vis-row { margin: 0 0 14px; }
+  .vis-h { font: 600 12px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+  .vis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; }
+  .vis-c { position: relative; padding: 0; border: 1px solid var(--line); background: #000; cursor: pointer; height: 86px; overflow: hidden; transition: border-color .2s, box-shadow .2s; }
+  .vis-c canvas { display: block; width: 100%; height: 84px; }
+  .vis-c span { position: absolute; left: 6px; top: 5px; font: 700 12px/1 var(--head); color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+  .vis-c:hover { border-color: var(--muted); }
+  .vis-c[aria-pressed="true"] { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal); }
+  .dt { position: relative; border: 1px solid var(--line); background: #000; user-select: none; touch-action: manipulation; }
+  .dt canvas { display: block; width: 100%; cursor: crosshair; }
+  .dt-over { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 14px; background: rgba(15, 25, 35, .78); text-align: center; padding: 16px; }
+  .dt-over[hidden] { display: none; }
+  .dt-over p { margin: 0; max-width: 42ch; color: var(--ink); }
+  .dt-res table { margin-top: 12px; }
+  i.sw { display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 
   .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; }
   .btn { cursor: pointer; border: 1px solid var(--line2); background: transparent; padding: 12px 26px; min-height: 46px;
@@ -92,6 +120,36 @@
   .back .anim { animation-name: riseBack; }
 
   /* ---------- results ---------- */
+  .sum { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: clamp(10px, 1.2vw, 20px); margin: 4px 0 30px; }
+  @media (max-width: 1180px) { .sum { grid-template-columns: 1fr 1fr; } .sum .s1 { grid-column: 1 / -1; } }
+  @media (max-width: 640px) { .sum { grid-template-columns: 1fr; } }
+  .sum-c { position: relative; text-align: left; background: var(--panel); border: 1px solid var(--line); padding: 16px 20px 18px; min-width: 0; animation: rise .5s var(--ease) both; }
+  .sum-c.s2 { animation-delay: .08s; } .sum-c.s3 { animation-delay: .16s; }
+  button.sum-c { cursor: pointer; transition: border-color .2s, background .2s; } button.sum-c:hover { border-color: var(--line2); background: rgba(30, 48, 64, .8); }
+  .sum-k { font: 600 12px/1 var(--head); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .sum-k b { color: var(--teal); margin-right: 8px; }
+  .sum .res-head { margin: 0; }
+  .sum-b { display: flex; align-items: center; gap: 16px; min-width: 0; }
+  .sum-b > div { min-width: 0; }
+  .sum-b canvas { flex: none; width: 76px; height: 76px; border: 1px solid var(--line); }
+  .sum-v { font: 700 clamp(22px, 2vw, 30px)/1.05 var(--head); text-transform: uppercase; letter-spacing: .02em; }
+  .sum-s { color: var(--dim); font-size: 13px; margin-top: 6px; }
+  .sum-code { display: block; margin-top: 8px; font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted); overflow-wrap: anywhere; }
+  .xh-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 0 0 16px; }
+  .xh-fig { margin: 0; } .xh-fig canvas { display: block; width: 100%; height: 150px; border: 1px solid var(--line); }
+  .xh-fig figcaption { font: 600 11px/1 var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin-top: 6px; }
+  .codebox { display: flex; gap: 10px; align-items: center; background: rgba(0, 0, 0, .28); border-left: 2px solid var(--teal); padding: 10px 12px; }
+  .codebox code { flex: 1; min-width: 0; font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); overflow-wrap: anywhere; user-select: all; }
+  table.kv td:first-child { color: var(--muted); width: 42%; }
+  .sbars { display: grid; gap: 2px; }
+  .sbar { display: grid; grid-template-columns: minmax(0, 11em) minmax(0, 1fr) 4.2em; align-items: center; gap: 10px; padding: 7px 10px; font-size: 13px; }
+  .sbar:nth-child(odd) { background: var(--row); }
+  .sbar.on { outline: 1px solid rgba(42, 214, 176, .55); background: rgba(42, 214, 176, .08); }
+  .sb-n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sb-t { height: 6px; background: var(--line); position: relative; } .sb-t i { position: absolute; left: 0; top: 0; bottom: 0; opacity: .85; }
+  .sb-v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .sb-why { margin: 0 0 6px; padding: 0 10px 6px; font-size: 12px; color: var(--dim); }
+  @media (min-width: 1500px) { .duo .bd { grid-template-columns: 1fr; } }
   .res-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 20px; margin: 6px 0 30px; }
   @media (max-width: 640px) { .res-head { grid-template-columns: 1fr; } .meta { text-align: left; } }
   .big { margin: 0; font: 700 clamp(50px, 8.4vw, 88px)/.86 var(--head); letter-spacing: -.01em; display: flex; align-items: baseline; gap: .18em; flex-wrap: wrap; }
@@ -101,7 +159,9 @@
   .meta { text-align: right; font: 600 12px/1.6 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
   .meta b { color: var(--ink); font-weight: 600; }
 
-  .layout { display: grid; grid-template-columns: 200px minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+  .layout { display: grid; grid-template-columns: clamp(170px, 12vw, 260px) minmax(0, 1fr) clamp(300px, 22vw, 440px); gap: clamp(20px, 2vw, 40px); align-items: start; }
+  .duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 28px; }
+  @media (min-width: 1500px) { .duo { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
   @media (max-width: 1080px) { .layout { grid-template-columns: 170px minmax(0, 1fr); } .side { grid-column: 2; } }
   @media (max-width: 760px) { .layout { grid-template-columns: minmax(0, 1fr); } .side { grid-column: auto; } }
   .tabs { display: flex; flex-direction: column; gap: 4px; }
@@ -219,14 +279,15 @@
   <div class="crumb" id="crumb">Setup</div>
   <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
 </header>
-<div class="wrap">
+<div class="wrap" id="wrap">
   <main id="app" aria-live="polite"></main>
 </div>
 
 <script src="model.js"></script>
+<script src="xhair.js"></script>
 <script>
 "use strict";
-var M = window.ValoModel;
+var M = window.ValoModel, X = window.ValoXhair;
 
 /* ---------- State ---------- */
 function freshState() {
@@ -235,7 +296,9 @@ function freshState() {
     curMode: null, cur: "", measured: "", otherGame: "cs2", otherSens: "", sat: 3,
     padSel: null, padCustom: "", surface: null, limb: null,
     role: null, agent1: "", agent2: "", agent3: "", weapon: null, exp: null,
-    statsGate: null, stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stPaste: ""
+    statsGate: null, stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stPaste: "",
+    cvd: null, moving: null, aim: null, shape: null, lose: null, res: null, vis: [null, null, null],
+    hCur: null, hKeep: false, hMaps: null, hClutter: {}, hTest: null
   };
 }
 var S = freshState();
@@ -331,11 +394,213 @@ function parseStats(text) {
   return n;
 }
 
+/* ---------- Crosshair + highlight helpers ---------- */
+function toggle(host, key, label) {
+  var b = el("button", { type: "button", "class": "chk", "aria-pressed": String(!!S[key]) }, '<i aria-hidden="true"></i>' + label);
+  b.addEventListener("click", function () { S[key] = !S[key]; b.setAttribute("aria-pressed", String(S[key])); });
+  host.appendChild(b);
+}
+function toggleChoice(host, key, label, sub) {
+  var b = el("button", { type: "button", "class": "choice", "aria-pressed": String(!!S.hClutter[key]) }, '<span class="c-l">' + label + '</span><span class="c-s">' + sub + "</span>");
+  b.addEventListener("click", function () { S.hClutter[key] = !S.hClutter[key]; b.setAttribute("aria-pressed", String(!!S.hClutter[key])); });
+  host.appendChild(b);
+}
+// Inputs for the crosshair/highlight model. withTests=false gives the geometry used to draw the test candidates.
+function xhInput(withTests) {
+  var inp = { cvd: S.cvd, exp: S.exp, moving: S.moving, aim: S.aim, shape: S.shape, lose: S.lose, res: S.res,
+    hCur: S.hCur, hKeep: S.hKeep, hMaps: S.hMaps, hClutter: S.hClutter };
+  if (withTests !== false) {
+    var wins = {}, outl = 0;
+    S.vis.forEach(function (k) { if (!k) return; var v = VIS_CANDS.filter(function (c) { return c.id === k; })[0]; if (!v) return; wins[v.color] = (wins[v.color] || 0) + 1; if (v.outline) outl++; });
+    inp.visWins = wins; inp.visOutline = outl; inp.hTest = S.hTest;
+  }
+  return inp;
+}
+
+// Map-like backgrounds, seeded so they look the same on every render.
+var BGS = {
+  bright: { name: "Bright sand", base: [200, 180, 140], var: 26, blocks: [[226, 210, 172], [176, 152, 112]] },
+  mid: { name: "Concrete", base: [125, 130, 136], var: 20, blocks: [[150, 154, 158], [96, 100, 108]] },
+  dark: { name: "Shadow", base: [31, 42, 54], var: 12, blocks: [[44, 58, 72], [20, 28, 38]] },
+  smoke: { name: "Utility", base: [70, 60, 90], var: 16, blocks: [[120, 70, 160], [200, 110, 40]], blobs: true }
+};
+function rng(seed) { return function () { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
+function paintBg(ctx, w, h, key, seed) {
+  var b = BGS[key], r = rng(seed || 7);
+  ctx.fillStyle = "rgb(" + b.base.join(",") + ")"; ctx.fillRect(0, 0, w, h);
+  for (var i = 0; i < 14; i++) {
+    var c = b.blocks[i % 2], a = 0.25 + r() * 0.5;
+    ctx.fillStyle = "rgba(" + c.join(",") + "," + a.toFixed(2) + ")";
+    ctx.fillRect(r() * w, r() * h, w * (0.08 + r() * 0.35), h * (0.08 + r() * 0.5));
+  }
+  if (b.blobs) for (var j = 0; j < 5; j++) {
+    var cx = r() * w, cy = r() * h, rad = Math.max(w, h) * (0.12 + r() * 0.2), col = j % 2 ? b.blocks[1] : b.blocks[0];
+    var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    g.addColorStop(0, "rgba(" + col.join(",") + ",.75)"); g.addColorStop(1, "rgba(" + col.join(",") + ",0)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+  }
+  var img = ctx.getImageData(0, 0, w, h), d = img.data;
+  for (var k = 0; k < d.length; k += 4) { var n = (r() - 0.5) * b.var; d[k] += n; d[k + 1] += n; d[k + 2] += n; }
+  ctx.putImageData(img, 0, 0);
+}
+// Draws a crosshair config (decoded code fields) at (cx, cy). s = device pixels per game pixel.
+function drawCross(ctx, cx, cy, x, s) {
+  s = s || 1;
+  var col = X.XCOLORS[x.c] ? X.XCOLORS[x.c].hex : "#fff", ot = x.h ? x.t * s : 0, rects = [];
+  if (x["0b"]) {
+    var t = x["0t"] * s, l = x["0l"] * s, o = x["0o"] * s;
+    rects.push([cx + o, cy - t / 2, l, t], [cx - o - l, cy - t / 2, l, t], [cx - t / 2, cy - o - l, t, l], [cx - t / 2, cy + o, t, l]);
+  }
+  var dot = x.d ? [cx - x.z * s / 2, cy - x.z * s / 2, x.z * s, x.z * s] : null;
+  function snap(r) { return [Math.round(r[0]), Math.round(r[1]), Math.max(1, Math.round(r[2])), Math.max(1, Math.round(r[3]))]; }
+  if (ot) {
+    ctx.fillStyle = "rgba(0,0,0," + x.o + ")";
+    rects.concat(dot ? [dot] : []).forEach(function (r) { r = snap(r); ctx.fillRect(r[0] - ot, r[1] - ot, r[2] + 2 * ot, r[3] + 2 * ot); });
+  }
+  ctx.fillStyle = col;
+  ctx.globalAlpha = x["0a"]; rects.forEach(function (r) { r = snap(r); ctx.fillRect(r[0], r[1], r[2], r[3]); });
+  ctx.globalAlpha = x.a; if (dot) { var d = snap(dot); ctx.fillRect(d[0], d[1], d[2], d[3]); }
+  ctx.globalAlpha = 1;
+}
+// Enemy silhouette with a coloured outline and glow (the highlight). Size in device pixels.
+function drawEnemy(ctx, cx, cy, size, hex, bodyRGB) {
+  var w = size * 0.42, hh = size, head = size * 0.13;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy - hh / 2 + head, head, 0, Math.PI * 2);
+  ctx.moveTo(cx - w / 2, cy - hh / 2 + head * 2.3);
+  ctx.lineTo(cx + w / 2, cy - hh / 2 + head * 2.3); ctx.lineTo(cx + w * 0.38, cy + hh * 0.08); ctx.lineTo(cx + w * 0.3, cy + hh / 2);
+  ctx.lineTo(cx - w * 0.3, cy + hh / 2); ctx.lineTo(cx - w * 0.38, cy + hh * 0.08); ctx.closePath();
+  ctx.fillStyle = "rgb(" + bodyRGB.join(",") + ")"; ctx.fill();
+  ctx.shadowColor = hex; ctx.shadowBlur = Math.max(4, size * 0.12);
+  ctx.strokeStyle = hex; ctx.lineWidth = Math.max(1.5, size * 0.035); ctx.stroke();
+  ctx.restore();
+}
+function hidpi(canvas, cssW, cssH) {
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+  canvas.style.width = cssW + "px"; canvas.style.height = cssH + "px";
+  var ctx = canvas.getContext("2d"); return { ctx: ctx, dpr: dpr, w: canvas.width, h: canvas.height };
+}
+
+/* ---------- Test 1: crosshair visibility ---------- */
+var VIS_CANDS = [
+  { id: "wO", color: "white", outline: true, label: "White + outline" },
+  { id: "w", color: "white", outline: false, label: "White" },
+  { id: "c", color: "cyan", outline: false, label: "Cyan" },
+  { id: "gO", color: "green", outline: true, label: "Green + outline" },
+  { id: "yO", color: "yellow", outline: true, label: "Yellow + outline" },
+  { id: "p", color: "pink", outline: false, label: "Pink" }
+];
+function visCands() {
+  return VIS_CANDS.filter(function (v) {
+    if ((S.cvd === "deutan" || S.cvd === "protan" || S.cvd === "rg") && v.color === "green") return false;
+    if (S.cvd === "tritan" && v.color === "yellow") return false;
+    return true;
+  });
+}
+function visTest(host) {
+  var base = X.decode(X.recommend(xhInput(false)).crosshair.code), cands = visCands();
+  ["bright", "mid", "dark"].forEach(function (bg, row) {
+    var wrap = el("div", { "class": "vis-row" });
+    wrap.appendChild(el("div", { "class": "vis-h" }, BGS[bg].name));
+    var grid = el("div", { "class": "vis-grid", role: "group", "aria-label": BGS[bg].name + " background" });
+    cands.forEach(function (v, k) {
+      var b = el("button", { type: "button", "class": "vis-c", "aria-pressed": String(S.vis[row] === v.id), "aria-label": v.label + " on " + BGS[bg].name });
+      var cv = el("canvas"); b.appendChild(cv); b.appendChild(el("span", null, String.fromCharCode(65 + k)));
+      grid.appendChild(b);
+      requestAnimationFrame(function () {
+        var c = hidpi(cv, b.clientWidth || 110, 84);
+        paintBg(c.ctx, c.w, c.h, bg, 11 + row * 31 + k * 5);
+        var cfg = Object.assign({}, base, { c: X.XC[v.color].i, h: v.outline ? 1 : 0, o: 1 });
+        drawCross(c.ctx, Math.round(c.w / 2), Math.round(c.h / 2), cfg, 1);
+      });
+      b.addEventListener("click", function () {
+        S.vis[row] = S.vis[row] === v.id ? null : v.id;
+        Array.prototype.forEach.call(grid.children, function (n, j) { n.setAttribute("aria-pressed", String(S.vis[row] === cands[j].id)); });
+      });
+    });
+    wrap.appendChild(grid); host.appendChild(wrap);
+  });
+  host.appendChild(el("p", { "class": "tip" }, "Pick one per background, or none. Click again to undo. Key: " + cands.map(function (v, k) { return String.fromCharCode(65 + k) + " " + v.label.toLowerCase(); }).join(", ") + "."));
+}
+
+/* ---------- Test 2: enemy detection ---------- */
+var DT = null;
+function detectTest(host) {
+  var stage = el("div", { "class": "dt" });
+  var cv = el("canvas", { "aria-label": "Detection test area" });
+  var over = el("div", { "class": "dt-over" });
+  stage.appendChild(cv); stage.appendChild(over); host.appendChild(stage);
+  var res = el("div", { "class": "dt-res", role: "status" }); host.appendChild(res);
+  function summary() {
+    if (!S.hTest) { res.innerHTML = ""; return; }
+    res.innerHTML = '<table><thead><tr><th>Color</th><th class="n">Hits</th><th class="n">Avg time</th></tr></thead><tbody>' +
+      ["yellow", "red", "purple"].map(function (k) { var t = S.hTest[k]; return '<tr><td><i class="sw" style="background:' + DT_COL[k] + '"></i>' + k[0].toUpperCase() + k.slice(1) + '</td><td class="n">' + t.hit + " / " + t.n + '</td><td class="n">' + (t.hit ? Math.round(t.rt * 1000) + " ms" : "–") + "</td></tr>"; }).join("") + "</tbody></table>";
+  }
+  function idle(msg) {
+    over.innerHTML = '<p>' + msg + '</p><button type="button" class="btn primary" id="dtStart">' + (S.hTest ? "Run again" : "Start test") + "</button>";
+    over.hidden = false;
+    over.querySelector("#dtStart").addEventListener("click", run);
+  }
+  function size() { var w = Math.max(280, stage.clientWidth); return hidpi(cv, w, Math.round(Math.min(420, w * 0.56))); }
+  var c = size();
+  requestAnimationFrame(function () { c = size(); paintBg(c.ctx, c.w, c.h, "mid", 3); });
+  idle(S.hTest ? "Done. You can run it again; the new result replaces the old one." : "Keep your eyes on the center cross. Click each enemy the moment you see it.");
+  summary();
+
+  function run() {
+    if (DT) DT.stop = true;
+    over.hidden = true;
+    c = size();
+    var bgs = ["bright", "mid", "dark", "smoke"], trials = [], st = { yellow: { rt: 0, hit: 0, n: 0 }, red: { rt: 0, hit: 0, n: 0 }, purple: { rt: 0, hit: 0, n: 0 } };
+    ["yellow", "red", "purple"].forEach(function (k) { for (var i = 0; i < 6; i++) trials.push({ col: k, bg: bgs[(i + (k === "red" ? 1 : k === "purple" ? 2 : 0)) % 4] }); });
+    for (var i = trials.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = trials[i]; trials[i] = trials[j]; trials[j] = t; }
+    var me = DT = { stop: false }, n = 0, target = null, timer = null;
+    function fix() {
+      var ctx = c.ctx, m = 7 * c.dpr; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2 * c.dpr;
+      ctx.beginPath(); ctx.moveTo(c.w / 2 - m, c.h / 2); ctx.lineTo(c.w / 2 + m, c.h / 2); ctx.moveTo(c.w / 2, c.h / 2 - m); ctx.lineTo(c.w / 2, c.h / 2 + m); ctx.stroke();
+    }
+    function next() {
+      if (me.stop) return;
+      if (n >= trials.length) { finish(); return; }
+      var tr = trials[n], seed = 100 + n * 17;
+      paintBg(c.ctx, c.w, c.h, tr.bg, seed); fix();
+      target = null;
+      timer = setTimeout(function () {
+        if (me.stop) return;
+        var sz = Math.round(c.h * 0.13), ang = Math.random() * Math.PI * 2, rx = c.w * (0.18 + Math.random() * 0.24), ry = c.h * (0.16 + Math.random() * 0.2);
+        var x = Math.max(sz, Math.min(c.w - sz, c.w / 2 + Math.cos(ang) * rx)), y = Math.max(sz, Math.min(c.h - sz, c.h / 2 + Math.sin(ang) * ry));
+        var b = BGS[tr.bg].base.map(function (v) { return Math.round(v * 0.55); });
+        drawEnemy(c.ctx, x, y, sz, DT_COL[tr.col], b);
+        target = me.target = { x: x, y: y, sz: sz, t0: performance.now(), tr: tr };
+        timer = setTimeout(function () {                     // flash ends: repaint without the enemy, keep a short window to respond
+          if (me.stop || !target) return;
+          paintBg(c.ctx, c.w, c.h, tr.bg, seed); fix();
+          timer = setTimeout(function () { if (me.stop || !target) return; st[tr.col].n++; target = null; n++; next(); }, 650);
+        }, 650);
+      }, 500 + Math.random() * 700);
+    }
+    cv.onpointerdown = function (ev) {
+      if (me.stop || !target) return;
+      var r = cv.getBoundingClientRect(), px = (ev.clientX - r.left) * c.w / r.width, py = (ev.clientY - r.top) * c.h / r.height;
+      if (Math.abs(px - target.x) < target.sz * 0.6 && Math.abs(py - target.y) < target.sz * 0.75) {
+        var k = target.tr.col, rt = (performance.now() - target.t0) / 1000;
+        st[k].rt = (st[k].rt * st[k].hit + rt) / (st[k].hit + 1); st[k].hit++; st[k].n++;
+        clearTimeout(timer); target = null; n++; next();
+      }
+    };
+    function finish() { S.hTest = st; me.stop = true; cv.onpointerdown = null; paintBg(c.ctx, c.w, c.h, "mid", 3); idle("Done. You can run it again; the new result replaces the old one."); summary(); }
+    next();
+  }
+}
+var DT_COL = { yellow: "#F2E33A", red: "#E23B3B", purple: "#B04CF0" };
+
 /* ---------- Questions ---------- */
 var RANKS = [["unsure", "Not sure / unranked"], ["iron", "Iron"], ["bronze", "Bronze"], ["silver", "Silver"], ["gold", "Gold"], ["plat", "Platinum"], ["diamond", "Diamond"], ["asc", "Ascendant"], ["imm", "Immortal"], ["rad", "Radiant"]];
 
 var Q = [
-  { id: "dpi", sec: "Your sensitivity", title: "What DPI is your mouse set to?",
+  { id: "dpi", part: 1, sec: "Your sensitivity", title: "What DPI is your mouse set to?",
     why: "Your mouse software shows this. It converts the result into the number you type into Valorant.",
     uses: "Converts cm/360 into in-game sensitivity.",
     show: function () { return true; },
@@ -347,7 +612,7 @@ var Q = [
     },
     valid: function () { var d = getDpi(); return d >= 100 && d <= 32000; } },
 
-  { id: "cur", sec: "Your sensitivity", title: "What sensitivity do you use now?",
+  { id: "cur", part: 1, sec: "Your sensitivity", title: "What sensitivity do you use now?",
     why: "If your current setting is already in the near-optimal range, the result keeps it. Otherwise the result moves only as far as it needs to.",
     uses: "The result is the near-optimal setting closest to this one.",
     show: function () { return true; },
@@ -375,7 +640,7 @@ var Q = [
     },
     valid: function () { return S.curMode === "none" || (S.curMode !== null && currentCm() > 3 && currentCm() < 400); } },
 
-  { id: "sat", sec: "Your sensitivity", title: "How well does that sensitivity work for you?",
+  { id: "sat", part: 1, sec: "Your sensitivity", title: "How well does that sensitivity work for you?",
     why: "Comfort is a reason to stay put, but it isn't a measurement of accuracy. A high rating lets a slightly less optimal current setting stay.",
     uses: "Widens the 'close enough to keep' margin, from 1× (rating 1) up to at most 2× (rating 5).",
     show: function () { return S.curMode && S.curMode !== "none"; },
@@ -391,7 +656,7 @@ var Q = [
     },
     valid: function () { return true; } },
 
-  { id: "pad", sec: "Your mousepad setup", title: "How wide is the area your mouse can glide on?",
+  { id: "pad", part: 1, sec: "Your mousepad setup", title: "How wide is the area your mouse can glide on?",
     why: "Measure the usable width left to right in cm. A rough number is fine.",
     uses: "Usable travel = width − mouse width. Expected lifts depend on where your hand starts and how far it has to go.",
     show: function () { return true; },
@@ -406,20 +671,7 @@ var Q = [
     },
     valid: function () { var p = getPad(); return p >= 12 && p <= 200; } },
 
-  { id: "surface", sec: "Your mousepad setup", title: "What kind of surface is it?",
-    why: "More friction makes it easier to stop precisely but slows big movements. Low friction does the opposite.",
-    uses: "Recorded only. There's no reliable data linking surface type to the best sensitivity, so it doesn't change the number.",
-    show: function () { return true; },
-    render: function (h) {
-      choices(h, "surface", [
-        { v: "control", l: "Control", s: "Rough cloth, noticeable stopping power" },
-        { v: "hybrid", l: "Balanced / hybrid", s: "Or not sure" },
-        { v: "speed", l: "Speed", s: "Smooth cloth, glides easily" },
-        { v: "glass", l: "Glass or hard", s: "Very low friction" }], 2);
-    },
-    valid: function () { return !!S.surface; } },
-
-  { id: "limb", sec: "Your mousepad setup", title: "Which joint does most of your aiming?",
+  { id: "limb", part: 1, sec: "Your mousepad setup", title: "Which joint does most of your aiming?",
     why: "Quick test: swipe as if turning 90°. If your forearm stays planted and your hand pivots, that's wrist. If your elbow slides, that's forearm. If your shoulder moves too, that's arm.",
     uses: "Estimates how far you can move comfortably before a bigger joint takes over (about 2.5 cm each way for wrist, 10 cm for arm, mixed styles in between). This is a rough estimate with wide uncertainty.",
     show: function () { return true; },
@@ -433,7 +685,7 @@ var Q = [
     },
     valid: function () { return !!S.limb; } },
 
-  { id: "role", sec: "Your role", title: "What role do you play most?",
+  { id: "role", part: 1, sec: "Your role", title: "What role do you play most?",
     why: "Roles differ a little in their mix of small corrections, target switches and big turns. There's no solid evidence for bigger role effects, so the effect is kept small.",
     uses: "Nudges the assumed task mix by a few percent.",
     show: function () { return true; },
@@ -447,7 +699,7 @@ var Q = [
     },
     valid: function () { return !!S.role; } },
 
-  { id: "agents", sec: "Your role", title: "Which agents do you play most?",
+  { id: "agents", part: 1, sec: "Your role", title: "Which agents do you play most?",
     why: "Agents change what your aim has to do. Teleports and dashes mean fast re-orientation, anchors hold angles, and Chamber or Operator players spend more time scoped. Pick your main first. Leave the others blank if you one-trick.",
     uses: "Builds your task mix from each agent's abilities, replacing the role average. Agents are weighted 50/30/20 (rescaled if you pick fewer). It also sets the scoped-multiplier advice.",
     show: function () { return true; },
@@ -471,7 +723,7 @@ var Q = [
     },
     valid: function () { return true; } },
 
-  { id: "weapon", sec: "Your role", title: "Which weapon do you use most?",
+  { id: "weapon", part: 1, sec: "Your role", title: "Which weapon do you use most?",
     why: "Snipers fight at longer range, which needs finer control. SMGs and shotguns fight close up, where heads are bigger on screen and fights involve more flicking.",
     uses: "Sets typical fight distance (10, 20 or 30 m). Smaller targets on screen shift the flick optimum slightly slower, using the size of the effect NVIDIA measured.",
     show: function () { return true; },
@@ -483,16 +735,7 @@ var Q = [
     },
     valid: function () { return !!S.weapon; } },
 
-  { id: "exp", sec: "Your stats", title: "How long have you played tactical shooters?",
-    why: "Newer players haven't settled on a style yet, so the model is less certain about them.",
-    uses: "Shown for context only. It doesn't change the number.",
-    show: function () { return true; },
-    render: function (h) {
-      choices(h, "exp", [{ v: "new", l: "Under 6 months" }, { v: "mid", l: "6 months to 2 years" }, { v: "exp", l: "2+ years" }, { v: "comp", l: "Competitive", s: "Diamond+ or organized play" }], 2);
-    },
-    valid: function () { return !!S.exp; } },
-
-  { id: "statsGate", sec: "Your stats", title: "Add your season stats?",
+  { id: "statsGate", part: 1, sec: "Your stats", title: "Add your season stats?",
     why: "Stats depend on role, teammates and game sense, so they can't show whether your sensitivity suits your hand. They're kept as a before snapshot only.",
     uses: "Not used in the calculation. They're shown next to typical values for your rank.",
     show: function () { return true; },
@@ -501,7 +744,7 @@ var Q = [
     },
     valid: function () { return !!S.statsGate; } },
 
-  { id: "stats", sec: "Your stats", title: "Enter your stats for this season",
+  { id: "stats", part: 1, sec: "Your stats", title: "Enter your stats for this season",
     why: "Fill in what you have. Compare the same stats after 2–4 weeks on the new setting.",
     uses: "HS%, K/D and ADR are compared with typical values for your rank.",
     show: function () { return S.statsGate === "yes"; },
@@ -532,7 +775,124 @@ var Q = [
       det.appendChild(ta); det.appendChild(btn); det.appendChild(msg);
       h.appendChild(det);
     },
-    valid: function () { return okRange(S.stHs, 0, 100) && okRange(S.stKd, 0, 10) && okRange(S.stAdr, 0, 400) && okRange(S.stMatches, 0, 5000); } }
+    valid: function () { return okRange(S.stHs, 0, 100) && okRange(S.stKd, 0, 10) && okRange(S.stAdr, 0, 400) && okRange(S.stMatches, 0, 5000); } },
+
+  /* ---------- Part 2: Crosshair ---------- */
+  { id: "cvd", part: 2, sec: "Color vision", title: "Do you have any color blindness?",
+    why: "About 8% of men and 0.5% of women have red-green color blindness. It changes which crosshair and enemy colors stay visible.",
+    uses: "Red-green rules out green, yellow green and red crosshairs and picks the matching yellow highlight. Blue-yellow picks the purple highlight. This answer is used in Parts 2 and 3.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "cvd", [
+        { v: "none", l: "No" },
+        { v: "deutan", l: "Red-green: deutan", s: "Greens look weak. The most common type" },
+        { v: "protan", l: "Red-green: protan", s: "Reds look dark or dull" },
+        { v: "rg", l: "Red-green, type unknown" },
+        { v: "tritan", l: "Blue-yellow: tritan", s: "Very rare" },
+        { v: "unsure", l: "Not sure", s: "Treated as no. The tests later still check what you see" }], 2);
+    },
+    valid: function () { return !!S.cvd; } },
+
+  { id: "exp", part: 2, sec: "Your experience", title: "How long have you played tactical shooters?",
+    why: "Newer players can use a crosshair that reacts to movement as a reminder to stop before shooting. Experienced players are better off with a static one.",
+    uses: "Decides whether movement error is suggested as a training aid. It doesn't change the sensitivity.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "exp", [{ v: "new", l: "Under 6 months" }, { v: "mid", l: "6 months to 2 years" }, { v: "exp", l: "2+ years" }, { v: "comp", l: "Competitive", s: "Diamond+ or organized play" }], 2);
+    },
+    valid: function () { return !!S.exp; } },
+
+  { id: "moving", part: 2, sec: "Your experience", title: "Do you often shoot while still moving?",
+    why: "In Valorant, shots fired while moving are inaccurate. If you often shoot on the move, crosshair lines that spread while you move give you instant feedback.",
+    uses: "\"Often\" turns on movement error as a temporary training aid. Otherwise all error lines stay off, like 99% of pros.",
+    show: function () { return S.exp === "new" || S.exp === "mid"; },
+    render: function (h) {
+      choices(h, "moving", [{ v: "still", l: "No, I stop or counter-strafe" }, { v: "moving", l: "Yes, often" }, { v: "unsure", l: "Not sure" }]);
+    },
+    valid: function () { return !!S.moving; } },
+
+  { id: "aim", part: 2, sec: "Your aim", title: "How do you mostly aim?",
+    why: "Flick and tap players want a small, precise point. Players who track or spray benefit from lines that stay visible around a moving target.",
+    uses: "Sets line length: about 2–3 for flicking, 4–5 for tracking. This is a heuristic; no study has measured it.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "aim", [{ v: "flick", l: "Flicks and taps", s: "Snap to the head, 1–2 bullets" }, { v: "track", l: "Tracking and spraying", s: "Follow targets, longer bursts" }, { v: "mix", l: "A mix / not sure" }], 3);
+    },
+    valid: function () { return !!S.aim; } },
+
+  { id: "shape", part: 2, sec: "Your aim", title: "Which crosshair shape do you prefer?",
+    why: "57% of pros use a small cross, 26% a dot, 11% a cross with a dot. Shape is mostly preference, so pick what you like if you already know.",
+    uses: "Sets the shape. \"No preference\" picks a cross sized for your aim style.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "shape", [{ v: "small", l: "Small cross" }, { v: "medium", l: "Bigger cross" }, { v: "dot", l: "Dot only" }, { v: "crossDot", l: "Cross + dot" }, { v: "any", l: "No preference" }], 2);
+    },
+    valid: function () { return !!S.shape; } },
+
+  { id: "lose", part: 2, sec: "Visibility", title: "When do you lose track of your crosshair?",
+    why: "A white or yellow crosshair washes out on bright, sandy walls. A dark outline adds the contrast the color alone lacks.",
+    uses: "\"Bright maps\" turns outlines on at full opacity. \"In utility\" lowers red and pink.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "lose", [{ v: "bright", l: "On bright maps", s: "Breeze, Bind, Sunset" }, { v: "dark", l: "In dark corners" }, { v: "util", l: "In smokes and utility" }, { v: "never", l: "Rarely or never" }], 2);
+    },
+    valid: function () { return !!S.lose; } },
+
+  { id: "res", part: 2, sec: "Visibility", title: "What resolution do you play at?",
+    why: "Crosshair values are in screen pixels, so the same numbers look smaller at higher resolutions.",
+    uses: "Scales line length, gap and thickness by 1.33 for 1440p and 2 for 4K. Stretched 4:3 shortens the lines by 1.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "res", [{ v: "1080", l: "1920×1080", s: "Most common" }, { v: "1440", l: "2560×1440" }, { v: "2160", l: "3840×2160 (4K)" }, { v: "stretched", l: "4:3 stretched" }], 2);
+    },
+    valid: function () { return !!S.res; } },
+
+  { id: "vis", part: 2, sec: "Visibility test", title: "Which crosshair can you see instantly?",
+    why: "On each background, pick the one you spot without searching. They're drawn at real pixel size for your resolution. Sit as you normally play.",
+    uses: "Each pick adds weight to that color (and to outlines, if you pick outlined versions). Optional: skip it and the research defaults decide.",
+    show: function () { return true; },
+    render: function (h) { visTest(h); },
+    valid: function () { return true; } },
+
+  /* ---------- Part 3: Highlight color ---------- */
+  { id: "hCur", part: 3, sec: "Enemy highlight", title: "Which enemy highlight color do you use now?",
+    why: "Settings › General › Accessibility › Enemy Highlight Color. It recolors the outline around enemies.",
+    uses: "If you'd rather keep it, it gets a small bonus. Color vision, maps, utility and the test can still outweigh it.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "hCur", [{ v: "red", l: "Red (Default)" }, { v: "yd", l: "Yellow (Deuteranopia)" }, { v: "yp", l: "Yellow (Protanopia)" }, { v: "purple", l: "Purple (Tritanopia)" }, { v: "unsure", l: "Not sure" }], 2);
+      toggle(h, "hKeep", "I'd rather keep it unless there's a clear reason to switch");
+    },
+    valid: function () { return !!S.hCur; } },
+
+  { id: "hMaps", part: 3, sec: "Enemy highlight", title: "Where do you lose sight of enemies most?",
+    why: "Yellow is the brightest option and pops in shadows, but it's close in brightness to sandy walls. Purple separates from warm light but sits close to blue maps.",
+    uses: "Warm maps favor purple, dark areas favor yellow, cool maps lower purple.",
+    show: function () { return true; },
+    render: function (h) {
+      choices(h, "hMaps", [{ v: "warm", l: "Bright, warm maps", s: "Breeze, Bind, Sunset" }, { v: "dark", l: "Dark corners and shadows", s: "Split, Abyss, Lotus interiors" }, { v: "cool", l: "Cool, blue maps", s: "Icebox, Pearl" }, { v: "none", l: "No pattern" }], 2);
+    },
+    valid: function () { return !!S.hMaps; } },
+
+  { id: "hClutter", part: 3, sec: "Enemy highlight", title: "Which utility clutters your screen most?",
+    why: "An outline that shares a hue with utility blends in exactly when enemies peek through it. Pick any that apply.",
+    uses: "Fire lowers red, purple smokes and blinds lower purple, yellow utility lowers yellow slightly.",
+    show: function () { return true; },
+    render: function (h) {
+      [["fire", "Fire and orange", "Phoenix, Brimstone, Breach"], ["purple", "Purple smokes and blinds", "Omen, Reyna, Astra, Clove, Fade"], ["yellow", "Yellow utility", "Killjoy, Raze, Gekko, Tejo"]].forEach(function (o) {
+        toggleChoice(h, o[0], o[1], o[2]);
+      });
+      h.appendChild(el("p", { "class": "tip" }, "None of these? Just press Next."));
+    },
+    valid: function () { return true; } },
+
+  { id: "hTest", part: 3, sec: "Detection test", title: "Click enemies as fast as you can",
+    why: "Look at the center cross. Outlined enemies flash briefly somewhere on screen, in red, yellow or purple, over map-like and utility backgrounds. Click each one. 18 rounds, about 40 seconds.",
+    uses: "Each color is scored by reaction time divided by hit rate (the inverse efficiency score). The fastest color gets up to a 2.5-point bonus. Optional.",
+    show: function () { return true; },
+    render: function (h) { detectTest(h); },
+    valid: function () { return true; } }
+
 ];
 
 /* ---------- Flow ---------- */
@@ -558,12 +918,21 @@ function stagger(root) {
   });
 }
 
+var PARTS = ["Sensitivity", "Crosshair", "Highlight color"];
+function partsBar(n) {
+  return el("div", { "class": "parts", "aria-label": "Part " + n + " of 3: " + PARTS[n - 1] }, PARTS.map(function (t, k) {
+    return '<div class="part' + (k + 1 === n ? " on" : k + 1 < n ? " done" : "") + '"><b>' + (k + 1) + "</b>" + t + "</div>";
+  }).join(""));
+}
 function renderQ(dir) {
+  if (DT) DT.stop = true;
+  document.getElementById("wrap").classList.remove("wide");
   var list = visible(), i = idxOf(list, currentId), q = list[i];
   currentId = q.id;
   app.innerHTML = "";
-  setProgress(i / list.length * 100, q.sec);
-  var box = el("section", { "class": "q" + (dir === "back" ? " back" : "") });
+  setProgress(i / list.length * 100, "Part " + q.part + " · " + PARTS[q.part - 1]);
+  var box = el("section", { "class": "q" + (dir === "back" ? " back" : "") + (q.id === "vis" || q.id === "hTest" ? " wideq" : "") });
+  box.appendChild(partsBar(q.part));
   box.appendChild(el("div", { "class": "q-sec" }, String(i + 1).padStart(2, "0") + " <span>/ " + String(list.length).padStart(2, "0") + "</span> &nbsp;" + q.sec));
   box.appendChild(el("h2", { tabindex: "-1", id: "qh" }, q.title));
   box.appendChild(el("p", { "class": "why" }, q.why));
@@ -721,13 +1090,32 @@ function wireDotHover(host) {
   });
 }
 
+function drawPreviews(cfg, hex) {
+  app.querySelectorAll("canvas.xh-prev").forEach(function (cv, i) {
+    if (!cv.offsetParent) return;
+    var z = +cv.getAttribute("data-z") || 1, w = cv.clientWidth || 96, h = cv.clientHeight || 96, c = hidpi(cv, w, h);
+    paintBg(c.ctx, c.w, c.h, cv.getAttribute("data-bg"), 21 + i * 13);
+    if (z > 1) c.ctx.imageSmoothingEnabled = false;
+    drawCross(c.ctx, Math.round(c.w / 2), Math.round(c.h / 2), cfg, z > 1 ? z : 1);
+  });
+  app.querySelectorAll("canvas.hl-prev").forEach(function (cv, i) {
+    if (!cv.offsetParent) return;
+    var w = cv.clientWidth || 96, h = cv.clientHeight || 96, c = hidpi(cv, w, h), bg = cv.getAttribute("data-bg") || "mid";
+    paintBg(c.ctx, c.w, c.h, bg, 41 + i * 7);
+    var body = BGS[bg].base.map(function (v) { return Math.round(v * 0.55); });
+    drawEnemy(c.ctx, c.w / 2, c.h / 2, c.h * 0.62, cv.getAttribute("data-hl"), body);
+  });
+}
+
 /* ---------- Results ---------- */
 function renderResult() {
+  if (DT) DT.stop = true;
   var inp = buildInput();
   var R = M.recommend(inp);
   var dpi = inp.dpi, cm = R.cm, sens = M.sensFor(cm, dpi), edpi = dpi * sens, pr = R.profile;
   var cur = R.anchor ? R.anchor.cm : null;
   setProgress(100, "Result");
+  document.getElementById("wrap").classList.add("wide");
 
   // Factor impact: the model optimum with your answer vs. with a neutral reference answer.
   var REF = { pad: 45, limb: "unsure", agents: null, role: "f", weapon: "rifle" };
@@ -798,22 +1186,94 @@ function renderResult() {
   var cc = costChart(R);
   var today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
+  var XR = X.recommend(xhInput()), xc = XR.crosshair, hl = XR.highlight, gx = xc.geometry;
+  var shapeName = ({ small: "small cross", medium: "cross", dot: "dot", crossDot: "cross + dot" })[gx.shape];
+  var TABS = [["Sensitivity", 0], ["Crosshair", 4], ["Highlight", 5], ["Model", 1], ["Vs pros", 2], ["Test plan", 3]];
+  function onoff(v) { return v ? "On" : "Off"; }
+  var cfg = xc.cfg, xRows = [
+    ["Color", '<i class="sw" style="background:' + xc.color.hex + '"></i>' + xc.color.name],
+    ["Outlines", cfg.h ? "On · opacity " + cfg.o + " · thickness 1" : "Off"],
+    ["Center dot", cfg.d ? "On · thickness " + cfg.z + " · opacity 1" : "Off"],
+    ["Inner lines", cfg["0b"] === 0 ? "Off" : "Opacity 1 · length " + cfg["0l"] + " · thickness " + cfg["0t"] + " · offset " + cfg["0o"]],
+    ["Outer lines", "Off"],
+    ["Movement error", cfg["0m"] ? "On (training aid)" : "Off"],
+    ["Firing error", "Off"],
+    ["Fade with firing error", "Off"]
+  ].map(function (r) { return "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td></tr>"; }).join("");
+  var maxS = Math.max.apply(null, xc.scores.map(function (z) { return z.s; })), minS = Math.min.apply(null, xc.scores.map(function (z) { return z.s; }));
+  var xBars = xc.scores.map(function (z) {
+    var w = Math.max(3, (z.s - minS) / (maxS - minS || 1) * 100);
+    return '<div class="sbar' + (z.key === xc.color.key ? " on" : "") + '"><span class="sb-n"><i class="sw" style="background:' + z.hex + '"></i>' + z.name + '</span><span class="sb-t"><i style="width:' + w.toFixed(0) + '%;background:' + z.hex + '"></i></span><span class="sb-v">' + (z.clash ? "clashes" : z.s.toFixed(1)) + "</span></div>";
+  }).join("");
+  var xhPane =
+    '<section class="pane" id="pane-4" role="tabpanel" aria-labelledby="tab-1" hidden>' +
+      '<div class="sec-t">Crosshair <span>' + xc.color.name + " " + shapeName + "</span></div>" +
+      '<div class="panel"><div class="xh-row">' +
+        ["bright", "mid", "dark", "smoke"].map(function (b) { return '<figure class="xh-fig"><canvas class="xh-prev" data-bg="' + b + '" aria-label="Crosshair on ' + BGS[b].name + '"></canvas><figcaption>' + BGS[b].name + "</figcaption></figure>"; }).join("") +
+        '<figure class="xh-fig"><canvas class="xh-prev" data-bg="mid" data-z="8" aria-label="Crosshair zoomed in"></canvas><figcaption>Zoomed ×8</figcaption></figure>' +
+      "</div>" +
+      '<div class="codebox"><code id="xhCode">' + esc(xc.code) + '</code><button type="button" class="btn primary small" id="copyXh">Copy code</button></div>' +
+      '<p class="tip">In Valorant: Settings › Crosshair › Primary › import profile code (the arrow icon), then paste. Previews are drawn at real pixel size.</p>' +
+      '<div class="duo" style="margin-top:20px"><div><div class="sub-t">Settings</div><table class="kv"><tbody>' + xRows + "</tbody></table>" +
+        '<div class="sub-t" style="margin-top:20px">Why this crosshair</div><ul class="notes">' + xc.why.map(function (w) { return "<li>" + esc(w) + "</li>"; }).join("") + "</ul></div>" +
+        '<div><div class="sub-t">Color scores</div><div class="sbars">' + xBars + '</div><p class="tip">Base score from brightness, pro use and a community visibility test, adjusted by your answers and picks. Colors that share a hue with your enemy highlight are ruled out.</p>' +
+        '<div class="sub-t" style="margin-top:20px">Pros (' + X.PRO.nCross + ' codes)</div><table><tbody>' +
+          "<tr><td>Color</td><td>White 58% · Cyan 19% · Green 11%</td></tr><tr><td>Shape</td><td>Cross 57% · Dot 26% · Cross + dot 11%</td></tr>" +
+          "<tr><td>Outlines</td><td>59% visible</td></tr><tr><td>Error lines</td><td>About 1% use them</td></tr><tr><td>Inner lines</td><td>Length 2–4 (median 3), gap 0–2, thickness 2</td></tr></tbody></table>" +
+        '<div class="sub-t" style="margin-top:20px">Alternative: ' + (xc.alt.shape === "dot" ? "dot" : "small cross") + '</div><div class="codebox"><code>' + esc(xc.alt.code) + "</code></div></div>" +
+      "</div>" +
+      '<details><summary>Sources</summary><ul class="src"><li>Pro data: own scrape of <a href="https://prosettings.net/lists/valorant/" target="_blank" rel="noopener">ProSettings.net</a>, Nov 2026</li><li>Abrams &amp; Christ 2003, motion onset captures attention (Psych. Sci. 14:427)</li><li>Hansen, Pracejus &amp; Gegenfurtner 2009, color vision in the periphery (JOV 9(4):26)</li><li>Pelli &amp; Tillman 2008, crowding (Nat. Neurosci.)</li><li>Code format: genesy/crosshair-codes and spartytech/Crosshair-Bridge (Riot does not publish it)</li><li>Full notes: research/crosshair_research.md</li></ul></details>' +
+    "</div></section>";
+
+  var hMax = Math.max.apply(null, hl.ranking.map(function (z) { return z.s; })), hMin = Math.min.apply(null, hl.ranking.map(function (z) { return z.s; }));
+  var hRows = hl.ranking.map(function (z) {
+    var w = Math.max(3, (z.s - hMin) / (hMax - hMin || 1) * 100);
+    return '<div class="sbar' + (z.key === hl.color.key ? " on" : "") + '"><span class="sb-n"><i class="sw" style="background:' + z.hex + '"></i>' + esc(z.name) + '</span><span class="sb-t"><i style="width:' + w.toFixed(0) + '%;background:' + z.hex + '"></i></span><span class="sb-v">' + (z.clash ? "clashes" : z.s.toFixed(1)) + "</span></div>" +
+      (z.why.length ? '<p class="sb-why">' + esc(z.why.join(" · ")) + "</p>" : "");
+  }).join("");
+  var tRows = "";
+  if (S.hTest) tRows = '<div class="sub-t" style="margin-top:20px">Your detection test</div><table><thead><tr><th>Color</th><th class="n">Hits</th><th class="n">Avg time</th><th class="n">Score</th></tr></thead><tbody>' +
+    ["yellow", "red", "purple"].map(function (k) { var t = S.hTest[k], ies = hl.test && hl.test.ies[k]; return '<tr><td><i class="sw" style="background:' + DT_COL[k] + '"></i>' + k[0].toUpperCase() + k.slice(1) + '</td><td class="n">' + t.hit + " / " + t.n + '</td><td class="n">' + (t.hit ? Math.round(t.rt * 1000) + " ms" : "–") + '</td><td class="n">' + (ies ? Math.round(ies * 1000) + " ms" : "–") + "</td></tr>"; }).join("") +
+    '</tbody></table><p class="tip">Score = average time ÷ hit rate (lower is better). 6 trials per color is a small sample, so it counts as one factor among several.</p>';
+  var hWhy = hl.why.length ? hl.why : ["No strong reason to move away from the default ranking: yellow is the brightest option and keeps its brightness in your peripheral vision, where enemies usually appear first."];
+  var hlPane =
+    '<section class="pane" id="pane-5" role="tabpanel" aria-labelledby="tab-2" hidden>' +
+      '<div class="sec-t">Enemy highlight <span>' + esc(hl.color.name) + "</span></div>" +
+      '<div class="panel"><div class="xh-row">' +
+        ["bright", "mid", "dark", "smoke"].map(function (b) { return '<figure class="xh-fig"><canvas class="hl-prev" data-bg="' + b + '" data-hl="' + hl.color.hex + '" aria-label="Enemy outline on ' + BGS[b].name + '"></canvas><figcaption>' + BGS[b].name + "</figcaption></figure>"; }).join("") +
+      "</div>" +
+      '<p class="tip">Settings › General › Accessibility › Enemy Highlight Color › <b style="color:var(--ink)">' + esc(hl.color.name) + "</b>. The preview colors are approximations; Riot doesn't publish the exact values.</p>" +
+      '<div class="duo" style="margin-top:20px"><div><div class="sub-t">Why this color</div><ul class="notes">' + hWhy.map(function (w) { return "<li>" + esc(w[0].toUpperCase() + w.slice(1)) + ".</li>"; }).join("") +
+        (hl.overridden ? "<li>" + esc(hl.overridden.name) + " scored higher on its own, but it would share a hue with your crosshair, and this pair scored best overall.</li>" : "") +
+        "<li>Pros (" + X.PRO.nHighlight + " with a known setting): yellow 71%, red 22%, purple 7%.</li>" +
+        "<li>No controlled study links highlight color to performance, so the test and your answers matter more than the pro split.</li></ul>" + tRows + "</div>" +
+        '<div><div class="sub-t">Ranking</div><div class="sbars">' + hRows + "</div>" +
+        '<details><summary>Sources</summary><ul class="src"><li>Hansen, Pracejus &amp; Gegenfurtner 2009: red-green contrast fades fastest in peripheral vision</li><li>Wolfe &amp; Horowitz 2017, what guides visual search (Nat. Hum. Behav.)</li><li>Townsend &amp; Ashby 1983, inverse efficiency score</li><li>Color blindness prevalence: NCBI Webvision</li><li>Full notes: research/highlight_color_research.md</li></ul></details></div>' +
+      "</div></div></section>";
+
   app.innerHTML =
-    '<div class="res-head">' +
-      '<h2 class="big" id="qh" tabindex="-1"><span class="n1" id="sensNum">' + sens.toFixed(3) + '</span><span class="lab">Sens</span><span class="n2"><span id="cmNum">' + f1(cm) + "</span> cm/360</span></h2>" +
-      '<div class="meta">' + esc(today) + "<br>" + (R.mode === "measured" ? "Measured" : "Questionnaire") + "<br><b>" + dpi + " DPI · eDPI " + Math.round(edpi) + "</b></div>" +
+    '<div class="sum">' +
+      '<div class="sum-c s1"><div class="sum-k"><b>1</b>Sensitivity</div><div class="res-head">' +
+        '<h2 class="big" id="qh" tabindex="-1"><span class="n1" id="sensNum">' + sens.toFixed(3) + '</span><span class="lab">Sens</span><span class="n2"><span id="cmNum">' + f1(cm) + "</span> cm/360</span></h2>" +
+        '<div class="meta">' + esc(today) + "<br>" + (R.mode === "measured" ? "Measured" : "Questionnaire") + "<br><b>" + dpi + " DPI · eDPI " + Math.round(edpi) + "</b></div>" +
+      "</div></div>" +
+      '<button type="button" class="sum-c s2" data-go="1"><div class="sum-k"><b>2</b>Crosshair</div><div class="sum-b"><canvas class="xh-prev" data-bg="dark" data-z="3" width="96" height="96" aria-hidden="true"></canvas>' +
+        '<div><div class="sum-v">' + XR.crosshair.color.name + " " + shapeName + '</div><code class="sum-code">' + esc(XR.crosshair.code) + "</code></div></div></button>" +
+      '<button type="button" class="sum-c s3" data-go="2"><div class="sum-k"><b>3</b>Highlight color</div><div class="sum-b"><canvas class="hl-prev" data-hl="' + XR.highlight.color.hex + '" width="96" height="96" aria-hidden="true"></canvas>' +
+        '<div><div class="sum-v" style="color:' + XR.highlight.color.hex + '">' + esc(XR.highlight.color.name) + '</div><div class="sum-s">Settings › General › Accessibility</div></div></div></button>' +
     "</div>" +
     '<div class="layout">' +
       '<nav class="tabs" role="tablist" aria-label="Result sections">' +
-        ["Result", "Model", "Vs pros", "Test plan"].map(function (t, i) { return '<button type="button" class="tab" role="tab" id="tab-' + i + '" aria-controls="pane-' + i + '" aria-selected="' + (i === 0) + '">' + t + "</button>"; }).join("") +
+        TABS.map(function (t, i) { return '<button type="button" class="tab" role="tab" id="tab-' + i + '" aria-controls="pane-' + t[1] + '" aria-selected="' + (i === 0) + '">' + t[0] + "</button>"; }).join("") +
       "</nav>" +
       "<div>" +
         '<section class="pane" id="pane-0" role="tabpanel" aria-labelledby="tab-0">' +
           '<div class="sec-t">Sensitivity <span>' + esc(R.reason) + "</span></div>" +
-          '<div class="panel"><div class="sub-t">Distribution</div><div class="dist">' + distChart(R, cur) + "</div>" +
-          '<div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div>" +
+          '<div class="panel duo"><div><div class="sub-t">Distribution</div><div class="dist">' + distChart(R, cur) + "</div></div>" +
+          '<div><div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div></div>" +
         "</section>" +
-        '<section class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-1" hidden>' +
+        xhPane + hlPane +
+        '<section class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-3" hidden>' +
           '<div class="sec-t">Model <span>estimated extra time per engagement</span></div><div class="panel">' +
           '<div class="chart" id="costChart">' + cc.svg + '<div class="tt"></div></div>' +
           '<div class="legend"><span><i style="background:var(--ink)"></i>Total</span><span><i style="background:#2a9fd6"></i>Precision</span><span><i style="background:var(--yellow)"></i>Speed / slow flicks</span><span><i style="background:var(--pink)"></i>Pad / reach</span><span><i style="background:var(--teal)"></i>Your result</span></div>' +
@@ -828,12 +1288,12 @@ function renderResult() {
           '<li>Agents: <a href="https://wiki.playvalorant.com" target="_blank" rel="noopener">Riot\'s official wiki</a>. Pro settings: <a href="https://prosettings.net/lists/valorant/" target="_blank" rel="noopener">ProSettings.net</a>; roles: <a href="https://www.vlr.gg" target="_blank" rel="noopener">VLR.gg</a></li>' +
           "</ul></details></div>" +
         "</section>" +
-        '<section class="pane" id="pane-2" role="tabpanel" aria-labelledby="tab-2" hidden>' +
+        '<section class="pane" id="pane-2" role="tabpanel" aria-labelledby="tab-4" hidden>' +
           '<div class="sec-t">Vs pros <span>' + M.PRO_STATS.n + " VCT 2026 players · comparison only</span></div><div class=\"panel\">" +
           '<div class="chart" id="proChart">' + proChart(R) + '<div class="tt"></div></div>' +
           '<div class="scroll-x" style="margin-top:14px"><table><thead><tr><th>Closest pros</th><th>Role</th><th class="n">cm/360</th><th class="n">eDPI</th></tr></thead><tbody>' + near + "</tbody></table></div></div>" +
         "</section>" +
-        '<section class="pane" id="pane-3" role="tabpanel" aria-labelledby="tab-3" hidden>' +
+        '<section class="pane" id="pane-3" role="tabpanel" aria-labelledby="tab-5" hidden>' +
           '<div class="sec-t">Test plan <span>2–4 weeks</span></div><div class="panel">' +
           '<table><thead><tr><th>Candidate</th><th class="n">cm/360</th><th class="n">Sens @ ' + dpi + "</th></tr></thead><tbody>" + tests + "</tbody></table>" +
           '<ol class="plan"><li><b>Clean input.</b> Turn off "Enhance pointer precision" and any acceleration, and keep your DPI fixed.</li>' +
@@ -853,7 +1313,9 @@ function renderResult() {
           '<div class="acc-r" style="--i:0"><span class="ic">' + ICON.mouse + '</span><span class="t">Sensitivity <b>' + sens.toFixed(3) + "</b><small>at " + dpi + " DPI</small></span></div>" +
           '<div class="acc-r" style="--i:1"><span class="ic">' + ICON.ruler + '</span><span class="t">cm/360 <b>' + f1(cm) + "</b><small>range " + f1(R.lo) + "–" + f1(R.hi) + "</small></span></div>" +
           '<div class="acc-r" style="--i:2"><span class="ic">' + ICON.scope + '</span><span class="t">Scoped <b>1.00</b><small>' + scopedShort + "</small></span></div>" +
-          '<div class="acc-r" style="--i:3"><span class="ic">' + ICON.cross + '</span><span class="t">ADS <b>1.00</b><small>' + adsShort + "</small></span></div>" +
+          '<div class="acc-r" style="--i:3"><span class="ic">' + ICON.scope + '</span><span class="t">ADS <b>1.00</b><small>' + adsShort + "</small></span></div>" +
+          '<div class="acc-r" style="--i:4"><span class="ic">' + ICON.cross + '</span><span class="t">Crosshair <b>' + XR.crosshair.color.name + '</b><small>' + shapeName + ", code in the Crosshair tab</small></span></div>" +
+          '<div class="acc-r" style="--i:5"><span class="ic"><i class="sw" style="background:' + XR.highlight.color.hex + ';margin:0"></i></span><span class="t">Highlight <b>' + XR.highlight.color.short + '</b><small>' + esc(XR.highlight.color.name) + "</small></span></div>" +
         "</div>" +
         '<div class="actions"><button type="button" class="btn primary small" id="copy">Copy</button><button type="button" class="btn small" id="edit">Edit</button><button type="button" class="btn small" id="reset">Restart</button></div>' +
         '<p class="toast" id="toast" role="status"></p></div>' +
@@ -865,7 +1327,7 @@ function renderResult() {
   var tabs = app.querySelectorAll(".tab");
   tabs.forEach(function (t, i) {
     t.addEventListener("click", function () {
-      tabs.forEach(function (u, j) { u.setAttribute("aria-selected", String(i === j)); document.getElementById("pane-" + j).hidden = i !== j; });
+      tabs.forEach(function (u, j) { u.setAttribute("aria-selected", String(i === j)); document.getElementById("pane-" + TABS[j][1]).hidden = i !== j; });
     });
     t.addEventListener("keydown", function (e) {
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
@@ -873,8 +1335,15 @@ function renderResult() {
     });
   });
   wireCostHover(document.getElementById("costChart"), R, cc);
+  drawPreviews(X.decode(xc.code), hl.color.hex);
+  app.querySelectorAll(".sum-c[data-go]").forEach(function (b) { b.addEventListener("click", function () { tabs[+b.getAttribute("data-go")].click(); }); });
+  tabs.forEach(function (t) { t.addEventListener("click", function () { requestAnimationFrame(function () { drawPreviews(X.decode(xc.code), hl.color.hex); }); }); });
+  document.getElementById("copyXh").addEventListener("click", function () {
+    var t = document.getElementById("toast");
+    try { navigator.clipboard.writeText(xc.code).then(function () { t.textContent = "Crosshair code copied."; }, function () { t.textContent = xc.code; }); } catch (e) { t.textContent = xc.code; }
+  });
   wireDotHover(document.getElementById("proChart"));
-  var line = "Valorant: " + dpi + " DPI, sens " + sens.toFixed(3) + " (eDPI " + Math.round(edpi) + ", " + f1(cm) + " cm/360)";
+  var line = "Valorant: " + dpi + " DPI, sens " + sens.toFixed(3) + " (eDPI " + Math.round(edpi) + ", " + f1(cm) + " cm/360)\nCrosshair: " + XR.crosshair.code + "\nEnemy highlight: " + XR.highlight.color.name;
   document.getElementById("copy").addEventListener("click", function () {
     var t = document.getElementById("toast");
     try { navigator.clipboard.writeText(line).then(function () { t.textContent = "Copied."; }, function () { t.textContent = line; }); } catch (e) { t.textContent = line; }

@@ -1,23 +1,49 @@
-# valoSens: Valorant sensitivity finder
+# valoSens: Valorant settings finder
+
+The questionnaire has three parts: **1. Sensitivity**, **2. Crosshair** (with an in-browser visibility test), **3. Enemy highlight color** (with a timed detection test).
 
 Open `index.html` in a browser. It needs no build step or server, and nothing leaves the page.
 
 **UI:**
 - Dark, minimal, game-client style. One question per screen, with staggered entrances and a thin progress line.
 - The results screen is laid out like a match-details page:
-  - a count-up sensitivity header;
-  - Result / Model / Vs pros / Test plan tabs;
+  - full-width layout with three summary cards (sensitivity, crosshair, highlight);
+  - Sensitivity / Crosshair / Highlight / Model / Vs pros / Test plan tabs;
   - a pro-distribution curve that draws in, with your near-optimal range and a result pin;
   - a factor breakdown with impact chevrons (each factor's effect vs a neutral answer);
   - a confidence badge and a settings card.
 - Animations switch off under `prefers-reduced-motion`.
 - Fonts load from Google Fonts (Barlow / Barlow Condensed), with system fallbacks offline.
 
-- Model: `model.js` (works in the browser and in Node)
-- Tests: `node test/model.test.js` (model) and `node test/ui.e2e.js` (browser smoke test, needs Playwright)
+- Model: `model.js` (sensitivity) and `xhair.js` (crosshair + highlight); both work in the browser and in Node
+- Tests: `node test/model.test.js`, `node test/xhair.test.js`, and `node test/ui.e2e.js` (browser smoke test, needs Playwright)
 - Pro data: regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`
 - Agent data: regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`
 - `Valorant sensitivity finder.html` is the original multiplier-based version, kept for reference.
+
+## Crosshair and enemy highlight (`xhair.js`)
+
+Research: `research/crosshair_research.md` and `research/highlight_color_research.md` (pro stats from a ProSettings.net scrape of 2026-11-01: 91 crosshair codes, 58 known highlight colors).
+
+- **Colors are chosen as a pair.** Each crosshair color and each highlight option gets a score. Pairs that share a hue are not allowed: a yellow-family crosshair with a yellow highlight, a red or pink crosshair with red, or pink with purple. The best pair wins.
+- **Crosshair color score:**
+  - Base score from brightness, pro share and a community visibility test (cyan 3.2, white 3.0, green 1.6, …, red −1).
+  - Red-green color blindness rules out green, yellow green and red. Tritan lowers yellow.
+  - Each visibility-test pick adds +1.6.
+- **Highlight score:**
+  - Base score: Yellow (Deuteranopia) 3, Yellow (Protanopia) 2.7, Red 1.6, Purple 1.
+  - The option matching the user's color-blindness type gets +5.
+  - Map brightness adds or subtracts up to 1.5, and utility clutter subtracts up to 1.5.
+  - Keeping a familiar color adds +1.5.
+  - The detection test adds up to ±2.5, based on the inverse efficiency score (mean RT ÷ hit rate).
+- **Crosshair geometry:**
+  - Shape and aim style set the size: a small cross is 2–3 long, a bigger one 4–5.
+  - Values are scaled ×1.33 at 1440p and ×2 at 4K, because they are in screen pixels.
+  - Outlines go on for light colors, dots and bright-map complaints.
+  - Firing and movement error stay off, except movement error as a training aid for newer players who shoot while moving.
+  - Outer lines stay off.
+- The importable code is generated from the reverse-engineered code grammar. `decode()` is tested on real pro codes.
+- **Removed:** the mousepad surface question. It never changed the result.
 
 ## How the number is computed (model v2.1)
 
