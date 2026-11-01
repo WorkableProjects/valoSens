@@ -22,7 +22,7 @@
     stRank: ["unsure", "iron", "bronze", "silver", "gold", "plat", "diamond", "asc", "imm", "rad"],
     cvd: ["none", "deutan", "protan", "rg", "tritan", "unsure"], exp: ["new", "mid", "exp", "comp"], moving: ["still", "moving", "unsure"],
     aim: ["flick", "track", "mix"], shape: ["small", "medium", "dot", "crossDot", "any"], lose: ["bright", "dark", "util", "never"],
-    res: ["1080", "1440", "2160", "stretched"], hCur: ["red", "yd", "yp", "purple", "unsure"], hMaps: ["warm", "dark", "cool", "none"]
+    res: ["1080", "1440", "2160", "stretched"], grip: ["palm", "claw", "fingertip", "unsure"], mouseW: ["light", "mid", "heavy", "xheavy", "unsure"], hCur: ["red", "yd", "yp", "purple", "unsure"], hMaps: ["warm", "dark", "cool", "none"]
   };
   var NUMS = ["dpiCustom", "cur", "measured", "otherSens", "padCustom", "stMatches", "stHs", "stKd", "stAdr"];
   var AGENTS = ["agent1", "agent2", "agent3"];

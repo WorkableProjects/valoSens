@@ -1,8 +1,25 @@
-# valoSens 3.1: Valorant settings finder
+# valoSens 4.0: Valorant settings finder
 
 Version 3.0 is a full release covering all three parts: **1. Sensitivity**, **2. Crosshair** (with a rotating visibility test), and **3. Enemy highlight color** (with a vision-threshold test).
 
 Open `index.html` in a browser. It needs no build step or server, and nothing leaves the page.
+
+**Sensitivity model 4.0**
+- **Progression rule replaces "keep it if it's close enough".** Before, any current setting inside the near-optimal range was kept, so the result often just repeated what you typed. Now the model:
+  1. minimises *expected cost + re-adaptation cost × (log change)²* between your setting and its optimum;
+  2. scales that step by how many of the 243 assumption sets agree on the direction (≥ 85% agreement gives the full step, 50% or less gives none);
+  3. skips changes under 3% (too small to feel);
+  4. caps each run at 15% and lays out a staged plan (e.g. 20 → 23 → 26.4 → 30.4 cm). Import your results file next run to take the next step.
+  - Satisfaction now raises the re-adaptation cost (1× to at most 2×). It shrinks steps but no longer blocks a clear move.
+  - The same answers with the same pad and agents can still give a new number when your current setting isn't where the model thinks you'd do best.
+  - The measured pathway uses the same rule, with bootstrap refits as the evidence of direction. It never leaves the tested range.
+- **New task: tracking a strafing target** (15% of fights for rifles, 25% SMG/shotgun, 5% Operator; estimates). Enemy strafe speed is 5.4 m/s (derived from Riot's ADS move speed), giving 15.5°/s at 20 m. The hand's noise floor costs less at slower settings; speed-matching error doesn't depend on sensitivity. So tracking pulls the optimum slightly slower.
+- **Hand modifiers:**
+  - Experience scales hand noise (×1.30 under 6 months … ×0.90 competitive).
+  - Grip and mouse weight (new optional question) scale lift time and peak speed, around the 60 g pro median.
+  - Fingertip is *not* treated as more precise: finger pointing has lower throughput than the wrist (Balakrishnan & MacKenzie 1997).
+- **More output:** the 10th–90th percentile of the optimum across assumption sets, per-task cost at your result, and new `sensitivityAnalysis()` toggles (no tracking, tracking ×2, experience, grip/weight).
+- **Research:** `research/sensitivity_motor_research.md` (tracking noise, adaptation, skill, grip, weight, direction) and `research/valorant_aim_data.md` (movement speeds, engagement distances, peeker's advantage, pro eDPI and mouse trends). Most of the new constants have **no direct study** and are labelled `estimate` in `PARAMS`.
 
 **What's new in 3.0**
 - **Crosshair test rotates.** Each page load draws a fresh random set from an 18-crosshair pool of pro archetypes: 8 rounds of 4, random slot order, over 7 map and utility scenes. Picks are scored with a choice model.
@@ -48,7 +65,7 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
 **Files**
 - **Model:** `model.js` (sensitivity), `xhair.js` (crosshair + highlight) and `session.js` (results files); all work in the browser and in Node.
 - **Tests:**
-  - `node test/model.test.js` (48)
+  - `node test/model.test.js` (52)
   - `node test/xhair.test.js` (21, including simulated observers for the vision test)
   - `node test/session.test.js` (9: file round trip, appending sessions, rejecting bad files, sanitising, pooling)
   - `node test/ui.e2e.js` (browser test: both tests, the rotation, the animations, and download → import → second run; needs Playwright)

@@ -43,6 +43,7 @@ async function flow(b, vp, steps, after) {
     await pick("I know my Valorant sens"); await p.fill("#in-cur", "0.5"); await next();
     await next();
     await pick("About 45 cm"); await next(); await pick("Wrist + forearm"); await next();
+    await pick("Claw"); await pick("55–70 g"); await next();
     await pick("Duelist"); await next();
     await p.selectOption("#in-agent1", "Jett"); await p.selectOption("#in-agent2", "Omen");
     await next();
@@ -107,6 +108,7 @@ async function flow(b, vp, steps, after) {
     await next();
     await pick("Enter exact width"); await p.fill("#in-padCustom", "90"); await next();
     await pick("Not sure"); await next();
+    await next();
     await pick("Sentinel"); await next(); await next();
     await pick("Operator"); await next();
     await pick("Skip"); await next();

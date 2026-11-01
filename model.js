@@ -1,5 +1,5 @@
 /*
- * valoSens model v3.0.
+ * valoSens model v4.0.
  *
  * Internal unit: cm/360 (centimetres of mouse travel per full 360° turn), written C.
  *
@@ -27,11 +27,16 @@
  *   trials and compared with a flat baseline, the player's current setting and the best
  *   raw tested setting. No extrapolation outside the tested range.
  *
- * RECOMMENDATION RULE (both pathways)
- *   Near-optimal set N = { C : cost(C) <= min cost + tolerance }. If the current setting is
- *   in N (satisfaction may widen the tolerance by up to 2x for staying), keep it. Otherwise
- *   recommend the point of N closest (in log space) to the current setting. Without a
- *   current setting, recommend the minimum.
+ *     track   (v4.0, following a strafing target): angular error = sqrt((360*floor/C)^2 + (k*omega*delay)^2),
+ *             T = t_track * (p_inf / p - 1). Experience, grip and mouse weight scale the noise floors,
+ *             correction time, lift time and peak speed.
+ *
+ * RECOMMENDATION RULE (v4.0, both pathways): progression, not "keep if close enough"
+ *   Minimise J(x) = cost(e^x) + lambda*(x - ln C0)^2 between the current setting C0 and the optimum,
+ *   scale the step by how strongly the assumption scenarios (or bootstrap refits) agree on the direction,
+ *   skip steps below the JND, and split steps above maxStep into stages (one per run). Satisfaction
+ *   raises lambda by at most 2x. The near-optimal set N = { C : cost(C) <= min cost + tolerance } is
+ *   still reported. Without a current setting, recommend the minimum.
  */
 (function (root, factory) {
   if (typeof module === "object" && module.exports) module.exports = factory();
@@ -209,7 +214,25 @@
     turnScale:{ central: 1.0,   low: 0.5,   high: 1.5,   unit: "x",   basis: "estimate",
                 note: "How many big turns the task mix contains, relative to the role/agent mix. No study measures turn angles in real Valorant or CS matches, so the turn shares are averaged over half to one and a half times their stated value." },
     tolerance:{ central: 0.006, low: 0.003, high: 0.012, unit: "s",   basis: "estimate",
-                note: "Extra time per engagement treated as practically negligible when defining the near-optimal range." }
+                note: "Extra time per engagement treated as practically negligible when defining the near-optimal range." },
+    // ---- v4.0: tracking task (research/sensitivity_motor_research.md §1, research/valorant_aim_data.md §1)
+    strafeV:  { central: 5.4,   low: 4.1,   high: 6.75,  unit: "m/s", basis: "research",
+                note: "Enemy strafe speed. 5.40 m/s derived from the Riot wiki's ADS move speed (4.10 m/s = 76% of run); 6.75 m/s knife speed is a community figure." },
+    trackK:   { central: 0.10,  low: 0.05,  high: 0.20,  unit: "fraction", basis: "estimate",
+                note: "Signal-dependent noise: velocity error as a share of the target's angular speed (Harris & Wolpert 1998 show it exists; no fitted value for mouse tracking was found)." },
+    trackFloor:{ central: 0.025, low: 0.015, high: 0.04, unit: "cm",  basis: "estimate",
+                note: "Hand position noise while following a moving target. Set just above the static floor sigma0, because the hand is already moving; no study measures it." },
+    trackDelay:{ central: 0.15, low: 0.10,  high: 0.20,  unit: "s",   basis: "estimate",
+                note: "Visual feedback delay during pursuit: the window over which a speed mismatch builds up before it can be corrected." },
+    tTrack:   { central: 0.25,  low: 0.15,  high: 0.40,  unit: "s",   basis: "estimate",
+                note: "Firing time needed on a moving target at a perfect hit rate (about 2–3 Vandal/Phantom rounds at 9.75–11 rounds/s, Riot wiki)." },
+    // ---- v4.0: progression rule (how far to move from the current setting)
+    adaptLambda:{ central: 0.03, low: 0.015, high: 0.06, unit: "s/ln²", basis: "estimate",
+                note: "Re-adaptation cost of changing sensitivity, as seconds per engagement per squared log-change. Gain adaptation generalises broadly (Krakauer et al. 2000), but no study gives a recovery time for mouse sensitivity." },
+    maxStep:  { central: 0.15,  low: 0.10,  high: 0.20,  unit: "fraction", basis: "estimate",
+                note: "Largest change recommended in one session. Bigger moves are split into stages, one per run. Heuristic: no study measures it." },
+    jnd:      { central: 0.03,  low: 0.02,  high: 0.05,  unit: "fraction", basis: "estimate",
+                note: "Smallest change worth recommending. No just-noticeable-difference study for mouse sensitivity exists." }
   };
   // Parameters averaged over (3-point quadrature: low/central/high with weights 1/4, 1/2, 1/4).
   // These are the constants that moved the questionnaire answer most in sensitivityAnalysis().
@@ -220,8 +243,10 @@
     { key: "micro",   theta: 2,   mech: "floor", label: "small correction" },
     { key: "flick",   theta: 25,  mech: "flick", label: "target switch" },
     { key: "turn90",  theta: 90,  mech: "reach", mt: 0.40, label: "90° turn" },
-    { key: "turn180", theta: 180, mech: "reach", mt: 0.50, label: "180° turn" }
+    { key: "turn180", theta: 180, mech: "reach", mt: 0.50, label: "180° turn" },
+    { key: "track",   theta: 0,   mech: "track", label: "tracking" }
   ];
+  var NT = TASKS.length;
   var BASE_MIX = [0.40, 0.40, 0.15, 0.05];
   // Role nudges are deliberately small (no reliable role-specific evidence; see research/).
   var ROLE = {
@@ -240,6 +265,34 @@
     sniper: { r: 30, label: "Operator / Marshal" },
     close:  { r: 10, label: "SMG / shotgun" }
   };
+  // v4.0: share of engagements decided while following a strafing target, carved proportionally out of the
+  // small-correction and target-switch shares. ESTIMATES: no Valorant analytics split tracking from flicking.
+  // Close-range guns fight moving targets more; Operator shots are mostly held angles.
+  var TRACK_SHARE = { rifle: 0.15, sniper: 0.05, close: 0.25 };
+  // v4.0: experience scales the hand noise floors and correction time. ESTIMATES: practice lowers endpoint
+  // variability in general motor learning, but no study gives expert vs novice mouse numbers.
+  var EXPERIENCE = {
+    "new":  { noise: 1.30, tSub: 1.15, label: "Under 6 months" },
+    mid:    { noise: 1.12, tSub: 1.05, label: "6 months to 2 years" },
+    exp:    { noise: 1.00, tSub: 1.00, label: "2+ years" },
+    comp:   { noise: 0.90, tSub: 0.95, label: "Competitive" }
+  };
+  // v4.0: grip. Finger pointing has lower throughput than wrist pointing (Balakrishnan & MacKenzie 1997: ~3.0 vs
+  // ~4.1 bits/s), so fingertip control is not treated as more precise. A raised-palm grip makes lifts quicker.
+  var GRIP = {
+    palm:      { noise: 1.00, lift: 1.00, label: "Palm" },
+    claw:      { noise: 1.03, lift: 0.92, label: "Claw" },
+    fingertip: { noise: 1.05, lift: 0.85, label: "Fingertip" },
+    unsure:    { noise: 1.00, lift: 1.00, label: "Not sure" }
+  };
+  // v4.0: mouse weight (g). Reference = pro median 60 g (EsportsSettings, 1481 pros). Heavier mice make lifts
+  // slower and lower peak speed slightly. ESTIMATES: no study measures movement time against weight.
+  var MOUSE_REF_G = 60;
+  function weightFactors(g) {
+    if (!finitePos(g)) return { lift: 1, v: 1 };
+    var r = clamp(g, 30, 200) / MOUSE_REF_G;
+    return { lift: clamp(Math.pow(r, 0.35), 0.8, 1.4), v: clamp(Math.pow(r, -0.10), 0.85, 1.1) };
+  }
   // Aiming joint -> wrist share and comfortable one-direction reach (cm) before a bigger joint takes over.
   // One-direction reach from the starting point, about half of a comfortable single swipe, since a turn can go either way:
   // wrist-only ~±3 cm (30–40° comfortable radial–ulnar deviation, Ryu et al. 1991, on an estimated 8–10 cm pivot),
@@ -277,15 +330,32 @@
     var reach = reachMeasured ? input.reachCm : LIMB[limbKey].reach;
     var reachSd = reachMeasured ? 0.10 : P.reachSd * (limbKey === "unsure" ? 1.4 : 1);
     var w = headDeg(R_REF, P.headM), wWpn = headDeg(wpn.r, P.headM);
-    var mix0 = (input.mix && input.mix.length === 4) ? input.mix.slice()
+    var mix0 = (input.mix && (input.mix.length === 4 || input.mix.length === 5)) ? input.mix.slice()
         : (input._agentProf ? input._agentProf.mix.slice() : ROLE[role].mix.slice());
+    var mix4 = scaleTurns(mix0.slice(0, 4), input.mix ? 1 : P.turnScale);
+    var trackShare = input.mix ? (input.mix.length === 5 ? input.mix[4] : 0) : trackShareFor(input.weapon);
+    var mix = input.mix && input.mix.length === 5 ? input.mix.slice() : carveTracking(mix4, trackShare);
+    // v4.0 skill, grip and mouse modifiers act on copies of the constants used by this profile.
+    var ex = EXPERIENCE[input.experience] || EXPERIENCE.exp, gr = GRIP[input.grip] || GRIP.unsure, wf = weightFactors(input.mouseG);
+    var Q = Object.assign({}, P, {
+      sigma0: P.sigma0 * ex.noise * gr.noise, trackFloor: P.trackFloor * ex.noise * gr.noise,
+      tSub: P.tSub * ex.tSub, tLift: P.tLift * gr.lift * wf.lift, vPeak: P.vPeak * wf.v
+    });
+    var omega = P.strafeV / wpn.r * 180 / Math.PI;      // target angular speed, deg/s
     return {
-      mix: scaleTurns(mix0, input.mix ? 1 : P.turnScale),
+      mix: mix, trackShare: mix[4],
       usable: usable, D: usable / 2, reach: reach, reachSd: reachSd, reachMeasured: reachMeasured,
-      r: wpn.r, headDeg: w, sigma: P.sigma0, v: P.vPeak,
+      r: wpn.r, headDeg: w, headDegWpn: wWpn, sigma: Q.sigma0, v: Q.vPeak, omega: omega,
       cFlick: P.cFlick * Math.pow(wWpn / w, -0.25),    // 16x smaller target -> 1 octave slower (NVIDIA)
-      P: P
+      modifiers: { experience: ex.label, noise: ex.noise * gr.noise, tSub: ex.tSub, grip: gr.label, lift: gr.lift * wf.lift, speed: wf.v },
+      P: Q
     };
+  }
+  function trackShareFor(weapon) { return TRACK_SHARE[weapon] != null ? TRACK_SHARE[weapon] : TRACK_SHARE.rifle; }
+  // Take a tracking share t out of the small-correction and target-switch shares, in proportion.
+  function carveTracking(mix4, t) {
+    var small = mix4[0] + mix4[1], take = Math.min(t, small * 0.9), f = small > 0 ? (small - take) / small : 1;
+    return [mix4[0] * f, mix4[1] * f, mix4[2], mix4[3], take];
   }
 
   // Scale the big-turn shares by k and take the difference from the small-correction/flick shares proportionally.
@@ -322,6 +392,15 @@
     if (task.mech === "flick") {
       var o = log2(C / pr.cFlick), v = P.mtFlick * P.kappa * o * o;
       return { prec: o < 0 ? v : 0, trav: o > 0 ? v : 0, lift: 0 };
+    }
+    if (task.mech === "track") {
+      // Angular tracking error: the hand noise floor maps to 360*floor/C degrees (shrinks as C grows), while the
+      // speed-matching error k*omega*delay is the same at every C. Hit probability on the head follows erf; firing
+      // time to land the needed hits scales as 1/p, measured against an ideal (noise-floor-free) tracker.
+      var eFloor = 360 * P.trackFloor / C, eVel = P.trackK * pr.omega * P.trackDelay;
+      var W2 = pr.headDegWpn / (2 * Math.SQRT2);
+      var pT = Math.max(1e-6, erf(W2 / Math.sqrt(eFloor * eFloor + eVel * eVel))), pInf = erf(W2 / Math.max(1e-9, eVel));
+      return { prec: P.tTrack * (pInf / pT - 1), trav: 0, lift: 0 };
     }
     var dur = 1.875 * a / P.vPeak;        // minimum-jerk duration at peak speed vPeak
     var speed = Math.pow(Math.pow(task.mt, 4) + Math.pow(dur, 4), 0.25) - task.mt;
@@ -374,7 +453,64 @@
       if (at(Math.exp(m1)).total < at(Math.exp(m2)).total) hi = m2; else lo = m1;
     }
     var cStar = Math.exp((lo + hi) / 2);
-    return { at: at, cStar: cStar, jStar: at(cStar).total, profile: buildProfile(input, base), base: base, nScenarios: scen.length };
+    // Optimum of each scenario (lazy: only the recommendation needs it). Gives the spread of the optimum
+    // implied by the uncertain constants, and how strongly the scenarios agree on a direction.
+    var scenOpt = null;
+    function scenarioOptima() {
+      if (scenOpt) return scenOpt;
+      scenOpt = profs.map(function (x) {
+        var best = 0, bv = Infinity;
+        for (var i = 0; i < GRID.length; i += 3) { var v = costAt(GRID[i], x.pr).total; if (v < bv) { bv = v; best = i; } }
+        var a = Math.max(0, best - 3), b = Math.min(GRID.length - 1, best + 3), bi2 = best;
+        for (var j = a; j <= b; j++) if (costAt(GRID[j], x.pr).total < costAt(GRID[bi2], x.pr).total) bi2 = j;
+        return { c: GRID[bi2], w: x.w, pr: x.pr };
+      });
+      return scenOpt;
+    }
+    return { at: at, cStar: cStar, jStar: at(cStar).total, profile: buildProfile(input, base), base: base, nScenarios: scen.length, scenarioOptima: scenarioOptima };
+  }
+  function weightedQuantile(items, q) {
+    var b = items.slice().sort(function (x, y) { return x.c - y.c; }), tot = b.reduce(function (s, x) { return s + x.w; }, 0), acc = 0;
+    for (var i = 0; i < b.length; i++) { acc += b[i].w; if (acc >= q * tot - 1e-12) return b[i].c; }
+    return b[b.length - 1].c;
+  }
+
+  /* =========================================================================
+   * Progression rule (v4.0): how far to move from the current setting.
+   * Old rule: keep the current setting whenever it was inside the near-optimal range. That made the result
+   * stick to whatever the player typed. New rule, an expected-utility step:
+   *   1. J(x) = expected cost(e^x) + lambda * (x - x0)^2, x = ln C. lambda is the re-adaptation cost
+   *      (satisfaction raises it by up to 2x: comfort is a reason to move less, not a measurement).
+   *      The minimiser of J lies between the current setting and the optimum and always moves some way
+   *      toward the optimum unless the current setting already is the optimum.
+   *   2. Agreement: the share of scenarios (or bootstrap refits) whose own optimum lies beyond the JND in
+   *      that direction. The step is scaled by (agreement - 0.5) / 0.35, clipped to [0, 1]: the model moves
+   *      you only as far as its evidence agrees on a direction.
+   *   3. Steps below the JND are not worth feeling: stay. Steps above maxStep are split into stages, one per run.
+   * ========================================================================= */
+  function progression(f, c0, cStar, opts) {
+    var lam = opts.lambda, jnd = Math.log(1 + opts.jnd), cap = Math.log(1 + opts.maxStep);
+    var x0 = Math.log(c0), xs = Math.log(cStar), lo = Math.min(x0, xs), hi = Math.max(x0, xs);
+    function J(x) { return f(Math.exp(x)) + lam * (x - x0) * (x - x0); }
+    var xt = x0, jt = J(x0);
+    for (var x = lo; x <= hi + 1e-9; x += 0.002) { var v = J(x); if (v < jt) { jt = v; xt = x; } }
+    var dir = xs > x0 ? 1 : xs < x0 ? -1 : 0;
+    var agree = 0, tot = 0;
+    (opts.optima || []).forEach(function (o) { tot += o.w; if (dir && dir * (Math.log(o.c) - x0) > jnd) agree += o.w; });
+    var pAgree = tot > 0 ? agree / tot : (dir ? 1 : 0);
+    var g = clamp((pAgree - 0.5) / 0.35, 0, 1);
+    var want = (xt - x0) * g;                               // evidence-weighted target step (log units)
+    var step = Math.abs(want) < jnd ? 0 : clamp(want, -cap, cap);
+    var stages = step === 0 ? 0 : Math.ceil(Math.abs(want) / cap - 1e-9);
+    var plan = [];
+    for (var k = 1; k <= stages; k++) plan.push(Math.exp(x0 + clamp(want, -k * cap, k * cap)));
+    var why;
+    if (step !== 0) why = stages > 1 ? "moving toward the model's best in stages (stage 1 of " + stages + ")" : "moving toward the model's best";
+    else if (!dir || Math.abs(xs - x0) < jnd) why = "current setting is already at the model's best";
+    else if (g === 0) why = "the model's scenarios don't agree on which way to move: keep current";
+    else why = "the change worth making is too small to feel: keep current";
+    return { cm: Math.exp(x0 + step), step: Math.exp(step) - 1, target: Math.exp(x0 + want), targetFull: Math.exp(xt),
+      agreement: pAgree, evidenceScale: g, stages: stages, plan: plan, stay: step === 0, reason: why, lambda: lam };
   }
 
   // Contiguous set around the minimum where cost <= jStar + tol (log-spaced grid, then refined edges).
@@ -406,9 +542,11 @@
     if (input.resWidth != null && !(input.resWidth >= 640 && input.resWidth <= 8000)) throw new RangeError("resWidth must be 640–8000 px");
     if (input.reachCm != null && !(finitePos(input.reachCm) && input.reachCm <= 100)) throw new RangeError("reachCm must be between 0 and 100");
     if (input.mix != null) {
-      if (!Array.isArray(input.mix) || input.mix.length !== 4 || input.mix.some(function (x) { return !(x >= 0); }) || Math.abs(mean(input.mix) * 4 - 1) > 1e-6)
-        throw new RangeError("mix must be 4 non-negative shares summing to 1");
+      if (!Array.isArray(input.mix) || (input.mix.length !== 4 && input.mix.length !== 5) || input.mix.some(function (x) { return !(x >= 0); }) || Math.abs(mean(input.mix) * input.mix.length - 1) > 1e-6)
+        throw new RangeError("mix must be 4 (or 5, with tracking) non-negative shares summing to 1");
     }
+    if (input.mouseG != null && !(finitePos(input.mouseG) && input.mouseG >= 20 && input.mouseG <= 250)) throw new RangeError("mouseG must be 20–250 g");
+    if (input.grip != null && !GRIP[input.grip]) throw new RangeError("grip must be palm, claw, fingertip or unsure");
   }
 
   /* =========================================================================
@@ -448,7 +586,7 @@
     var out = [];
     trials.forEach(function (t, i) {
       if (!t || !validCm(t.cm)) throw new RangeError("trial " + i + ": cm must be a valid cm/360");
-      if (["micro", "flick", "turn"].indexOf(t.task) < 0) throw new RangeError("trial " + i + ": task must be micro, flick or turn");
+      if (["micro", "flick", "turn", "track"].indexOf(t.task) < 0) throw new RangeError("trial " + i + ": task must be micro, flick, turn or track");
       if (!(typeof t.time === "number" && isFinite(t.time) && t.time >= 0 && t.time < 30)) throw new RangeError("trial " + i + ": time must be seconds (0–30)");
       var ses = t.session == null ? "s1" : String(t.session);
       counters[ses] = (counters[ses] || 0) + 1;
@@ -498,7 +636,7 @@
   function fitAll(rows, shares, opts) {
     var xc = mean(rows.map(function (r) { return r.x; }));
     var fits = {};
-    ["micro", "flick", "turn"].forEach(function (t) {
+    ["micro", "flick", "turn", "track"].forEach(function (t) {
       var rs = rows.filter(function (r) { return r.task === t; });
       if (rs.length) { var f = fitTask(rs, xc, opts); if (f) fits[t] = f; }
     });
@@ -577,7 +715,8 @@
     var o = Object.assign({}, CAL_DEFAULTS, options || {});
     var rows = prepTrials(trials, o);
     var mix = (input && input.mix) || (ROLE[input && input.role] || ROLE.f).mix;
-    var shares = { micro: mix[0], flick: mix[1], turn: mix[2] + mix[3] };
+    if (mix.length === 4) mix = carveTracking(mix, input && input.mix ? 0 : trackShareFor(input && input.weapon));
+    var shares = { micro: mix[0], flick: mix[1], turn: mix[2] + mix[3], track: mix[4] };
     var tested = Array.from(new Set(rows.map(function (r) { return r.cm; }))).sort(function (a, b) { return a - b; });
     var warnings = [];
     if (tested.length < 3) warnings.push("Fewer than 3 sensitivities tested: no curve can be fitted, only tested values compared.");
@@ -661,15 +800,23 @@
     var near = grid.filter(function (c, i) { return within[i] >= 0.5 * B; });
     var best = argminOver(full.composite, lo, hi);
     var nearSet = near.length ? [Math.min.apply(null, near), Math.max.apply(null, near)] : [best.c, best.c];
-    var cm, reason;
+    var cm, reason, prog = null;
     if (!validation.curveBeatsFlat) {
       cm = current && current >= lo && current <= hi ? current : best.c;
       reason = current && current >= lo && current <= hi ? "no reliable difference between tested settings: keep current" : "no reliable difference between tested settings";
       nearSet = [lo, hi];
-    } else if (current && current >= nearSet[0] && current <= nearSet[1]) { cm = current; reason = "current setting is within the measured near-optimal range"; }
-    else { cm = current ? nearestInSet(current, nearSet) : best.c; reason = current ? "closest near-optimal setting to your current one" : "measured optimum"; }
+    } else if (current) {
+      // v4.0: same progression rule as the questionnaire, with bootstrap optima as the evidence of direction.
+      // The target never leaves the tested range.
+      var cc = clamp(current, lo, hi);
+      var lamM = (o.adaptLambda != null ? o.adaptLambda : PARAMS.adaptLambda.central) * (1 + 0.25 * ((o.satisfaction || 3) - 1));
+      prog = progression(full.composite, cc, best.c, { lambda: lamM, jnd: PARAMS.jnd.central, maxStep: PARAMS.maxStep.central,
+        optima: opts.map(function (c) { return { c: c, w: 1 }; }) });
+      cm = prog.cm; reason = prog.stay && Math.abs(Math.log(cc / current)) > 1e-9 ? "closest tested setting to your current one" : (prog.stay ? prog.reason.replace("model's scenarios", "bootstrap refits") : prog.reason.replace("model's best", "measured best"));
+      if (prog.stay) cm = cc;
+    } else { cm = best.c; reason = "measured optimum"; }
     return {
-      cm: cm, reason: reason, fittedOptimum: best.c, tested: tested, nearOptimal: nearSet,
+      cm: cm, reason: reason, fittedOptimum: best.c, tested: tested, nearOptimal: nearSet, progression: prog,
       optimumInterval: opts.length ? [quantile(opts, 0.1), quantile(opts, 0.9)] : null,
       bootstrapRuns: B, validation: validation, warnings: warnings, orderCorrelation: orderCorr,
       composite: full.composite, taskWeights: full.w, nTrials: rows.length, options: o
@@ -699,20 +846,26 @@
 
     var c0 = input.current ? input.current.cm : null, sat = input.satisfaction || 3;
     var cm = E.cStar, reason = "model optimum", anchor = null;
+    var optima = E.scenarioOptima();
+    var spread = [weightedQuantile(optima, 0.1), weightedQuantile(optima, 0.9)];
     if (c0) {
-      // Preference is not performance: satisfaction can only widen the "close enough to stay" tolerance, at most 2x.
-      var tolStay = tol * (1 + 0.25 * (sat - 1));
-      var jc = E.at(clamp(c0, GRID[0], GRID[GRID.length - 1])).total;
-      var stay = jc <= E.jStar + tolStay && c0 >= GRID[0] && c0 <= GRID[GRID.length - 1];
-      cm = stay ? c0 : nearestInSet(c0, band);
-      reason = stay ? (jc <= E.jStar + tol ? "current setting is already near-optimal" : "current setting is close enough, and you're comfortable with it") : "closest near-optimal setting to your current one";
-      anchor = { cm: c0, costDiff: jc - E.jStar, inBand: c0 >= band[0] && c0 <= band[1], stay: stay, tolStay: tolStay,
-        lifts90: expectedLifts(c0 * 90 / 360, pr), sd: null, weight: stay ? 1 : 0 };
+      // Preference is not performance: satisfaction only raises the re-adaptation cost (fewer, smaller steps), at most 2x.
+      var satMult = 1 + 0.25 * (sat - 1);
+      var cc = clamp(c0, GRID[0], GRID[GRID.length - 1]);
+      var jc = E.at(cc).total;
+      var prog = progression(function (C) { return E.at(C).total; }, cc, E.cStar, {
+        lambda: P.adaptLambda * satMult, jnd: P.jnd, maxStep: P.maxStep, optima: optima });
+      cm = prog.stay ? c0 : prog.cm;
+      reason = prog.reason;
+      anchor = { cm: c0, costDiff: jc - E.jStar, inBand: c0 >= band[0] && c0 <= band[1], stay: prog.stay, tolStay: tol * satMult,
+        satMult: satMult, step: prog.stay ? 0 : cm / c0 - 1, target: prog.target, agreement: prog.agreement, evidenceScale: prog.evidenceScale,
+        stages: prog.stages, plan: prog.plan, gainMs: (jc - E.at(cm).total) * 1000,
+        lifts90: expectedLifts(c0 * 90 / 360, pr), sd: null, weight: prog.stay ? 1 : 0 };
     }
 
     var measured = null;
     if (input.calibration && input.calibration.trials) {
-      measured = calibrate(input.calibration.trials, input, input.calibration.options);
+      measured = calibrate(input.calibration.trials, input, Object.assign({ satisfaction: input.satisfaction }, input.calibration.options));
       cm = measured.cm; reason = measured.reason;
     }
 
@@ -723,12 +876,14 @@
 
     var curve = [];
     for (var C = 15; C <= 120; C += 1) { var c = E.at(C); curve.push({ C: C, total: c.total, prec: c.prec, trav: c.trav, lift: c.lift }); }
+    // Per-task cost at the result (central constants), so the UI can show what drives the number.
+    var byTask = TASKS.map(function (t, j) { var c = taskCost(t, cm, pr); return { key: t.key, label: t.label, share: pr.mix[j], cost: pr.mix[j] * (c.prec + c.trav + c.lift) }; });
 
-    var unsure = 0; if (!LIMB[input.limb] || input.limb === "unsure") unsure++; if (!input.role) unsure++; if (!input.weapon) unsure++;
+    var unsure = 0; if (!LIMB[input.limb] || input.limb === "unsure") unsure++; if (!input.role && !input._agentProf) unsure++; if (!input.weapon) unsure++;
     var confidence = measured
       ? { type: "measured", label: measured.validation.curveBeatsFlat ? "measured" : "measured, no clear difference", interval: measured.optimumInterval }
-      : { type: "heuristic", label: unsure ? "low" : (input.reachCm ? "medium" : "low–medium"),
-          note: "Questionnaire-only estimates are unvalidated. The label is a heuristic, not a probability." };
+      : { type: "heuristic", label: unsure ? "low" : (input.reachCm ? "medium" : "low–medium"), spread: spread,
+          note: "Questionnaire-only estimates are unvalidated. The label is a heuristic, not a probability. The spread is the 10th–90th percentile of the optimum across the averaged assumption scenarios." };
 
     var range = measured ? measured.nearOptimal : band;
     var near = PROS.slice().sort(function (a, b) { return Math.abs(Math.log(a.cm / cm)) - Math.abs(Math.log(b.cm / cm)); }).slice(0, 5);
@@ -738,7 +893,7 @@
       profile: pr, anchor: anchor, stats: statsSignals(input.stats), measured: measured, confidence: confidence,
       agents: input._agentProf || null, scopedAdvice: scopedAdvice(input._agentProf, input.weapon),
       dpiAdvice: input.dpi ? dpiAdvice(cm, input.dpi, input.resWidth) : null,
-      notes: notes, curve: curve, nearPros: near,
+      notes: notes, curve: curve, byTask: byTask, optimumSpread: spread, nearPros: near,
       proPercentile: PROS.filter(function (p) { return p.cm < cm; }).length / Math.max(1, PROS.length),
       nScenarios: E.nScenarios
     };
@@ -756,7 +911,7 @@
     var rawInput = input;
     input = withAgents(input);
     var baseC = expectedCurve(input, { noUncertainty: true }).cStar;
-    var rows = Object.keys(PARAMS).filter(function (k) { return k !== "tolerance"; }).map(function (k) {
+    var rows = Object.keys(PARAMS).filter(function (k) { return ["tolerance", "adaptLambda", "maxStep", "jnd"].indexOf(k) < 0; }).map(function (k) {
       var lo = {}, hi = {}; lo[k] = PARAMS[k].low; hi[k] = PARAMS[k].high;
       var cl = expectedCurve(input, { noUncertainty: true, params: lo }).cStar, ch = expectedCurve(input, { noUncertainty: true, params: hi }).cStar;
       return { param: k, basis: PARAMS[k].basis, low: cl, high: ch, swing: Math.abs(Math.log(ch / cl)) };
@@ -769,7 +924,11 @@
       { param: "mix: all micro/flick equal, no turns", value: alt({ mix: [0.5, 0.5, 0, 0] }) },
       { param: "agents ignored (role mix)", value: expectedCurve(Object.assign({}, rawInput, { agents: null }), { noUncertainty: true }).cStar },
       { param: "agent ability rates x0.5", value: expectedCurve(withAgents(rawInput, scaleRates(0.5)), { noUncertainty: true }).cStar },
-      { param: "agent ability rates x2", value: expectedCurve(withAgents(rawInput, scaleRates(2)), { noUncertainty: true }).cStar }
+      { param: "agent ability rates x2", value: expectedCurve(withAgents(rawInput, scaleRates(2)), { noUncertainty: true }).cStar },
+      { param: "no tracking task", value: alt({ mix: carveTracking(scaleTurns((input._agentProf ? input._agentProf.mix : (ROLE[input.role] || ROLE.f).mix).slice(), 1), 0) }) },
+      { param: "tracking share x2", value: alt({ mix: carveTracking((input._agentProf ? input._agentProf.mix : (ROLE[input.role] || ROLE.f).mix).slice(), 2 * trackShareFor(input.weapon)) }) },
+      { param: "experience → 2+ years", value: alt({ experience: "exp" }) },
+      { param: "grip and mouse weight ignored", value: alt({ grip: null, mouseG: null }) }
     ].map(function (t) { t.change = Math.log(t.value / baseC); return t; });
     rows.sort(function (a, b) { return b.swing - a.swing; });
     return { base: baseC, params: rows, toggles: toggles };
@@ -930,7 +1089,7 @@
   }
 
   var api = {
-    VERSION: "3.0.0", dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
+    VERSION: "4.0.0", TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
     findAgent: findAgent, agentMix: agentMix, agentsProfile: agentsProfile, matchMultiplier: matchMultiplier, scopedAdvice: scopedAdvice,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,
