@@ -1,4 +1,4 @@
-# valoSens 3.0: Valorant settings finder
+# valoSens 3.1: Valorant settings finder
 
 Version 3.0 is a full release covering all three parts: **1. Sensitivity**, **2. Crosshair** (with a rotating visibility test), and **3. Enemy highlight color** (with a vision-threshold test).
 
@@ -24,17 +24,34 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
   - staggered rows and settings.
   - All of it switches off under `prefers-reduced-motion`.
 
+**Results files and calibration runs (3.1)**
+- **Download.** The results screen has **Download results**, which saves `valosens-results-<date>-<n>-sessions.json` to your device. Nothing is kept in browser storage, so the file is the only copy.
+- **Import.** On the first screen, **Import results file** loads it, fills in your answers from the latest session, and offers **Skip to the tests**.
+- **Pooling.** In the next run:
+  - visibility-test picks and vision-test rounds from every session are combined in one fit;
+  - the vision test's staircases start near your earlier thresholds;
+  - the crosshair test shows crosshairs you haven't seen yet first.
+- **On the results screen:**
+  - a "Last session" row in the breakdown;
+  - a "Sessions" row in the settings card;
+  - per-session thresholds in the Highlight tab, so you can see whether runs agree.
+- **What a new download contains:** every imported session plus this one, up to the latest 12.
+- **Import safety.** `session.js` validates every imported value against the questionnaire's options:
+  - unknown answers, crosshair IDs and trial fields are dropped;
+  - files over 3 MB, files that aren't valid JSON, and files that aren't valoSens results are rejected with a readable message.
+
 **UI:**
 - Dark, minimal, game-client style. One question per screen, with staggered entrances and a thin progress line.
 - The results screen is laid out like a match-details page: three summary cards, Sensitivity / Crosshair / Highlight / Model / Vs pros / Test plan tabs, a pro-distribution curve, a factor breakdown, a confidence badge and a settings card.
 - Fonts load from Google Fonts (Barlow / Barlow Condensed), with system fallbacks offline.
 
 **Files**
-- **Model:** `model.js` (sensitivity) and `xhair.js` (crosshair + highlight); both work in the browser and in Node.
+- **Model:** `model.js` (sensitivity), `xhair.js` (crosshair + highlight) and `session.js` (results files); all work in the browser and in Node.
 - **Tests:**
   - `node test/model.test.js` (48)
   - `node test/xhair.test.js` (21, including simulated observers for the vision test)
-  - `node test/ui.e2e.js` (browser test: both tests, the rotation and the animations; needs Playwright)
+  - `node test/session.test.js` (8: file round trip, appending sessions, rejecting bad files, sanitising, pooling)
+  - `node test/ui.e2e.js` (browser test: both tests, the rotation, the animations, and download → import → second run; needs Playwright)
 - **Pro data:** regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`.
 - **Agent data:** regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`.
 - `Valorant sensitivity finder.html` is the original multiplier-based version, kept for reference.

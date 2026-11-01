@@ -214,7 +214,8 @@
     opts = opts || {};
     var r = rng(opts.seed || 1), k = opts.k || 4, rounds = opts.rounds || 8, pref = opts.shape;
     var pool = POOL.filter(function (p) { return allowedColor(p.color, opts.cvd); });
-    var shown = {}; pool.forEach(function (p) { shown[p.id] = 0; });
+    // Prior exposure from imported sessions (opts.seen) carries over, so a new session favors crosshairs not yet shown.
+    var shown = {}, seen = opts.seen || {}; pool.forEach(function (p) { shown[p.id] = seen[p.id] > 0 ? Math.min(20, seen[p.id]) : 0; });
     var scenes = shuffle(["sand", "concrete", "shadow", "ice", "foliage", "smoke", "fire"], r), out = [];
     for (var i = 0; i < rounds; i++) {
       var order = shuffle(pool.slice(), r).sort(function (a, b) {
@@ -314,7 +315,8 @@
       var at = Math.floor((j + 0.5) * queue.length / opts.catchN);
       queue.splice(at + j, 0, { color: opts.colors[j % opts.colors.length], k: -1, catchTrial: true });
     }
-    var st = {}; opts.colors.forEach(function (c) { st[c] = { x: opts.x0, last: null, reversals: 0, n: 0 }; });
+    // opts.start: per-color starting level (log10 opacity), e.g. from an imported session's thresholds.
+    var st = {}; opts.colors.forEach(function (c) { var x = opts.start && isFinite(opts.start[c]) ? Math.max(opts.xMin, Math.min(opts.xMax, opts.start[c])) : opts.x0; st[c] = { x: x, last: null, reversals: opts.start && isFinite(opts.start[c]) ? 2 : 0, n: 0 }; });
     var trials = [], pos = 0;
     function nextTrial() {
       if (pos >= queue.length) return null;
@@ -587,7 +589,7 @@
     };
   }
 
-  var api = { VERSION: "3.0.0", XCOLORS: XCOLORS, HCOLORS: HCOLORS, XC: XC, HC: HC, PRO: PRO, SCENES: SCENES, SCENE_KEYS: SCENE_KEYS, TEST_HEX: TEST_HEX,
+  var api = { VERSION: "3.1.0", XCOLORS: XCOLORS, HCOLORS: HCOLORS, XC: XC, HC: HC, PRO: PRO, SCENES: SCENES, SCENE_KEYS: SCENE_KEYS, TEST_HEX: TEST_HEX,
     POOL: POOL, POOL_BY: POOL_BY, poolCfg: poolCfg, scaleCfg: scaleCfg, xSession: xSession, fitChoices: fitChoices, allowedColor: allowedColor,
     VT: VT, visionRun: visionRun, analyzeVision: analyzeVision, rng: rng,
     encode: encode, decode: decode, recommend: recommend, lum: lum, contrast: contrast, clash: clash, simHex: simHex, dE: dE, visAgg: visAgg, headPx: headPx };

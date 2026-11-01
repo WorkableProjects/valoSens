@@ -337,6 +337,17 @@
   .opt-n { font-size: 13px; color: var(--muted); margin: 8px 0; text-transform: capitalize; }
   .opt .codebox code { font-size: 12px; }
   .copy-code.flash { animation: flash .6s ease; }
+
+  /* ---------- results files ---------- */
+  .sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); }
+  .imp { margin: 0 0 22px; padding: 14px 16px; border: 1px dashed var(--line2); background: rgba(42, 214, 176, .04); animation: rise .5s var(--ease) both; }
+  .imp-t { font-size: 14px; } .imp-t b { font: 700 14px var(--head); letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-right: 4px; }
+  .imp-s { color: var(--muted); font-size: 13px; margin: 6px 0 10px; }
+  .imp-b { display: flex; gap: 8px; flex-wrap: wrap; } .imp-b label.btn { display: inline-flex; align-items: center; }
+  .imp-msg { font-size: 13px; color: var(--teal); margin: 8px 0 0; min-height: 1em; } .imp-msg.bad { color: var(--yellow); }
+  .btn.dl { width: 100%; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); background: var(--red); border-color: var(--red); color: #fff; }
+  .btn.dl svg { width: 16px; height: 16px; }
+  .dl-s { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: 1ms !important; }
     .draw { stroke-dashoffset: 0; }
@@ -355,9 +366,10 @@
 
 <script src="model.js"></script>
 <script src="xhair.js"></script>
+<script src="session.js"></script>
 <script>
 "use strict";
-var M = window.ValoModel, X = window.ValoXhair;
+var M = window.ValoModel, X = window.ValoXhair, V = window.ValoSession;
 
 /* ---------- State ---------- */
 function freshState() {
@@ -369,7 +381,8 @@ function freshState() {
     statsGate: null, stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stPaste: "",
     cvd: null, moving: null, aim: null, shape: null, lose: null, res: null,
     xSeed: newSeed(), xKey: null, xTest: null, xRound: 0,
-    hCur: null, hKeep: false, hMaps: null, hClutter: {}, hTest: null
+    hCur: null, hKeep: false, hMaps: null, hClutter: {}, hTest: null,
+    prior: null, frameMs: null      // prior = sessions imported from a results file (never stored in the browser)
   };
 }
 var S = freshState();
@@ -482,8 +495,9 @@ function xhInput(withTests) {
   var inp = { cvd: S.cvd, exp: S.exp, moving: S.moving, aim: S.aim, shape: S.shape, lose: S.lose, res: S.res, weapon: S.weapon,
     hCur: S.hCur, hKeep: S.hKeep, hMaps: S.hMaps, hClutter: S.hClutter };
   if (withTests !== false) {
-    inp.xTest = S.xTest ? S.xTest.filter(function (r) { return r.pick !== undefined; }) : null;
-    inp.hTest = S.hTest;
+    var P = V.pooled(S.prior, { xTest: answeredRounds(), hTest: S.hTest });
+    inp.xTest = P.xTest.length ? P.xTest : null;
+    inp.hTest = P.hTest.length ? P.hTest : null;
   }
   return inp;
 }
@@ -558,10 +572,11 @@ function xRounds() {
   var key = [S.xSeed, S.cvd, S.shape].join("|");
   if (S.xKey !== key || !S.xTest) {
     S.xKey = key; S.xRound = 0;
-    S.xTest = X.xSession({ seed: S.xSeed, cvd: S.cvd, shape: S.shape, rounds: 8, k: 4 }).map(function (r) { return { scene: r.scene, ids: r.ids, pick: undefined }; });
+    S.xTest = X.xSession({ seed: S.xSeed, cvd: S.cvd, shape: S.shape, rounds: 8, k: 4, seen: S.prior ? V.seenCounts(S.prior) : null }).map(function (r) { return { scene: r.scene, ids: r.ids, pick: undefined }; });
   }
   return S.xTest;
 }
+function answeredRounds() { return S.xTest ? S.xTest.filter(function (r) { return r.pick !== undefined; }) : []; }
 function poolCfgFor(p) { return X.decode(X.encode(X.scaleCfg(X.poolCfg(p), S.res))); }
 function visTest(host) {
   var rounds = xRounds();
@@ -622,12 +637,13 @@ function visionTest(host) {
   function size() { var w = Math.max(300, stage.clientWidth || 640); return hidpi(cv, w, Math.round(Math.min(420, Math.max(220, w * 0.46)))); }
   c = size(); paintBg(c.ctx, c.w, c.h, "concrete", 3);
   function summary() {
-    var a = S.hTest ? X.analyzeVision(S.hTest) : null;
+    var pool = V.pooled(S.prior, { hTest: S.hTest }).hTest;
+    var a = S.hTest ? X.analyzeVision(pool) : null;
     if (!a || !a.ok) { res.innerHTML = a ? '<p class="tip">' + esc(a.reason) + "</p>" : ""; return; }
     res.innerHTML = '<div class="vr">' + X.VT.colors.map(function (k, i) {
       var r = a.colors[k], pct = Math.round(Math.min(1, r.alpha75) * 100);
       return '<div class="vr-r" style="--i:' + i + '"><span class="vr-n"><i class="sw" style="background:' + X.TEST_HEX[k] + '"></i>' + k[0].toUpperCase() + k.slice(1) + '</span><span class="vr-t"><i style="width:' + Math.max(3, pct) + '%;background:' + X.TEST_HEX[k] + '"></i></span><span class="vr-v">' + pct + "% strength</span></div>";
-    }).join("") + '</div><p class="tip">Outline strength you needed to find the enemy 75% of the time (lower = easier to see). Easy check rounds: ' + (a.catchPc === null ? "–" : Math.round(a.catchPc * 100) + "%") + (a.flags.length ? ". " + esc(a.flags.join(" ")) : ".") + "</p>";
+    }).join("") + '</div><p class="tip">Outline strength you needed to find the enemy 75% of the time (lower = easier to see). Easy check rounds: ' + (a.catchPc === null ? "–" : Math.round(a.catchPc * 100) + "%") + (a.flags.length ? ". " + esc(a.flags.join(" ")) : ".") + (S.prior ? " Pooled with " + S.prior.length + " imported session" + (S.prior.length > 1 ? "s" : "") + "." : "") + "</p>";
   }
   function idle(msg) {
     over.innerHTML = "<p>" + msg + '</p><button type="button" class="btn primary" id="dtStart">' + (S.hTest ? "Run again" : "Start test") + "</button>";
@@ -652,7 +668,7 @@ function visionTest(host) {
     xcfg = X.decode(X.recommend(xhInput(false)).crosshair.code);
     measureRefresh(function (frameMs) {
       if (me.stop) return;
-      run = X.visionRun({ seed: newSeed() }); run.frameMs = frameMs;
+      run = X.visionRun({ seed: newSeed(), start: S.prior ? V.visionStart(S.prior) : null }); run.frameMs = frameMs; S.frameMs = frameMs;
       setTimeout(trial, 400);
     });
   }
@@ -1046,7 +1062,81 @@ function focusH() { var h = document.getElementById("qh"); if (h) { h.focus({ pr
 function setProgress(p, label) {
   var bar = document.getElementById("progress");
   bar.style.width = p + "%"; bar.setAttribute("aria-valuenow", String(Math.round(p)));
-  document.getElementById("crumb").textContent = label;
+  document.getElementById("crumb").textContent = label + (S.prior ? " · Run " + (S.prior.length + 1) : "");
+}
+
+/* ---------- Results files: download and import (no browser storage) ---------- */
+function agentOk(n) { return !!M.findAgent(n); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "unknown date"; }
+function importFile(file, done) {
+  if (!file) return;
+  if (file.size > 3000000) { done(new Error("The file is too large to be a valoSens results file.")); return; }
+  var r = new FileReader();
+  r.onload = function () { try { done(null, V.parse(String(r.result), agentOk)); } catch (e) { done(e); } };
+  r.onerror = function () { done(new Error("The file couldn't be read.")); };
+  r.readAsText(file);
+}
+function applyImport(res) {
+  S = freshState();
+  Object.keys(res.latest.answers).forEach(function (k) { S[k] = k === "hClutter" ? Object.assign({}, res.latest.answers[k]) : res.latest.answers[k]; });
+  S.prior = res.sessions;
+}
+// Everything before the visibility test is answered and valid, so the player can jump straight to the tests.
+function canSkipToTests() {
+  var l = visible(), k = idxOf(l, "vis");
+  for (var i = 0; i < k; i++) if (!l[i].valid()) return false;
+  return k > 0;
+}
+function importCard() {
+  var card = el("div", { "class": "imp" });
+  var input = el("input", { type: "file", accept: ".json,application/json", id: "impFile", "class": "sr" });
+  var msg = el("p", { "class": "imp-msg", role: "status" });
+  function draw(note) {
+    card.innerHTML = "";
+    if (S.prior) {
+      var n = S.prior.length, last = S.prior[n - 1];
+      card.appendChild(el("div", { "class": "imp-t" }, '<b>Calibration run ' + (n + 1) + "</b> · " + n + " earlier session" + (n > 1 ? "s" : "") + " loaded (latest " + esc(fmtDate(last.date)) + ")"));
+      card.appendChild(el("p", { "class": "imp-s" }, "Your answers are filled in from the latest session. Picks from the visibility test and rounds from the vision test will be pooled with this run's, and the vision test starts near your earlier thresholds." +
+        (last.result && last.result.cm ? " Last result: " + last.result.cm.toFixed(1) + " cm/360" + (last.result.sens ? " (sens " + last.result.sens.toFixed(3) + ")" : "") + "." : "")));
+      var row = el("div", { "class": "imp-b" });
+      if (canSkipToTests()) {
+        var go = el("button", { type: "button", "class": "btn primary small", id: "impGo" }, "Skip to the tests");
+        go.addEventListener("click", function () { currentId = "vis"; renderQ("next"); focusH(); });
+        row.appendChild(go);
+      }
+      var clr = el("button", { type: "button", "class": "btn small", id: "impClear" }, "Remove import");
+      clr.addEventListener("click", function () { S = freshState(); renderQ(); });
+      row.appendChild(clr); card.appendChild(row);
+    } else {
+      card.appendChild(el("div", { "class": "imp-t" }, "<b>Doing a second test?</b> Import the results file you downloaded last time."));
+      card.appendChild(el("p", { "class": "imp-s" }, "It fills in your answers and pools your earlier test data with this run for a tighter calibration. The file stays on your device; nothing is saved in the browser."));
+      var row2 = el("div", { "class": "imp-b" });
+      var btn = el("label", { "class": "btn small", "for": "impFile", tabindex: "0", role: "button" }, "Import results file");
+      btn.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); } });
+      row2.appendChild(btn); card.appendChild(row2);
+    }
+    card.appendChild(input); card.appendChild(msg);
+    if (note) msg.textContent = note;
+  }
+  input.addEventListener("change", function () {
+    importFile(input.files[0], function (err, res) {
+      if (err) { msg.textContent = err.message; msg.classList.add("bad"); return; }
+      applyImport(res); renderQ();
+      var m = document.querySelector(".imp-msg");
+      if (m) m.textContent = "Imported " + res.sessions.length + " session" + (res.sessions.length > 1 ? "s" : "") + "." + (res.warnings.length ? " " + res.warnings.join(" ") : "");
+    });
+  });
+  draw();
+  return card;
+}
+function downloadResults(R, XR, sens, dpi) {
+  var b = V.build({ prior: S.prior, answers: S, xTest: answeredRounds(), hTest: S.hTest, frameMs: S.frameMs, version: X.VERSION, agentOk: agentOk,
+    result: { cm: R.cm, sens: sens, dpi: dpi, code: XR.crosshair.code, highlight: XR.highlight.color.key } });
+  var blob = new Blob([V.serialize(b)], { type: "application/json" }), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = V.fileName(b);
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+  return b;
 }
 // Stagger every direct block and every choice so the question builds in.
 function stagger(root) {
@@ -1077,6 +1167,7 @@ function renderQ(dir) {
   box.appendChild(el("h2", { tabindex: "-1", id: "qh" }, q.title));
   box.appendChild(el("p", { "class": "why" }, q.why));
   box.appendChild(el("p", { "class": "uses" }, q.uses));
+  if (i === 0) box.appendChild(importCard());
   var body = el("div", { "class": "q-body" }); box.appendChild(body);
   q.render(body);
   var last = i === list.length - 1;
@@ -1100,6 +1191,7 @@ var ICON = {
   up: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 10l5-5 5 5" fill="none" stroke="var(--teal)" stroke-width="2.4"/></svg>',
   down: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5 5-5" fill="none" stroke="var(--pink)" stroke-width="2.4"/></svg>',
   flat: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" stroke="var(--dim)" stroke-width="2.4"/></svg>',
+  down2: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
   mouse: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="1.5" width="8" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4v3" stroke="currentColor" stroke-width="1.5"/></svg>',
   cross: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v5M8 10v5M1 8h5M10 8h5" stroke="currentColor" stroke-width="1.6"/></svg>',
   scope: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/></svg>',
@@ -1314,6 +1406,8 @@ function renderResult() {
     ["Vs pros", R.proPercentile === 0 ? "Fastest" : R.proPercentile === 1 ? "Slowest" : "Faster than " + Math.round((1 - R.proPercentile) * 100) + "%", null],
     ["Stats", "Not used", null]
   ];
+  var prevRes = S.prior && S.prior[S.prior.length - 1].result;
+  if (prevRes && prevRes.cm) rowsR.splice(1, 0, ["Last session", f1(prevRes.cm) + " cm", (cm / prevRes.cm - 1) * 100]);
   function bdCol(rows, off) {
     return '<div><div class="bd-h"><span>Factor</span><span>Value</span><span>Impact</span></div>' +
       rows.map(function (r, i) { return '<div class="bd-r row-in" style="--i:' + (i + off) + '"><span class="k">' + r[0] + '</span><span class="v">' + esc(r[1]) + "</span>" + impactCell(r[2]) + "</div>"; }).join("") + "</div>";
@@ -1394,7 +1488,7 @@ function renderResult() {
   if (ft && ft.n) {
     var cc2 = X.XCOLORS.filter(function (c) { return X.allowedColor(c.key, S.cvd); }).map(function (c) { return { c: c, v: ft.coef["c:" + c.key] || 0 }; }).sort(function (a, b) { return b.v - a.v; });
     var vmax = Math.max(0.3, Math.max.apply(null, cc2.map(function (z) { return Math.abs(z.v); })));
-    xTestHtml = '<div class="sub-t" style="margin-top:20px">Your visibility test</div><p class="tip">' + ft.n + " of " + ft.rounds + " rounds picked. Choice-model effect of each color (right = you picked it more than expected):</p>" +
+    xTestHtml = '<div class="sub-t" style="margin-top:20px">Your visibility test</div><p class="tip">' + ft.n + " of " + ft.rounds + " rounds picked" + (S.prior ? ", pooled across " + (S.prior.length + 1) + " sessions" : "") + ". Choice-model effect of each color (right = you picked it more than expected):</p>" +
       '<div class="sbars">' + cc2.map(function (z, i) {
         var w = Math.abs(z.v) / vmax * 50;
         return '<div class="sbar" style="--i:' + i + '"><span class="sb-n"><i class="sw" style="background:' + z.c.hex + '"></i>' + z.c.name + '</span><span class="sb-t mid"><i style="' + (z.v >= 0 ? "left:50%" : "left:" + (50 - w).toFixed(1) + "%") + ";width:" + w.toFixed(1) + "%;background:" + z.c.hex + '"></i></span><span class="sb-v">' + (z.v >= 0 ? "+" : "") + z.v.toFixed(2) + "</span></div>";
@@ -1431,6 +1525,12 @@ function renderResult() {
   if (A && A.ok) tRows = '<div class="sub-t" style="margin-top:20px">Your vision test</div><table><thead><tr><th>Color</th><th class="n">Strength needed</th><th class="n">± </th><th class="n">Rounds</th><th class="n">Bonus</th></tr></thead><tbody>' +
     X.VT.colors.map(function (k) { var r = A.colors[k]; return '<tr><td><i class="sw" style="background:' + X.TEST_HEX[k] + '"></i>' + k[0].toUpperCase() + k.slice(1) + '</td><td class="n">' + Math.round(Math.min(1, r.alpha75) * 100) + '%</td><td class="n">×' + Math.pow(10, r.se).toFixed(2) + '</td><td class="n">' + r.n + '</td><td class="n">' + (A.bonus[k] >= 0 ? "+" : "") + A.bonus[k].toFixed(1) + "</td></tr>"; }).join("") +
     '</tbody></table><p class="tip">Strength = the outline opacity at which you found the highlighted enemy 75% of the time, from a maximum-likelihood fit (chance is 25%). Response time was never measured. Easy check rounds: ' + (A.catchPc === null ? "–" : Math.round(A.catchPc * 100) + "%") + "; dropped frames: " + A.dropped + "." + (A.flags.length ? " " + esc(A.flags.join(" ")) : "") + "</p>";
+  if (A && A.ok && S.prior) {
+    var ps = V.perSession(S.prior, { hTest: S.hTest });
+    tRows += '<div class="sub-t" style="margin-top:16px">By session (' + ps.length + ')</div><table><thead><tr><th>Session</th>' + X.VT.colors.map(function (k) { return '<th class="n"><i class="sw" style="background:' + X.TEST_HEX[k] + '"></i>' + k[0].toUpperCase() + k.slice(1) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+      ps.map(function (q) { return "<tr><td>" + esc(q.date === "this run" ? "This run" : fmtDate(q.date)) + "</td>" + X.VT.colors.map(function (k) { return '<td class="n">' + (q.ok ? Math.round(Math.min(1, q.colors[k].alpha75) * 100) + "%" : "–") + "</td>"; }).join("") + "</tr>"; }).join("") +
+      '</tbody></table><p class="tip">The ranking above uses every round from every session in one fit. If the sessions disagree a lot, check that your monitor brightness and room light were similar.</p>';
+  }
   else if (A && !A.ok) tRows = '<p class="tip" style="margin-top:16px">Vision test: ' + esc(A.reason) + "</p>";
   var hWhy = hl.why.length ? hl.why : ["no strong reason to move away from the computed ranking"];
   var HSCENES = ["sand", "concrete", "shadow", "smoke"];
@@ -1519,9 +1619,12 @@ function renderResult() {
           '<div class="acc-r" style="--i:2"><span class="ic">' + ICON.scope + '</span><span class="t">Scoped <b>1.00</b><small>' + scopedShort + "</small></span></div>" +
           '<div class="acc-r" style="--i:3"><span class="ic">' + ICON.scope + '</span><span class="t">ADS <b>1.00</b><small>' + adsShort + "</small></span></div>" +
           '<div class="acc-r" style="--i:4"><span class="ic">' + ICON.cross + '</span><span class="t">Crosshair <b>' + XR.crosshair.color.name + '</b><small>' + shapeName + ", code in the Crosshair tab</small></span></div>" +
+          (S.prior ? '<div class="acc-r" style="--i:6"><span class="ic">' + ICON.down2 + '</span><span class="t">Sessions <b>' + (S.prior.length + 1) + "</b><small>pooled test data, from " + esc(fmtDate(S.prior[0].date)) + "</small></span></div>" : "") +
           '<div class="acc-r" style="--i:5"><span class="ic"><i class="sw" style="background:' + XR.highlight.color.hex + ';margin:0"></i></span><span class="t">Highlight <b>' + XR.highlight.color.short + '</b><small>' + esc(XR.highlight.color.name) + "</small></span></div>" +
         "</div>" +
-        '<div class="actions"><button type="button" class="btn primary small" id="copy">Copy</button><button type="button" class="btn small" id="edit">Edit</button><button type="button" class="btn small" id="reset">Restart</button></div>' +
+        '<button type="button" class="btn primary dl" id="download">' + ICON.down2 + "Download results</button>" +
+        '<p class="dl-s">Saves a results file to your device (sessions in it: ' + ((S.prior ? S.prior.length : 0) + 1) + '). Import it on the first screen next time to pool this run with the next one.</p>' +
+        '<div class="actions"><button type="button" class="btn small" id="copy">Copy</button><button type="button" class="btn small" id="edit">Edit</button><button type="button" class="btn small" id="reset">Restart</button></div>' +
         '<p class="toast" id="toast" role="status"></p></div>' +
       "</aside>" +
     "</div>";
@@ -1560,6 +1663,10 @@ function renderResult() {
   document.getElementById("copy").addEventListener("click", function () {
     var t = document.getElementById("toast");
     try { navigator.clipboard.writeText(line).then(function () { t.textContent = "Copied."; }, function () { t.textContent = line; }); } catch (e) { t.textContent = line; }
+  });
+  document.getElementById("download").addEventListener("click", function () {
+    var t = document.getElementById("toast");
+    try { var b = downloadResults(R, XR, sens, dpi); t.textContent = "Saved " + V.fileName(b) + "."; } catch (e) { t.textContent = "Download failed: " + e.message; }
   });
   document.getElementById("edit").addEventListener("click", function () { currentId = "dpi"; renderQ("back"); focusH(); });
   document.getElementById("reset").addEventListener("click", function () { S = freshState(); currentId = "dpi"; renderQ("back"); focusH(); });

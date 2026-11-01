@@ -1,9 +1,10 @@
 // Browser smoke test of the questionnaire, both tests and the results screen (needs Playwright + Chromium).
 // Run: node test/ui.e2e.js
 const { chromium } = require("playwright");
-const path = require("path");
+const path = require("path"), fs = require("fs"), os = require("os");
+const SIM = `(() => { const run = X.visionRun({ seed: 5 }); let t; const r = X.rng(3); while ((t = run.nextTrial())) { const pc = t.catchTrial ? 1 : 0.25 + 0.72 / (1 + Math.exp(-8 * (t.x - ({ yellow: -1.3, red: -0.9, purple: -1 })[t.color]))); run.record(t, { answer: r() < pc ? t.target : (t.target + 1) % 4, shownMs: 58 }); } S.hTest = run.trials; })()`;
 const url = "file://" + path.join(__dirname, "..", "index.html");
-async function flow(b, vp, steps) {
+async function flow(b, vp, steps, after) {
   const errs = [];
   const p = await b.newPage({ viewport: vp.size, colorScheme: vp.scheme });
   p.on("pageerror", e => errs.push(e.message)); p.on("console", m => m.type() === "error" && errs.push(m.text()));
@@ -30,6 +31,7 @@ async function flow(b, vp, steps) {
   out.paneAnim = await p.evaluate(() => document.querySelector("#pane-4").classList.contains("play"));
   out.text = await p.textContent("#app");
   out.code = await p.textContent("#xhCode");
+  if (after) await after(p, out);
   await p.close();
   return out;
 }
@@ -64,7 +66,40 @@ async function flow(b, vp, steps) {
     await p.click("#dtStart");
     for (let i = 0; i < 4; i++) { await p.waitForTimeout(1700); await p.keyboard.press("2"); }
     out.vtProgress = await p.evaluate(() => parseFloat(document.querySelector(".dt-bar i").style.width) || 0);
+    await p.evaluate(SIM);                 // stand in for a full 2-minute run
     await next();
+  }, async (p, out) => {
+    // Download the results file.
+    const [dl] = await Promise.all([p.waitForEvent("download"), p.click("#download")]);
+    out.file = path.join(os.tmpdir(), "valosens-e2e-" + Date.now() + ".json");
+    await dl.saveAs(out.file);
+    out.fileName = dl.suggestedFilename();
+  }));
+  // Second run: import that file on the first screen, skip to the tests, and check the data is pooled.
+  const file = results[0].file;
+  results.push(await flow(b, { size: { width: 1000, height: 900 }, scheme: "dark" }, async (p, pick, next, out) => {
+    await p.setInputFiles("#impFile", file);
+    await p.waitForSelector("#impGo");
+    out.imported = await p.textContent(".imp");
+    out.prefill = await p.evaluate(() => [S.dpiSel, S.cur, S.agent1, S.cvd, S.res, S.prior.length].join("|"));
+    await p.click("#impGo");
+    out.jumpedTo = await p.evaluate(() => currentId);
+    out.secondRound = await p.evaluate(() => S.xTest[0].ids.join(","));
+    for (let i = 0; i < 8; i++) { await p.getByRole("button", { name: "Option B" }).click(); await p.waitForTimeout(200); }
+    await next(); await next(); await next(); await next();
+    await p.evaluate(SIM);
+    await next();
+  }, async (p, out) => {
+    await p.getByRole("tab", { name: "Highlight" }).click(); await p.waitForTimeout(300);
+    out.hlText = await p.textContent("#pane-5");
+    out.sideText = await p.textContent(".side");
+    const [dl] = await Promise.all([p.waitForEvent("download"), p.click("#download")]);
+    const f2 = path.join(os.tmpdir(), "valosens-e2e2-" + Date.now() + ".json"); await dl.saveAs(f2);
+    out.sessionsInFile = JSON.parse(fs.readFileSync(f2, "utf8")).sessions.length;
+    // A bad file shows a readable error.
+    const bad = path.join(os.tmpdir(), "valosens-bad.json"); fs.writeFileSync(bad, "{nope");
+    await p.click("#reset"); await p.setInputFiles("#impFile", bad); await p.waitForTimeout(200);
+    out.badMsg = await p.textContent(".imp-msg");
   }));
   results.push(await flow(b, { size: { width: 390, height: 900 }, scheme: "dark" }, async (p, pick, next) => {
     await pick("Not sure"); await next();
@@ -99,12 +134,19 @@ async function flow(b, vp, steps) {
   const r0 = results[0];
   console.log("visibility rounds answered:", r0.xAnswered, "| vision test progress %:", r0.vtProgress.toFixed(1));
   if (r0.xAnswered !== 8 || !(r0.vtProgress > 0)) ok = false;
-  console.log("rotation: seeds differ between loads:", results[0].seed !== results[1].seed);
-  if (results[0].seed === results[1].seed) ok = false;
+  console.log("rotation: seeds differ between loads:", results[0].seed !== results[2].seed);
+  if (results[0].seed === results[2].seed) ok = false;
   const deut = /Yellow \(Deuteranopia\)/.test(t0) && !/c;[127];/.test(r0.code) && /;h;|o;1/.test(r0.code) && /visibility test/.test(t0);
-  const trit = !/Yellow \(/.test(results[1].text.match(/Enemy highlight[^]*?Settings/)?.[0] || "x") && /0m;1/.test(results[1].code) && /d;1/.test(results[1].code);
+  const trit = !/Yellow \(/.test(results[2].text.match(/Enemy highlight[^]*?Settings/)?.[0] || "x") && /0m;1/.test(results[2].code) && /d;1/.test(results[2].code);
   console.log("codes:", results.map(r => r.code).join(" | "), "| deutan rules:", deut, "| tritan + dot + training:", trit);
   if (!deut || !trit) ok = false;
+  const r2 = results[1];
+  const file1 = JSON.parse(fs.readFileSync(file, "utf8"));
+  const filesOk = /^valosens-results-.*-1-session\.json$/.test(r0.fileName) && file1.sessions.length === 1 && file1.sessions[0].hTest.length > 50 && file1.sessions[0].xTest.length === 8;
+  const importOk = /Calibration run 2/.test(r2.imported) && r2.prefill === "800|0.5|Jett|deutan|1440|1" && r2.jumpedTo === "vis";
+  const pooledOk = /By session \(2\)/.test(r2.hlText) && /Sessions\s*2/.test(r2.sideText) && r2.sessionsInFile === 2 && /valid JSON/.test(r2.badMsg) && r2.secondRound !== r0.firstRound;
+  console.log("results file:", r0.fileName, filesOk, "| import + prefill + skip:", importOk, r2.prefill, "| pooled second run:", pooledOk, "| bad file message:", r2.badMsg);
+  if (!filesOk || !importOk || !pooledOk) ok = false;
   console.log("results width share at 1000px:", (r0.sumWidth / r0.width).toFixed(2));
   console.log(ok ? "UI smoke test passed" : "UI smoke test FAILED");
   process.exit(ok ? 0 : 1);
