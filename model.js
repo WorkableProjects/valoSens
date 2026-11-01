@@ -745,8 +745,11 @@
     return { base: baseC, params: rows, toggles: toggles };
   }
 
+  // Agent profiles: filled in from research/agent_mechanics.json (work in progress).
+  var AGENT_LIST = [];
+
   var api = {
-    VERSION: "2.0.0",
+    VERSION: "2.0.0", AGENT_LIST: AGENT_LIST,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,
     PARAMS: PARAMS, UNCERTAIN: UNCERTAIN, TASKS: TASKS, ROLE: ROLE, WEAPON: WEAPON, LIMB: LIMB, SURFACE: SURFACE,

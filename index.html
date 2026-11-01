@@ -137,7 +137,7 @@ function freshState() {
     dpiSel: null, dpiCustom: "",
     curMode: null, cur: "", measured: "", otherGame: "cs2", otherSens: "", sat: 3,
     padSel: null, padCustom: "", surface: null, limb: null,
-    role: null, weapon: null, exp: null,
+    role: null, agent1: "", agent2: "", agent3: "", weapon: null, exp: null,
     statsGate: null, stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stPaste: ""
   };
 }
@@ -167,11 +167,15 @@ function statsInput() {
   var st = { rank: S.stRank, matches: has(S.stMatches) ? num(S.stMatches) : NaN, hs: has(S.stHs) ? num(S.stHs) : NaN, kd: has(S.stKd) ? num(S.stKd) : NaN, adr: has(S.stAdr) ? num(S.stAdr) : NaN };
   return (isFinite(st.hs) || isFinite(st.kd) || isFinite(st.adr)) ? st : null;
 }
+function agentsInput() {
+  var seen = {};
+  return [S.agent1, S.agent2, S.agent3].filter(function (a) { if (!a || seen[a]) return false; seen[a] = 1; return true; });
+}
 function buildInput() {
   var c = currentCm();
   return {
     dpi: getDpi(), current: c ? { cm: c } : null, satisfaction: S.sat,
-    pad: getPad(), surface: S.surface, limb: S.limb, role: S.role, weapon: S.weapon,
+    pad: getPad(), surface: S.surface, limb: S.limb, role: S.role, weapon: S.weapon, agents: agentsInput(),
     experience: S.exp, stats: statsInput()
   };
 }
@@ -345,6 +349,30 @@ var Q = [
         { v: "f", l: "Flex / fill", s: "A mix of everything" }], 2);
     },
     valid: function () { return !!S.role; } },
+
+  { id: "agents", sec: "Your role", title: "Which agents do you play most?",
+    why: "Agents change what your aim has to do. Teleports and dashes mean fast re-orientation, anchors hold angles, and Chamber or Operator players spend more time scoped. Pick your main first. Leave the others blank if you one-trick.",
+    uses: "Builds your task mix from each agent's abilities (main 50%, second 30%, third 20%), replacing the role average. It also sets the scoped-multiplier advice.",
+    show: function () { return true; },
+    render: function (h) {
+      var groups = {};
+      M.AGENT_LIST.forEach(function (a) { (groups[a.role] = groups[a.role] || []).push(a); });
+      var opts = '<option value="">None</option>' + ["d", "i", "c", "s"].map(function (r) {
+        return '<optgroup label="' + M.ROLE[r].label + 's">' + (groups[r] || []).map(function (a) { return '<option value="' + a.name + '">' + a.name + "</option>"; }).join("") + "</optgroup>";
+      }).join("");
+      var row = el("div", { "class": "row" });
+      [["agent1", "Main agent"], ["agent2", "Second <small>(optional)</small>"], ["agent3", "Third <small>(optional)</small>"]].forEach(function (f) {
+        var box = el("div");
+        box.appendChild(el("label", { "class": "f", "for": "in-" + f[0] }, f[1]));
+        var sel = el("select", { id: "in-" + f[0] }, opts);
+        sel.value = S[f[0]];
+        sel.addEventListener("change", function () { S[f[0]] = sel.value; refreshNav(); });
+        box.appendChild(sel); row.appendChild(box);
+      });
+      h.appendChild(row);
+      h.appendChild(el("p", { "class": "tip" }, "Not sure or play everyone? Leave the main agent as None, and your role answer is used instead."));
+    },
+    valid: function () { return true; } },
 
   { id: "weapon", sec: "Your role", title: "Which weapon do you use most?",
     why: "Snipers fight at longer range, which needs finer control. SMGs and shotguns fight close up, where heads are bigger on screen and fights involve more flicking.",
