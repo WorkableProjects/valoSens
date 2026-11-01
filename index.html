@@ -383,7 +383,7 @@ function freshState() {
   return {
     dpiSel: null, dpiCustom: "",
     curMode: null, cur: "", measured: "", otherGame: "cs2", otherSens: "", sat: 3,
-    padSel: null, padCustom: "", surface: null, limb: null,
+    padSel: null, padCustom: "", surface: null, limb: null, grip: "unsure", mouseW: "unsure",
     role: null, agent1: "", agent2: "", agent3: "", weapon: null, exp: null,
     statsGate: null, stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stPaste: "",
     cvd: null, moving: null, aim: null, shape: null, lose: null, res: null,
@@ -422,13 +422,15 @@ function agentsInput() {
   var seen = {};
   return [S.agent1, S.agent2, S.agent3].filter(function (a) { if (!a || seen[a]) return false; seen[a] = 1; return true; });
 }
+var MOUSE_G = { light: 50, mid: 62, heavy: 80, xheavy: 100 };
 var RES_WIDTH = { "1080": 1920, "1440": 2560, "2160": 3840, stretched: 1440 };
 function buildInput() {
   var c = currentCm();
   return {
     dpi: getDpi(), current: c ? { cm: c } : null, satisfaction: S.sat,
     pad: getPad(), surface: S.surface, limb: S.limb, role: S.role, weapon: S.weapon, agents: agentsInput(),
-    experience: S.exp, stats: statsInput(), resWidth: RES_WIDTH[S.res] || 1920
+    experience: S.exp, stats: statsInput(), resWidth: RES_WIDTH[S.res] || 1920,
+    grip: S.grip || "unsure", mouseG: MOUSE_G[S.mouseW] || null
   };
 }
 
@@ -804,8 +806,8 @@ var Q = [
     valid: function () { return S.curMode === "none" || (S.curMode !== null && currentCm() > 3 && currentCm() < 400); } },
 
   { id: "sat", part: 1, sec: "Your sensitivity", title: "How well does that sensitivity work for you?",
-    why: "Comfort is a reason to stay put, but it isn't a measurement of accuracy. A high rating lets a slightly less optimal current setting stay.",
-    uses: "Widens the 'close enough to keep' margin, from 1× (rating 1) up to at most 2× (rating 5).",
+    why: "Comfort is a reason to move less, but it isn't a measurement of accuracy. Even at 5, the result still moves if the model is confident you'd gain.",
+    uses: "Raises the re-adaptation cost of changing, from 1× (rating 1) up to at most 2× (rating 5), so steps are smaller.",
     show: function () { return S.curMode && S.curMode !== "none"; },
     render: function (h) {
       var i = el("input", { type: "range", min: "1", max: "5", step: "1", "aria-label": "Satisfaction from 1 to 5" });
@@ -847,6 +849,18 @@ var Q = [
         { v: "unsure", l: "Not sure", s: "Uses wrist + forearm and widens the range" }]);
     },
     valid: function () { return !!S.limb; } },
+
+  { id: "mouse", part: 1, sec: "Your mousepad setup", title: "How do you hold your mouse, and how heavy is it?",
+    why: "Both are optional. A raised-palm grip and a lighter mouse make lifting and re-centring quicker, which makes slower settings cheaper. Finger control is not more precise than wrist control (Balakrishnan & MacKenzie 1997).",
+    uses: "Grip and weight scale the time lost per mouse lift and the peak hand speed (estimates around the 60 g pro median). Leave both on \"Not sure\" to skip.",
+    show: function () { return true; },
+    render: function (h) {
+      h.appendChild(el("div", { "class": "sub-t" }, "Grip"));
+      choices(h, "grip", [{ v: "palm", l: "Palm" }, { v: "claw", l: "Claw" }, { v: "fingertip", l: "Fingertip" }, { v: "unsure", l: "Not sure" }], 2);
+      h.appendChild(el("div", { "class": "sub-t" }, "Mouse weight"));
+      choices(h, "mouseW", [{ v: "light", l: "Under 55 g" }, { v: "mid", l: "55–70 g", s: "Pro median ~60 g" }, { v: "heavy", l: "70–90 g" }, { v: "xheavy", l: "Over 90 g" }, { v: "unsure", l: "Not sure" }], 2);
+    },
+    valid: function () { return true; } },
 
   { id: "role", part: 1, sec: "Your role", title: "What role do you play most?",
     why: "Roles differ a little in their mix of small corrections, target switches and big turns. There's no solid evidence for bigger role effects, so the effect is kept small.",
@@ -958,7 +972,7 @@ var Q = [
 
   { id: "exp", part: 2, sec: "Your experience", title: "How long have you played tactical shooters?",
     why: "Newer players can use a crosshair that reacts to movement as a reminder to stop before shooting. Experienced players are better off with a static one.",
-    uses: "Decides whether movement error is suggested as a training aid. It doesn't change the sensitivity.",
+    uses: "Decides whether movement error is suggested as a training aid. It also scales the hand-noise estimate in the sensitivity model (newer hands are assumed noisier, which favors slightly slower settings).",
     show: function () { return true; },
     render: function (h) {
       choices(h, "exp", [{ v: "new", l: "Under 6 months" }, { v: "mid", l: "6 months to 2 years" }, { v: "exp", l: "2+ years" }, { v: "comp", l: "Competitive", s: "Diamond+ or organized play" }], 2);
@@ -1471,9 +1485,17 @@ function renderResult() {
       return "<b>" + esc(a.name) + "</b> " + Math.round(a.share * 100) + "%" + (bits.length ? ": " + bits.join("; ") : ": no aim-changing mechanics");
     }).join(". ") + ". These move the model's best setting from " + f1(b0) + " to " + f1(R.cModel) + " cm. How often each ability forces a fast re-aim, and by how much, are estimates. In our 28-pro sample, mobility-duelist mains run about 15% faster (not statistically significant, p ≈ 0.12).";
   }
-  var anchorTxt = R.anchor
-    ? "Your current " + f1(R.anchor.cm) + " cm costs about " + Math.round(R.anchor.costDiff * 1000) + " ms more per engagement than the model's best (" + f1(R.cModel) + " cm). Within " + Math.round(R.tolerance * 1000) + " ms counts as near-optimal, and your comfort rating stretches that to " + Math.round(R.anchor.tolStay * 1000) + " ms for keeping it. Result: " + R.reason + "."
+  var A = R.anchor;
+  var anchorTxt = A
+    ? "Your current " + f1(A.cm) + " cm costs about " + Math.round(A.costDiff * 1000) + " ms more per engagement than the model's best (" + f1(R.cModel) + " cm). " +
+      Math.round(A.agreement * 100) + "% of the " + R.nScenarios + " assumption sets put the best setting on that side of yours. " +
+      "Weighing the gain against re-adapting (your comfort rating makes re-adapting " + A.satMult.toFixed(2) + "× as costly), " +
+      (A.stay ? "the result keeps your setting: " + R.reason + "."
+        : "the result moves " + (A.step > 0 ? "+" : "") + Math.round(A.step * 100) + "% (saves about " + A.gainMs.toFixed(1) + " ms per engagement)" +
+          (A.stages > 1 ? ". Bigger changes are split into steps of at most " + Math.round(M.PARAMS.maxStep.central * 100) + "%: " + A.plan.map(f1).join(" → ") + " cm, one per run. Import your results file next time to continue." : "."))
     : "No current setting, so the result is the model's minimum.";
+  var driveTxt = (R.byTask || []).slice().sort(function (a, b) { return b.cost - a.cost; }).map(function (b) { return b.label + " " + (b.cost * 1000).toFixed(1) + " ms"; }).join(", ");
+  var modTxt = pr.modifiers ? pr.modifiers.experience + " (hand noise ×" + pr.modifiers.noise.toFixed(2) + ")" + ", grip " + pr.modifiers.grip + ", lift time ×" + pr.modifiers.lift.toFixed(2) : "";
   var tests = [["Faster", cm / 1.12], ["Recommended", cm], ["Slower", cm * 1.12]].map(function (t) {
     return '<tr class="' + (t[0] === "Recommended" ? "hl" : "") + '"><td>' + t[0] + '</td><td class="n">' + f1(t[1]) + '</td><td class="n">' + M.sensFor(t[1], dpi).toFixed(3) + "</td></tr>";
   }).join("");
@@ -1610,9 +1632,10 @@ function renderResult() {
           '<div class="sec-t">Model <span>estimated extra time per engagement</span></div><div class="panel">' +
           '<div class="chart" id="costChart">' + cc.svg + '<div class="tt"></div></div>' +
           '<div class="legend"><span><i style="background:var(--ink)"></i>Total</span><span><i style="background:#2a9fd6"></i>Precision</span><span><i style="background:var(--yellow)"></i>Speed / slow flicks</span><span><i style="background:var(--pink)"></i>Pad / reach</span><span><i style="background:var(--teal)"></i>Your result</span></div>' +
-          '<div class="math">small correction  t_sub·(1−p)/p,  p = erf(W / 2√2·σ0)     σ0 = ' + (pr.sigma * 10).toFixed(2) + " mm\ntarget switch     0.50 s × 0.035 × log2(C / " + f1(pr.cFlick) + ")²\nbig turns         0.30 s·lifts + 0.06 s·P(travel > " + f1(pr.reach) + " cm) + speed limit\nusable pad " + f1(pr.usable) + " cm · averaged over " + R.nScenarios + " assumption sets · minimum " + f1(R.cModel) + " cm</div>" +
+          '<div class="math">small correction  t_sub·(1−p)/p,  p = erf(W / 2√2·σ0)     σ0 = ' + (pr.sigma * 10).toFixed(2) + " mm\ntarget switch     0.50 s × 0.035 × log2(C / " + f1(pr.cFlick) + ")²\nbig turns         0.30 s·lifts + 0.06 s·P(travel > " + f1(pr.reach) + " cm) + speed limit\ntracking          t_track·(p∞/p − 1),  angular error = √((360·σT/C)² + (k·ω·τ)²)   ω = " + pr.omega.toFixed(1) + "°/s\nusable pad " + f1(pr.usable) + " cm · averaged over " + R.nScenarios + " assumption sets · minimum " + f1(R.cModel) + " cm</div>" +
           '<ul class="notes"><li><b>Task mix:</b> ' + mixTxt + ".</li>" + (R.agents ? "<li><b>Agents:</b> " + agentTxt + "</li>" : "") +
           "<li><b>Your current setting:</b> " + anchorTxt + "</li>" +
+          "<li><b>What costs time at your result:</b> " + driveTxt + ". <b>Hand modifiers:</b> " + modTxt + ". <b>Optimum spread</b> across assumption sets: " + f1(R.optimumSpread[0]) + "–" + f1(R.optimumSpread[1]) + " cm.</li>" +
           "<li><b>Not used:</b> surface type and match stats. Neither shows whether a sensitivity suits your hand.</li></ul>" +
           '<p class="callout">Unvalidated estimate. The biggest uncertainty is the hand noise floor, which is why the result averages over its plausible range. Pro settings are for comparison only.</p>' +
           '<details><summary>Sources</summary><ul class="src">' +

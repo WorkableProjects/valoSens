@@ -69,7 +69,9 @@ t("extreme but valid inputs give finite, ordered results", () => {
     const r = rec({ pad, reachCm, current: cur ? { cm: cur } : null, satisfaction: 5 });
     assert(isFinite(r.cm) && r.cm > 0, JSON.stringify({ pad, reachCm, cur }));
     assert(r.band[0] <= r.cModel + 1e-9 && r.cModel <= r.band[1] + 1e-9);
-    assert(r.lo <= r.cm + 1e-9 && r.cm <= r.hi + 1e-9 || (r.anchor && r.anchor.stay));
+    // v4.0: the result lies between the current setting and the model optimum (or stays).
+    if (cur) { const a = Math.min(cur, r.cModel), b = Math.max(cur, r.cModel); assert(r.cm >= Math.min(a, 8) - 1e-9 && (r.cm <= b + 1e-9 || r.anchor.stay), JSON.stringify({ pad, reachCm, cur, cm: r.cm })); }
+    else assert(r.lo <= r.cm + 1e-9 && r.cm <= r.hi + 1e-9);
     r.curve.forEach(p => assert(isFinite(p.total) && p.total >= 0));
   }
 });
@@ -143,30 +145,60 @@ t("role and weapon effects stay inside the near-optimal range", () => {
 });
 
 /* ---------------- Current setting, satisfaction and range rule ---------------- */
-t("a current setting inside the near-optimal range is kept", () => {
+t("a current setting at the model's best is kept", () => {
   const r0 = rec({});
-  const inside = Math.sqrt(r0.band[0] * r0.band[1]) * 1.05;
-  const r = rec({ current: { cm: inside }, satisfaction: 1 });
-  assert.strictEqual(r.cm, inside);
+  const r = rec({ current: { cm: r0.cModel * 1.01 }, satisfaction: 1 });
+  assert.strictEqual(r.cm, r0.cModel * 1.01);
+  assert(r.anchor.stay);
 });
-t("a current setting far outside moves only to the nearest edge of the range", () => {
+t("v4: a setting inside the near-optimal range still moves when the scenarios agree", () => {
   const r0 = rec({});
-  const far = rec({ current: { cm: 12 }, satisfaction: 3 });
-  assert(Math.abs(far.cm - r0.band[0]) < 1e-9);
-  const slow = rec({ current: { cm: 140 }, satisfaction: 3 });
-  assert(Math.abs(slow.cm - r0.band[1]) < 1e-9);
+  const inside = r0.band[0] * 1.04;                          // inside the band, but well below the optimum
+  assert(inside < r0.cModel);
+  const r = rec({ current: { cm: inside }, satisfaction: 3 });
+  assert(!r.anchor.stay && r.cm > inside && r.cm <= r0.cModel, "moved from " + inside + " to " + r.cm);
+  assert(r.anchor.agreement > 0.7);
 });
-t("satisfaction can widen the stay tolerance, but at most 2x", () => {
-  const E = M.expectedCurve(base), tol = M.PARAMS.tolerance.central;
-  function at(mult) {                       // a setting just below the optimum whose extra cost is mult * tol
-    let lo = 8, hi = E.cStar;
-    for (let i = 0; i < 60; i++) { const m = Math.sqrt(lo * hi); if (E.at(m).total - E.jStar > mult * tol) lo = m; else hi = m; }
-    return hi;
-  }
-  const c15 = at(1.5), c3 = at(3);
-  assert(rec({ current: { cm: c15 }, satisfaction: 5 }).cm === c15);
-  assert(rec({ current: { cm: c15 }, satisfaction: 1 }).cm !== c15);
-  assert(rec({ current: { cm: c3 }, satisfaction: 5 }).cm !== c3);
+t("v4: the same answers with a different current setting give different results", () => {
+  const a = rec({ current: { cm: 30 } }).cm, b = rec({ current: { cm: 70 } }).cm;
+  assert(a > 30 && b < 70 && a !== b);
+});
+t("v4: large changes are split into stages capped at maxStep, and a re-run continues the plan", () => {
+  const cap = M.PARAMS.maxStep.central;
+  const r1 = rec({ current: { cm: 15 } });
+  assert(r1.anchor.stages >= 2 && Math.abs(r1.cm / 15 - 1 - cap) < 1e-6);
+  assert(Math.abs(r1.anchor.plan[0] - r1.cm) < 1e-9);
+  const r2 = rec({ current: { cm: r1.cm } });                 // next session starts from the new setting
+  assert(r2.cm > r1.cm && r2.cm <= r1.cModel + 1e-9);
+  const slow = rec({ current: { cm: 140 } });
+  assert(Math.abs(slow.cm / 140 - 1 / (1 + cap)) < 1e-6);
+});
+t("v4: satisfaction shrinks the step (at most 2x re-adaptation cost) but never blocks a clear move", () => {
+  const r0 = rec({}), c = r0.cModel * 1.12;
+  const s1 = rec({ current: { cm: c }, satisfaction: 1 }), s5 = rec({ current: { cm: c }, satisfaction: 5 });
+  assert(s1.anchor.satMult === 1 && s5.anchor.satMult === 2);
+  assert(Math.abs(Math.log(s5.cm / c)) <= Math.abs(Math.log(s1.cm / c)) + 1e-12);
+  const far = rec({ current: { cm: 20 }, satisfaction: 5 });
+  assert(!far.anchor.stay);
+});
+t("v4: steps below the JND are not recommended", () => {
+  const r0 = rec({});
+  const pr = M.progression(C => Math.pow(Math.log(C / 50), 2) * 0.001, 50 * 1.02, 50, { lambda: 0.03, jnd: 0.03, maxStep: 0.15, optima: [{ c: 50, w: 1 }] });
+  assert(pr.stay);
+  assert(r0.optimumSpread[0] < r0.cModel && r0.cModel < r0.optimumSpread[1]);
+});
+t("v4: tracking task, experience, grip and mouse weight act in the expected directions", () => {
+  assert.strictEqual(M.TASKS.length, 5);
+  const pr = rec({}).profile; assert(Math.abs(pr.mix.reduce((a, b) => a + b, 0) - 1) < 1e-9 && pr.mix[4] > 0);
+  // Tracking error from the hand floor shrinks with slower settings, so more tracking favors slower settings.
+  const noTrack = rec({ mix: [0.4, 0.4, 0.15, 0.05, 0] }).cModel, track = rec({ mix: [0.3, 0.3, 0.15, 0.05, 0.2] }).cModel;
+  assert(track > noTrack, track + " vs " + noTrack);
+  // A noisier (newer) hand favors slower settings.
+  assert(rec({ experience: "new" }).cModel > rec({ experience: "comp" }).cModel);
+  // Heavier mouse: slower lifts, so a faster setting.
+  assert(rec({ mouseG: 120 }).cModel < rec({ mouseG: 45 }).cModel);
+  assert.throws(() => rec({ grip: "banana" }), RangeError);
+  assert.throws(() => rec({ mouseG: 5 }), RangeError);
 });
 t("questionnaire confidence is a heuristic label, not a number", () => {
   const r = rec({});
@@ -177,7 +209,7 @@ t("questionnaire confidence is a heuristic label, not a number", () => {
 /* ---------------- Sensitivity analysis ---------------- */
 t("sensitivity analysis covers every assumption and reports finite swings", () => {
   const s = M.sensitivityAnalysis(base);
-  assert.strictEqual(s.params.length, Object.keys(M.PARAMS).length - 1);
+  assert.strictEqual(s.params.length, Object.keys(M.PARAMS).length - 4);   // decision constants are not model assumptions
   s.params.forEach(p => assert(isFinite(p.low) && isFinite(p.high) && p.swing >= 0, p.param));
   for (const p of s.params) assert(["measured", "research", "estimate"].includes(p.basis));
 });
@@ -210,7 +242,9 @@ t("calibration recovers a clear optimum and stays inside the tested range", () =
   assert(m.validation.curveBeatsFlat);
   assert(oct(m.fittedOptimum, 45) < 0.25, "fitted " + m.fittedOptimum);
   assert(r.cm >= m.tested[0] && r.cm <= m.tested[m.tested.length - 1]);
-  assert(r.cm >= m.nearOptimal[0] - 1e-9 && r.cm <= m.nearOptimal[1] + 1e-9);
+  // v4.0: moves from the current setting toward the measured best, never past it.
+  const cur = cinp.current.cm, a = Math.min(cur, m.fittedOptimum), b = Math.max(cur, m.fittedOptimum);
+  assert(r.cm >= a - 1e-9 && r.cm <= b + 1e-9 && r.cm !== cur, "cm " + r.cm);
   assert.strictEqual(m.validation.modelVsCurrent.verdict, "better");
   assert.strictEqual(r.confidence.type, "measured");
 });
