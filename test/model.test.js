@@ -339,5 +339,27 @@ t("scoped advice never changes the hipfire recommendation", () => {
   assert.strictEqual(rec({ weapon: "rifle", agents: ["Sage"] }).cm, rec({ weapon: "rifle", agents: ["Sage"] }).cm);
 });
 
+/* ---------------- v3: DPI / pixel skipping, turn-share uncertainty ---------------- */
+t("DPI check: flags pixel skipping at low DPI on 4K, passes normal setups", () => {
+  const a = M.dpiAdvice(40, 400, 3840);
+  assert.strictEqual(a.level, "skip");
+  assert(Math.abs(a.degPerPixel - 0.0375) < 0.001, a.degPerPixel);
+  assert(a.suggest.dpi > 400 && Math.abs(M.cmFrom(a.suggest.dpi, a.suggest.sens) - 40) < 1e-9);
+  assert.strictEqual(M.dpiAdvice(45, 800, 1920).level, "ok");
+  assert.strictEqual(M.dpiAdvice(45, 6400, 1920).level, "high");
+  assert(rec({ resWidth: 2560 }).dpiAdvice.width === 2560);
+  assert.throws(() => rec({ resWidth: 10 }), RangeError);
+});
+t("turn shares are averaged over their uncertainty (5 uncertain constants, 243 scenarios)", () => {
+  const r = rec({});
+  assert.strictEqual(r.nScenarios, 243);
+  const P = Object.assign({}, M.PARAMS); assert(P.turnScale && P.turnScale.basis === "estimate");
+  const lo = M.expectedCurve(Object.assign({}, base), { noUncertainty: true, params: { turnScale: 0.5 } }).cStar;
+  const hi = M.expectedCurve(Object.assign({}, base), { noUncertainty: true, params: { turnScale: 1.5 } }).cStar;
+  assert(hi < lo, "more big turns should favor a faster setting: " + lo + " vs " + hi);
+  const pr = M.buildProfile(Object.assign({}, base), Object.assign({}, Object.fromEntries(Object.keys(M.PARAMS).map(k => [k, M.PARAMS[k].central])), { turnScale: 1.5 }));
+  assert(Math.abs(pr.mix.reduce((a, b) => a + b, 0) - 1) < 1e-9);
+});
+
 console.log("\n" + n + " passed, " + failed + " failed");
 if (failed) process.exit(1);

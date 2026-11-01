@@ -1,5 +1,5 @@
 /*
- * valoSens model v2.
+ * valoSens model v3.0.
  *
  * Internal unit: cm/360 (centimetres of mouse travel per full 360° turn), written C.
  *
@@ -193,11 +193,11 @@
     mtFlick:  { central: 0.50,  low: 0.40,  high: 0.65,  unit: "s",   basis: "research",
                 note: "Typical flick completion time at the best setting in NVIDIA's study." },
     tLift:    { central: 0.30,  low: 0.20,  high: 0.50,  unit: "s",   basis: "estimate",
-                note: "Time lost per mouse lift and re-centre." },
+                note: "Time lost per mouse lift and re-centre. Casiez et al. 2008: about 24% clutch time raised movement time by 124%; no per-lift time is published for FPS play." },
     tSwitch:  { central: 0.06,  low: 0.03,  high: 0.12,  unit: "s",   basis: "estimate",
                 note: "Time lost when a movement exceeds the aiming joint's comfortable reach and a bigger joint takes over." },
-    vPeak:    { central: 150,   low: 100,   high: 250,   unit: "cm/s", basis: "estimate",
-                note: "Peak hand speed in a large turn." },
+    vPeak:    { central: 150,   low: 100,   high: 250,   unit: "cm/s", basis: "research",
+                note: "Peak hand speed in a large turn. Casiez et al. 2008 measured 1.5 m/s at the 97th percentile (2.4 m/s max) and a 10–14% slowdown near that limit." },
     startSpread: { central: 0.5, low: 0.2,  high: 0.8,   unit: "fraction", basis: "estimate",
                 note: "How far from the pad centre the hand typically starts a turn, as a fraction of the half-width." },
     recentre: { central: 0.85,  low: 0.7,   high: 0.95,  unit: "fraction", basis: "estimate",
@@ -206,12 +206,14 @@
                 note: "Uncertainty of comfortable reach when it hasn't been measured." },
     mouseW:   { central: 6.5,   low: 6.0,   high: 7.0,   unit: "cm",  basis: "measured",
                 note: "Typical mouse width, which reduces the usable pad width." },
+    turnScale:{ central: 1.0,   low: 0.5,   high: 1.5,   unit: "x",   basis: "estimate",
+                note: "How many big turns the task mix contains, relative to the role/agent mix. No study measures turn angles in real Valorant or CS matches, so the turn shares are averaged over half to one and a half times their stated value." },
     tolerance:{ central: 0.006, low: 0.003, high: 0.012, unit: "s",   basis: "estimate",
                 note: "Extra time per engagement treated as practically negligible when defining the near-optimal range." }
   };
   // Parameters averaged over (3-point quadrature: low/central/high with weights 1/4, 1/2, 1/4).
   // These are the constants that moved the questionnaire answer most in sensitivityAnalysis().
-  var UNCERTAIN = ["sigma0", "cFlick", "headM", "tSub"];
+  var UNCERTAIN = ["sigma0", "cFlick", "headM", "tSub", "turnScale"];
 
   /* Task mix: explicit assumptions, not role bonuses. theta = turn size (deg). */
   var TASKS = [
@@ -240,9 +242,9 @@
   };
   // Aiming joint -> wrist share and comfortable one-direction reach (cm) before a bigger joint takes over.
   // One-direction reach from the starting point, about half of a comfortable single swipe, since a turn can go either way:
-  // wrist-only swipe ~5 cm (3.5–8; measured wrist ROM x estimated 8–12 cm lever), arm + wrist swipe ~20 cm (15–30;
-  // estimate under Casiez et al.'s 30 cm no-clutch cap). Mixed styles interpolate in log space. ESTIMATES.
-  var REACH_WRIST = 2.5, REACH_ARM = 10;
+  // wrist-only ~±3 cm (30–40° comfortable radial–ulnar deviation, Ryu et al. 1991, on an estimated 8–10 cm pivot),
+  // arm + wrist swipe ~20 cm (15–30; estimate under Casiez et al.'s 30 cm no-clutch cap). Mixed styles interpolate in log space.
+  var REACH_WRIST = 3, REACH_ARM = 10;
   var R_REF = 20;   // m, reference engagement distance (estimate)
   var LIMB = {
     wrist:   { wristShare: 0.9, label: "Wrist" },
@@ -275,14 +277,23 @@
     var reach = reachMeasured ? input.reachCm : LIMB[limbKey].reach;
     var reachSd = reachMeasured ? 0.10 : P.reachSd * (limbKey === "unsure" ? 1.4 : 1);
     var w = headDeg(R_REF, P.headM), wWpn = headDeg(wpn.r, P.headM);
+    var mix0 = (input.mix && input.mix.length === 4) ? input.mix.slice()
+        : (input._agentProf ? input._agentProf.mix.slice() : ROLE[role].mix.slice());
     return {
-      mix: (input.mix && input.mix.length === 4) ? input.mix.slice()
-        : (input._agentProf ? input._agentProf.mix.slice() : ROLE[role].mix.slice()),
+      mix: scaleTurns(mix0, input.mix ? 1 : P.turnScale),
       usable: usable, D: usable / 2, reach: reach, reachSd: reachSd, reachMeasured: reachMeasured,
       r: wpn.r, headDeg: w, sigma: P.sigma0, v: P.vPeak,
       cFlick: P.cFlick * Math.pow(wWpn / w, -0.25),    // 16x smaller target -> 1 octave slower (NVIDIA)
       P: P
     };
+  }
+
+  // Scale the big-turn shares by k and take the difference from the small-correction/flick shares proportionally.
+  function scaleTurns(mix, k) {
+    if (k === 1 || k == null) return mix;
+    var turns = mix[2] + mix[3], small = mix[0] + mix[1];
+    var t2 = Math.min(0.9, turns * k), f = small > 0 ? (1 - t2) / small : 0, g = turns > 0 ? t2 / turns : 0;
+    return [mix[0] * f, mix[1] * f, mix[2] * g, mix[3] * g];
   }
 
   // Expected lifts for a movement of a cm. The distance R to the pad edge in the turn direction is uniform on
@@ -392,6 +403,7 @@
     }
     if (input.satisfaction != null && !(input.satisfaction >= 1 && input.satisfaction <= 5)) throw new RangeError("satisfaction must be 1–5");
     if (input.agents != null) normaliseAgents(input.agents);
+    if (input.resWidth != null && !(input.resWidth >= 640 && input.resWidth <= 8000)) throw new RangeError("resWidth must be 640–8000 px");
     if (input.reachCm != null && !(finitePos(input.reachCm) && input.reachCm <= 100)) throw new RangeError("reachCm must be between 0 and 100");
     if (input.mix != null) {
       if (!Array.isArray(input.mix) || input.mix.length !== 4 || input.mix.some(function (x) { return !(x >= 0); }) || Math.abs(mean(input.mix) * 4 - 1) > 1e-6)
@@ -725,6 +737,7 @@
       lo: range[0], hi: range[1], band: band, cModel: E.cStar, modelCost: E.at(E.cStar), tolerance: tol,
       profile: pr, anchor: anchor, stats: statsSignals(input.stats), measured: measured, confidence: confidence,
       agents: input._agentProf || null, scopedAdvice: scopedAdvice(input._agentProf, input.weapon),
+      dpiAdvice: input.dpi ? dpiAdvice(cm, input.dpi, input.resWidth) : null,
       notes: notes, curve: curve, nearPros: near,
       proPercentile: PROS.filter(function (p) { return p.cm < cm; }).length / Math.max(1, PROS.length),
       nScenarios: E.nScenarios
@@ -896,8 +909,28 @@
     };
   }
 
+  /* DPI / pixel-skipping check. At the screen centre one pixel spans atan(2 tan(hFOV/2) / width) degrees
+     (103° hFOV: 0.075° at 1920, 0.056° at 2560, 0.0375° at 3840). If one mouse count turns you further than one
+     pixel, the view jumps in steps you can see. Hand noise (~0.2 mm, Casiez 2008) is the real precision limit at
+     normal settings, and sensors smooth or jitter at very high DPI, so 800–1600 is the evidence-based range. */
+  function dpiAdvice(cm, dpi, width) {
+    width = width || 1920;
+    var sens = sensFor(cm, dpi), perCount = YAW * sens, px = Math.atan(Math.tan(HFOV / 2 * Math.PI / 180) / (width / 2)) * 180 / Math.PI;
+    var ratio = perCount / px, out = { dpi: dpi, sens: sens, degPerCount: perCount, degPerPixel: px, ratio: ratio, width: width, suggest: null, level: "ok" };
+    if (ratio > 1) {
+      var d = [800, 1600, 3200].filter(function (x) { return x > dpi && YAW * sensFor(cm, x) <= px * 0.75; })[0] || 1600;
+      out.level = "skip"; out.suggest = { dpi: d, sens: sensFor(cm, d) };
+      out.text = "At " + dpi + " DPI each mouse count turns you " + perCount.toFixed(3) + "°, more than one pixel (" + px.toFixed(3) + "°) at your resolution, so fine adjustments jump. Use " + d + " DPI at sens " + out.suggest.sens.toFixed(3) + " for the same cm/360.";
+    } else if (dpi > 3200) {
+      out.level = "high"; out.text = "Above 3200 DPI many sensors add smoothing or jitter, and nothing is gained: hand noise, not counts, limits precision. 800–1600 DPI is plenty.";
+    } else if (ratio > 0.5) {
+      out.level = "near"; out.text = "Each count turns you " + Math.round(ratio * 100) + "% of a pixel. Fine for now, but 1600 DPI would give finer steps at the same cm/360.";
+    } else out.text = "Each count turns you " + Math.round(ratio * 100) + "% of a pixel: no visible stepping. Keep your DPI.";
+    return out;
+  }
+
   var api = {
-    VERSION: "2.1.0", AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
+    VERSION: "3.0.0", dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
     findAgent: findAgent, agentMix: agentMix, agentsProfile: agentsProfile, matchMultiplier: matchMultiplier, scopedAdvice: scopedAdvice,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,

@@ -188,3 +188,17 @@ Casiez, Vogel, Balakrishnan & Cockburn 2008, *HCI* 23(3) ([PDF](https://www.dgp.
 | Gain-invariance band | movement time roughly flat between CDmin = Dmax/ORmax and CDmax = Wmin/c0 | n/a | n/a | MEASURED (Casiez 2008) |
 
 Rows marked **ESTIMATE**: Valorant pitch = yaw; the proportional noise coefficient k; comfortable swipe travel; wrist-only travel (the lever arm); the central values chosen for functional ROM; and the functional form `σ = sqrt(c0² + (kA)²)`.
+
+---
+
+## v3.0 changes (2026-11-01)
+
+| Constant or mechanism | v3 value | Evidence |
+|---|---|---|
+| Peak hand speed `vPeak` | 150 cm/s, now labelled research | Casiez et al. 2008: 1.5 m/s at the 97th percentile, 2.4 m/s max, and a 10–14% slowdown near the limit |
+| Wrist-only reach | **±3 cm** (was ±2.5) | 30–40° comfortable radial–ulnar deviation (Ryu et al. 1991, *J Hand Surg* 16:409) on an estimated 8–10 cm pivot [pivot U] |
+| Lift time `tLift` | 0.3 s (estimate) | Casiez 2008 reports clutching only as a share of time: about 24% clutch time gave +124% movement time. Kang et al. CHI 2024 (doi:10.1145/3613904.3642797) report clutches per minute in real play, but the tables could not be retrieved [U]. |
+| Big-turn share | **New uncertain constant `turnScale`** (0.5× / 1× / 1.5×, averaged with the others → 243 scenarios) | No study measures turn angles in real Valorant or CS matches. Swing 22% on the example player. |
+| Pixel skipping | **New `dpiAdvice()`** | One pixel at the screen centre is atan(tan(51.5°)/(W/2)): 0.075° at 1920, 0.056° at 2560, 0.0375° at 3840. One count is 0.07 × sens degrees. A warning appears when a count exceeds a pixel. NVIDIA used 3200 DPI so pixel-level rotation was possible. PAW3395 jitter at 15k CPI (TechPowerUp) [contested]. Recommend 800–1600. |
+| Adaptation | Test-plan text | Gain changes adapt fast and generalise (Krakauer et al. 2000, *J Neurosci* 20:8916). NVIDIA players settled within about 250 trials. No direct evidence for 5–10% steps or a 2–4 week trial, so these are now labelled heuristics. |
+| Pro median | ProSettings (705 pros, May 2026): median eDPI 240 → 54.4 cm; Setup.gg median 231; SensLab 224 | Comparison only |
