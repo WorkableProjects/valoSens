@@ -2,6 +2,17 @@
 
 Open `index.html` in a browser. It needs no build step or server, and nothing leaves the page.
 
+**UI:**
+- Dark, minimal, game-client style. One question per screen, with staggered entrances and a thin progress line.
+- The results screen is laid out like a match-details page:
+  - a count-up sensitivity header;
+  - Result / Model / Vs pros / Test plan tabs;
+  - a pro-distribution curve that draws in, with your near-optimal range and a result pin;
+  - a factor breakdown with impact chevrons (each factor's effect vs a neutral answer);
+  - a confidence badge and a settings card.
+- Animations switch off under `prefers-reduced-motion`.
+- Fonts load from Google Fonts (Barlow / Barlow Condensed), with system fallbacks offline.
+
 - Model: `model.js` (works in the browser and in Node)
 - Tests: `node test/model.test.js` (model) and `node test/ui.e2e.js` (browser smoke test, needs Playwright)
 - Pro data: regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`

@@ -11,7 +11,9 @@ async function flow(b, vp, steps) {
   const next = () => p.click("#next");
   await steps(p, pick, next);
   await p.waitForSelector(".big");
+  await p.waitForTimeout(1300);            // let the count-up finish
   const out = { big: (await p.textContent(".big")).trim(), scroll: await p.evaluate(() => document.documentElement.scrollWidth), width: vp.size.width, errs };
+  await p.getByRole("tab", { name: "Model" }).click();
   await p.hover("#costChart #hit", { position: { x: 200, y: 80 } });
   out.tooltip = await p.textContent("#costChart .tt");
   out.text = await p.textContent("#app");
