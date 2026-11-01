@@ -14,6 +14,7 @@ async function flow(b, vp, steps) {
   const out = { big: (await p.textContent(".big")).trim(), scroll: await p.evaluate(() => document.documentElement.scrollWidth), width: vp.size.width, errs };
   await p.hover("#costChart #hit", { position: { x: 200, y: 80 } });
   out.tooltip = await p.textContent("#costChart .tt");
+  out.text = await p.textContent("#app");
   await p.close();
   return out;
 }
@@ -26,7 +27,7 @@ async function flow(b, vp, steps) {
     await next();
     await pick("About 45 cm"); await next(); await pick("Speed"); await next(); await pick("Wrist + forearm"); await next();
     await pick("Duelist"); await next();
-    if (await p.$("#in-agent1") && (await p.$$("#in-agent1 option")).length > 1) { await p.selectOption("#in-agent1", { index: 1 }); }
+    await p.selectOption("#in-agent1", "Jett"); await p.selectOption("#in-agent2", "Omen");
     await next();
     await pick("Rifles"); await next(); await pick("2+ years"); await next();
     await pick("Yes, add stats"); await next();
@@ -49,6 +50,10 @@ async function flow(b, vp, steps) {
     console.log(r.width + "px:", r.big, "| tooltip:", r.tooltip.replace(/\s+/g, " "), "| errors:", r.errs.length);
     if (r.errs.length || r.scroll > r.width || !/cm/.test(r.big)) ok = false;
   });
+  const t0 = results[0].text;
+  const agentLine = /Agents:.*Jett.*Tailwind/.test(t0), scoped = /scoped multiplier of 0\.9/.test(t0);
+  console.log("agent explanation shown:", agentLine, "| scoped advice for Jett shown:", scoped);
+  if (!agentLine || !scoped) ok = false;
   console.log(ok ? "UI smoke test passed" : "UI smoke test FAILED");
   process.exit(ok ? 0 : 1);
 })();

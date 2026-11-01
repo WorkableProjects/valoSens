@@ -276,7 +276,8 @@
     var reachSd = reachMeasured ? 0.10 : P.reachSd * (limbKey === "unsure" ? 1.4 : 1);
     var w = headDeg(R_REF, P.headM), wWpn = headDeg(wpn.r, P.headM);
     return {
-      mix: (input.mix && input.mix.length === 4) ? input.mix.slice() : ROLE[role].mix.slice(),
+      mix: (input.mix && input.mix.length === 4) ? input.mix.slice()
+        : (input._agentProf ? input._agentProf.mix.slice() : ROLE[role].mix.slice()),
       usable: usable, D: usable / 2, reach: reach, reachSd: reachSd, reachMeasured: reachMeasured,
       r: wpn.r, headDeg: w, sigma: P.sigma0, v: P.vPeak,
       cFlick: P.cFlick * Math.pow(wWpn / w, -0.25),    // 16x smaller target -> 1 octave slower (NVIDIA)
@@ -390,6 +391,7 @@
       if (!validCm(input.current.cm)) throw new RangeError("current.cm must be a positive cm/360 between " + LIMITS.cmMin + " and " + LIMITS.cmMax);
     }
     if (input.satisfaction != null && !(input.satisfaction >= 1 && input.satisfaction <= 5)) throw new RangeError("satisfaction must be 1–5");
+    if (input.agents != null) normaliseAgents(input.agents);
     if (input.reachCm != null && !(finitePos(input.reachCm) && input.reachCm <= 100)) throw new RangeError("reachCm must be between 0 and 100");
     if (input.mix != null) {
       if (!Array.isArray(input.mix) || input.mix.length !== 4 || input.mix.some(function (x) { return !(x >= 0); }) || Math.abs(mean(input.mix) * 4 - 1) > 1e-6)
@@ -671,8 +673,13 @@
    *   calibration?: { trials: [...], options?: {...} }
    * }
    * ========================================================================= */
+  function withAgents(input, rules) {
+    var ap = agentsProfile(input.agents, rules);
+    return ap ? Object.assign({}, input, { _agentProf: ap }) : input;
+  }
   function recommend(input, opts) {
     validateInput(input);
+    input = withAgents(input, opts && opts.agentRules);
     var E = expectedCurve(input, opts);
     var pr = E.profile, P = E.base;
     var tol = P.tolerance;
@@ -717,6 +724,7 @@
       cm: cm, reason: reason, mode: measured ? "measured" : "questionnaire",
       lo: range[0], hi: range[1], band: band, cModel: E.cStar, modelCost: E.at(E.cStar), tolerance: tol,
       profile: pr, anchor: anchor, stats: statsSignals(input.stats), measured: measured, confidence: confidence,
+      agents: input._agentProf || null, scopedAdvice: scopedAdvice(input._agentProf, input.weapon),
       notes: notes, curve: curve, nearPros: near,
       proPercentile: PROS.filter(function (p) { return p.cm < cm; }).length / Math.max(1, PROS.length),
       nScenarios: E.nScenarios
@@ -726,8 +734,14 @@
   /* =========================================================================
    * Parameter-sensitivity check: how much each assumption moves the model optimum.
    * ========================================================================= */
+  function scaleRates(k) {
+    var r = {}; Object.keys(AGENT_RULES.rate).forEach(function (x) { r[x] = AGENT_RULES.rate[x] * k; });
+    return { rate: r, holdShift: AGENT_RULES.holdShift * k, weights: AGENT_RULES.weights };
+  }
   function sensitivityAnalysis(input) {
     validateInput(input);
+    var rawInput = input;
+    input = withAgents(input);
     var baseC = expectedCurve(input, { noUncertainty: true }).cStar;
     var rows = Object.keys(PARAMS).filter(function (k) { return k !== "tolerance"; }).map(function (k) {
       var lo = {}, hi = {}; lo[k] = PARAMS[k].low; hi[k] = PARAMS[k].high;
@@ -739,17 +753,152 @@
       { param: "role → flex", value: alt({ role: "f" }) },
       { param: "weapon → rifle", value: alt({ weapon: "rifle" }) },
       { param: "no NVIDIA flick term", value: expectedCurve(input, { noUncertainty: true, params: { kappa: 0 } }).cStar },
-      { param: "mix: all micro/flick equal, no turns", value: alt({ mix: [0.5, 0.5, 0, 0] }) }
+      { param: "mix: all micro/flick equal, no turns", value: alt({ mix: [0.5, 0.5, 0, 0] }) },
+      { param: "agents ignored (role mix)", value: expectedCurve(Object.assign({}, rawInput, { agents: null }), { noUncertainty: true }).cStar },
+      { param: "agent ability rates x0.5", value: expectedCurve(withAgents(rawInput, scaleRates(0.5)), { noUncertainty: true }).cStar },
+      { param: "agent ability rates x2", value: expectedCurve(withAgents(rawInput, scaleRates(2)), { noUncertainty: true }).cStar }
     ].map(function (t) { t.change = Math.log(t.value / baseC); return t; });
     rows.sort(function (a, b) { return b.swing - a.swing; });
     return { base: baseC, params: rows, toggles: toggles };
   }
 
-  // Agent profiles: filled in from research/agent_mechanics.json (work in progress).
-  var AGENT_LIST = [];
+  /* =========================================================================
+   * Agents (research/agent_mechanics.json -> scripts/build_agents.js)
+   * Raw catalogued mechanics per agent. How they change the task mix is set by AGENT_RULES below.
+   * ========================================================================= */
+  var AGENT_RULES = {
+    // Share of engagements that include a time-critical re-orientation caused by this ability (ESTIMATES:
+    // no per-ability usage data exists). Signature (E) abilities recharge, other basics are bought, ultimates are rare.
+    rate: { E: 0.15, C: 0.08, Q: 0.08, X: 0.03 },
+    holdShift: 0.05,          // max share moved from target switches to small corrections for anchor kits (ESTIMATE)
+    weights: [0.5, 0.3, 0.2]  // main, second, third agent (assumption, shown in the UI)
+  };
+  var AGENT_LIST = /*@AGENTS*/[
+    {"name":"Hush","role":"d","release":2026,"repos":[{"key":"C","name":"Flow","lo":0,"hi":90}],"hold":[],"guided":["Telekinesis","Flashbulb","Displacement","Suspension"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Iso","role":"d","release":2023,"repos":[{"key":"X","name":"Kill Contract","lo":0,"hi":90}],"hold":[],"guided":[],"weapon":["Double Tap","Kill Contract"],"adsZoom":null,"operator":"rare"},
+    {"name":"Jett","role":"d","release":2020,"repos":[{"key":"Q","name":"Updraft","lo":0,"hi":45},{"key":"E","name":"Tailwind","lo":0,"hi":180}],"hold":[],"guided":["Cloudburst"],"weapon":["Blade Storm"],"adsZoom":null,"operator":"main"},
+    {"name":"Neon","role":"d","release":2022,"repos":[{"key":"E","name":"High Gear","lo":0,"hi":90}],"hold":[],"guided":[],"weapon":["Overdrive"],"adsZoom":null,"operator":"rare"},
+    {"name":"Phoenix","role":"d","release":2020,"repos":[{"key":"X","name":"Run It Back","lo":0,"hi":180}],"hold":[],"guided":["Blaze"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Raze","role":"d","release":2020,"repos":[{"key":"Q","name":"Blast Pack","lo":0,"hi":180}],"hold":[],"guided":[],"weapon":["Showstopper"],"adsZoom":null,"operator":"rare"},
+    {"name":"Reyna","role":"d","release":2020,"repos":[{"key":"E","name":"Dismiss","lo":0,"hi":90}],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Waylay","role":"d","release":2025,"repos":[{"key":"Q","name":"Lightspeed","lo":0,"hi":90},{"key":"E","name":"Refract","lo":90,"hi":180}],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Yoru","role":"d","release":2021,"repos":[{"key":"E","name":"Gatecrash","lo":90,"hi":180},{"key":"X","name":"Dimensional Drift","lo":0,"hi":180}],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Breach","role":"i","release":2020,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Fade","role":"i","release":2022,"repos":[],"hold":[],"guided":["Prowler"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Gekko","role":"i","release":2023,"repos":[],"hold":[],"guided":["Thrash"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"KAY/O","role":"i","release":2021,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Skye","role":"i","release":2020,"repos":[],"hold":[],"guided":["Trailblazer","Guiding Light"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Sova","role":"i","release":2020,"repos":[],"hold":[],"guided":["Owl Drone"],"weapon":["Hunter's Fury"],"adsZoom":null,"operator":"sometimes"},
+    {"name":"Tejo","role":"i","release":2025,"repos":[],"hold":[],"guided":["Stealth Drone"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Astra","role":"c","release":2021,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Brimstone","role":"c","release":2020,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Clove","role":"c","release":2024,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Harbor","role":"c","release":2022,"repos":[],"hold":[],"guided":["High Tide"],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Miks","role":"c","release":2026,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Omen","role":"c","release":2020,"repos":[{"key":"C","name":"Shrouded Step","lo":45,"hi":180},{"key":"X","name":"From the Shadows","lo":0,"hi":180}],"hold":[],"guided":["Dark Cover"],"weapon":[],"adsZoom":null,"operator":"sometimes"},
+    {"name":"Viper","role":"c","release":2020,"repos":[],"hold":["Viper's Pit"],"guided":[],"weapon":[],"adsZoom":null,"operator":"sometimes"},
+    {"name":"Chamber","role":"s","release":2021,"repos":[{"key":"E","name":"Rendezvous","lo":0,"hi":180}],"hold":["Trademark","Rendezvous"],"guided":[],"weapon":["Headhunter","Tour De Force"],"adsZoom":1.5,"operator":"main"},
+    {"name":"Cypher","role":"s","release":2020,"repos":[],"hold":["Trapwire","Spycam"],"guided":["Spycam"],"weapon":[],"adsZoom":null,"operator":"sometimes"},
+    {"name":"Deadlock","role":"s","release":2023,"repos":[],"hold":["Barrier Mesh","Sonic Sensor"],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Killjoy","role":"s","release":2020,"repos":[],"hold":["Nanoswarm","Alarmbot","Turret"],"guided":[],"weapon":[],"adsZoom":null,"operator":"sometimes"},
+    {"name":"Sage","role":"s","release":2020,"repos":[],"hold":[],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Veto","role":"s","release":2025,"repos":[{"key":"C","name":"Crosscut","lo":45,"hi":180}],"hold":["Crosscut","Chokehold","Interceptor"],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"},
+    {"name":"Vyse","role":"s","release":2024,"repos":[],"hold":["Razorvine","Shear"],"guided":[],"weapon":[],"adsZoom":null,"operator":"rare"}
+  ]/*@END*/;
+
+  var AGENTS = {};
+  AGENT_LIST.forEach(function (a) { AGENTS[a.name.toLowerCase()] = a; });
+  function findAgent(name) { return typeof name === "string" ? AGENTS[name.toLowerCase()] || null : null; }
+
+  // Spread a re-orientation of theta degrees over the task amplitudes so the mean amplitude is preserved.
+  function spreadTheta(theta) {
+    var v = [0, 0, 0, 0];
+    if (theta <= TASKS[1].theta) v[1] = 1;
+    else if (theta <= TASKS[2].theta) { var w = (theta - TASKS[1].theta) / (TASKS[2].theta - TASKS[1].theta); v[2] = w; v[1] = 1 - w; }
+    else { var w2 = Math.min(1, (theta - TASKS[2].theta) / (TASKS[3].theta - TASKS[2].theta)); v[3] = w2; v[2] = 1 - w2; }
+    return v;
+  }
+  // One agent's task mix: start from its class's mix, add ability-driven re-orientations, shift toward holding for anchor kits.
+  function agentMix(a, rules) {
+    rules = rules || AGENT_RULES;
+    var base = (ROLE[a.role] || ROLE.f).mix, add = [0, 0, 0, 0], total = 0, parts = [];
+    a.repos.forEach(function (r) {
+      var rate = rules.rate[r.key] || 0, theta = (r.lo + r.hi) / 2, v = spreadTheta(theta);
+      for (var j = 0; j < 4; j++) add[j] += rate * v[j];
+      total += rate;
+      parts.push({ ability: r.name, key: r.key, rate: rate, theta: theta });
+    });
+    var mix = base.map(function (m, j) { return m * (1 - total) + add[j]; });
+    var h = Math.min(a.hold.length, 3) / 3 * rules.holdShift;
+    var moved = Math.min(h, mix[1]); mix[1] -= moved; mix[0] += moved;
+    return { mix: mix, reorient: parts, holdShift: moved };
+  }
+  function normaliseAgents(list) {
+    if (list == null) return [];
+    if (!Array.isArray(list)) throw new RangeError("agents must be an array");
+    var out = [], seen = {};
+    list.forEach(function (x, i) {
+      var name = typeof x === "string" ? x : x && x.name, a = findAgent(name);
+      if (!a) throw new RangeError("Unknown agent: " + name);
+      if (seen[a.name]) return; seen[a.name] = 1;
+      var rank = out.length;    // weight by rank after removing duplicates
+      var share = typeof x === "object" && x.share != null ? x.share : AGENT_RULES.weights[rank] != null ? AGENT_RULES.weights[rank] : 0;
+      if (!(share >= 0)) throw new RangeError("agent share must be >= 0");
+      out.push({ agent: a, share: share });
+    });
+    var tot = out.reduce(function (s, x) { return s + x.share; }, 0);
+    if (out.length && !(tot > 0)) throw new RangeError("agent shares must sum to more than 0");
+    out.forEach(function (x) { x.share /= tot; });
+    return out;
+  }
+  function agentsProfile(list, rules) {
+    var ag = normaliseAgents(list);
+    if (!ag.length) return null;
+    var mix = [0, 0, 0, 0], detail = [];
+    ag.forEach(function (x) {
+      var m = agentMix(x.agent, rules);
+      for (var j = 0; j < 4; j++) mix[j] += x.share * m.mix[j];
+      detail.push({ name: x.agent.name, role: x.agent.role, share: x.share, mix: m.mix, reorient: m.reorient, holdShift: m.holdShift,
+        operator: x.agent.operator, adsZoom: x.agent.adsZoom, guided: x.agent.guided, weapon: x.agent.weapon });
+    });
+    return { mix: mix, agents: detail };
+  }
+
+  /* Scoped / ADS multiplier advice. Valorant multiplier 1.0 ~ 100% horizontal monitor-distance match
+     (community-verified), zoomed hFOV = 103/zoom. A p% match keeps the on-screen point at p% of the half-width
+     moving the same; p = 0 is the crosshair (focal-length) match. No study shows any match improves performance. */
+  var HFOV = 103;
+  var ZOOMS = { operator: 2.5, marshal: 3.5, outlaw: 3.5, headhunter: 1.5, rifle: 1.25 };
+  function matchMultiplier(zoom, p) {
+    var rad = Math.PI / 180, fh = HFOV * rad, fz = fh / zoom;
+    var r = p === 0 ? Math.tan(fz / 2) / Math.tan(fh / 2) : Math.atan(p * Math.tan(fz / 2)) / Math.atan(p * Math.tan(fh / 2));
+    return r / (fz / fh);
+  }
+  function scopedAdvice(agentProf, weapon) {
+    var opWeight = 0, chamber = 0;
+    if (agentProf) agentProf.agents.forEach(function (x) {
+      opWeight += x.share * (x.operator === "main" ? 1 : x.operator === "sometimes" ? 0.3 : 0);
+      if (x.adsZoom) chamber += x.share;
+    });
+    if (weapon === "sniper") opWeight = Math.max(opWeight, 1);
+    var level = opWeight >= 0.4 ? "main" : opWeight >= 0.1 ? "sometimes" : "rare";
+    var r3 = function (x) { return Math.round(x * 1000) / 1000; };
+    return {
+      scoped: { start: 1.0, level: level,
+        alternatives: level === "rare" ? [] : [
+          { value: r3(matchMultiplier(ZOOMS.operator, 0.75)), label: "Operator, 75% match" },
+          { value: r3(matchMultiplier(ZOOMS.operator, 0)), label: "Operator, crosshair match" },
+          { value: r3(matchMultiplier(ZOOMS.marshal, 0)), label: "Marshal/Outlaw, crosshair match" }] },
+      ads: { start: 1.0, chamber: chamber >= 0.2,
+        alternatives: chamber >= 0.2 ? [{ value: r3(matchMultiplier(ZOOMS.headhunter, 0)), label: "crosshair match for its 1.5x zoom; it also changes rifle ADS" }] : [] },
+      opWeight: opWeight,
+      evidence: "Preference only: about 70–80% of pros keep the scoped multiplier at 1.0, and no study shows a matching method improves aim."
+    };
+  }
 
   var api = {
-    VERSION: "2.0.0", AGENT_LIST: AGENT_LIST,
+    VERSION: "2.1.0", AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
+    findAgent: findAgent, agentMix: agentMix, agentsProfile: agentsProfile, matchMultiplier: matchMultiplier, scopedAdvice: scopedAdvice,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,
     PARAMS: PARAMS, UNCERTAIN: UNCERTAIN, TASKS: TASKS, ROLE: ROLE, WEAPON: WEAPON, LIMB: LIMB, SURFACE: SURFACE,

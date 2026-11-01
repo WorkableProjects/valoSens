@@ -260,5 +260,84 @@ t("fewer than three tested settings is handled and flagged", () => {
   assert(m.cm >= 30 && m.cm <= 50);
 });
 
+/* ---------------- Agents ---------------- */
+t("agent table is built from the research catalogue (30 agents, valid roles)", () => {
+  const cat = require("../research/agent_mechanics.json");
+  assert.strictEqual(M.AGENT_LIST.length, cat.agents.length);
+  assert.strictEqual(M.AGENT_LIST.length, 30);
+  M.AGENT_LIST.forEach(a => {
+    assert(["d", "i", "c", "s"].includes(a.role), a.name);
+    a.repos.forEach(r => assert(r.lo >= 0 && r.hi <= 180 && r.lo <= r.hi, a.name));
+  });
+});
+t("every agent's task mix is a valid distribution", () => {
+  M.AGENT_LIST.forEach(a => {
+    const m = M.agentMix(a).mix;
+    assert(m.every(x => x >= 0), a.name);
+    assert(Math.abs(m.reduce((s, x) => s + x, 0) - 1) < 1e-12, a.name);
+  });
+});
+t("agents with no aim-relevant mechanics use their class mix unchanged", () => {
+  for (const name of ["Breach", "Sova", "Brimstone", "Astra"]) {
+    const a = M.findAgent(name);
+    assert.deepStrictEqual(M.agentMix(a).mix, M.ROLE[a.role].mix);
+  }
+});
+t("agent input: names are case-insensitive, duplicates ignored, unknown names rejected", () => {
+  const a = rec({ agents: ["jett", "JETT", "Omen"] });
+  assert.deepStrictEqual(a.agents.agents.map(x => x.name), ["Jett", "Omen"]);
+  assert(Math.abs(a.agents.agents[0].share - 0.5 / 0.8) < 1e-12);
+  assert.throws(() => rec({ agents: ["NotAnAgent"] }), RangeError);
+  assert.throws(() => rec({ agents: "Jett" }), RangeError);
+  assert.throws(() => rec({ agents: [{ name: "Jett", share: -1 }] }), RangeError);
+  assert.strictEqual(rec({ agents: [] }).cModel, rec({}).cModel);
+});
+t("agents override the role answer", () => {
+  assert.strictEqual(rec({ role: "s", agents: ["Jett"] }).cModel, rec({ role: "d", agents: ["Jett"] }).cModel);
+});
+t("more ability-driven re-orientation never makes the optimum slower", () => {
+  for (const name of ["Jett", "Yoru", "Omen", "Chamber"]) {
+    let prev = Infinity;
+    for (const k of [0, 0.5, 1, 2, 3]) {
+      const rules = { rate: Object.fromEntries(Object.entries(M.AGENT_RULES.rate).map(([x, v]) => [x, v * k])), holdShift: M.AGENT_RULES.holdShift, weights: M.AGENT_RULES.weights };
+      const c = rec({ agents: [name] }, { agentRules: rules, noUncertainty: true }).cModel;
+      assert(c <= prev + 1e-6, name + " x" + k); prev = c;
+    }
+  }
+});
+t("agent effects stay inside the near-optimal range of the role-average result", () => {
+  const ref = rec({});
+  const half = Math.log(ref.band[1] / ref.band[0]) / 2;
+  M.AGENT_LIST.forEach(a => assert(Math.abs(Math.log(rec({ agents: [a.name] }).cModel / ref.cModel)) < half, a.name));
+});
+t("sensitivity analysis reports agent toggles", () => {
+  const s = M.sensitivityAnalysis(Object.assign({}, base, { agents: ["Yoru"] }));
+  const names = s.toggles.map(x => x.param);
+  assert(names.includes("agents ignored (role mix)") && names.includes("agent ability rates x2"));
+});
+
+/* ---------------- Scoped / ADS advice ---------------- */
+t("match multipliers reproduce the researched values", () => {
+  assert(Math.abs(M.matchMultiplier(2.5, 0) - 0.747) < 0.001);
+  assert(Math.abs(M.matchMultiplier(3.5, 0) - 0.731) < 0.001);
+  assert(Math.abs(M.matchMultiplier(1.5, 0) - 0.815) < 0.001);
+  assert(Math.abs(M.matchMultiplier(1.25, 0) - 0.870) < 0.001);
+  assert(Math.abs(M.matchMultiplier(2.5, 1) - 1) < 1e-12);
+  let prev = 0;                                     // larger match point -> closer to 1.0
+  for (const p of [0, 0.25, 0.5, 0.75, 1]) { const m = M.matchMultiplier(2.5, p); assert(m >= prev); prev = m; }
+});
+t("scoped advice: defaults to 1.0, offers options only when the player scopes", () => {
+  const none = rec({ agents: ["Sage"] }).scopedAdvice;
+  assert.strictEqual(none.scoped.start, 1.0); assert.strictEqual(none.scoped.alternatives.length, 0); assert.strictEqual(none.ads.alternatives.length, 0);
+  const jett = rec({ agents: ["Jett"] }).scopedAdvice;
+  assert.strictEqual(jett.scoped.level, "main"); assert(jett.scoped.alternatives.length > 0);
+  const ch = rec({ agents: ["Chamber"] }).scopedAdvice;
+  assert(ch.ads.chamber && ch.ads.alternatives[0].value === 0.815);
+  assert.strictEqual(rec({ weapon: "sniper" }).scopedAdvice.scoped.level, "main");
+});
+t("scoped advice never changes the hipfire recommendation", () => {
+  assert.strictEqual(rec({ weapon: "rifle", agents: ["Sage"] }).cm, rec({ weapon: "rifle", agents: ["Sage"] }).cm);
+});
+
 console.log("\n" + n + " passed, " + failed + " failed");
 if (failed) process.exit(1);

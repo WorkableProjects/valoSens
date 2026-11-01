@@ -5,9 +5,10 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
 - Model: `model.js` (works in the browser and in Node)
 - Tests: `node test/model.test.js` (model) and `node test/ui.e2e.js` (browser smoke test, needs Playwright)
 - Pro data: regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`
+- Agent data: regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`
 - `Valorant sensitivity finder.html` is the original multiplier-based version, kept for reference.
 
-## How the number is computed (model v2)
+## How the number is computed (model v2.1)
 
 The internal unit is **cm/360**: centimetres of mouse travel per full turn.
 
@@ -63,6 +64,39 @@ The guessed constants that move the answer most (σ0, the flick optimum, head si
 - Questionnaire results get a heuristic label (low / low–medium / medium), not a probability.
 - Measured results report a bootstrap interval.
 
+### 4. Agents (v2.1)
+
+**Picking agents:** up to three, weighted 50/30/20 and rescaled when fewer are picked. When agents are given, they **replace the role average**.
+
+**Data:** each agent's abilities are catalogued from Riot's official wiki, 30 agents including Miks, Veto and Hush (`research/agent_mechanics.json`). `scripts/build_agents.js` copies only the raw mechanics into `model.js`. One rule set in `model.js` turns them into the task mix:
+
+| Mechanic | Effect on the task mix | Basis |
+|---|---|---|
+| Reposition (dash, teleport, slide, satchel, Rendezvous…) | Adds re-orientation turns at the catalogued angle, spread over the 25°/90°/180° tasks so the average angle is preserved. Frequency per engagement: signature (E) 15%, other basic 8%, ultimate 3%. | Ability list: Riot wiki. **Angles and frequencies: ESTIMATES** (no usage data exists) |
+| Hold (trips, turrets, sensors, Trademark…) | Moves up to 5 points of share from target switches to small corrections | ESTIMATE |
+| Placement / map-targeted | No effect: these use the map cursor or aren't time-critical | Riot wiki |
+| Guided (Blaze, High Tide, Guiding Light, drones) | No effect: slow steering with normal look sensitivity; no separate setting exists | Riot wiki, patch 9.02 |
+| Scoped/ADS kit (Chamber; Operator agents) | Changes the **scoped/ADS advice only**, never hipfire | see below |
+
+The effect on the model optimum (forearm aimer, 45 cm pad, compared with the role average) runs from roughly −18% (Yoru, Waylay) through −10% (Jett), about −6% (Omen, Raze, Neon, Reyna), 0% (pure-utility initiators and controllers, Chamber), to +4–7% (Sage, Cypher, Deadlock, Vyse, Killjoy). It grows on small pads (Yoru: −23% at 30 cm, −13% at 90 cm), because extra big turns cost more lifts there. Every agent's effect stays inside the near-optimal range (tested).
+
+**Uncertainty:** the frequency estimates matter. Halving or doubling them changes Jett's effect from +6% to −24% relative to the central value. `sensitivityAnalysis()` reports these toggles.
+
+**Sanity check, not calibration** (`research/agent_sens_data.md`): no public dataset links agents to sensitivity. The available "eDPI by role" pages rest on 9 or fewer players and contradict each other. In our 28-pro sample, mains of mobility duelists (Jett, Raze, Neon, Yoru, Waylay) run about 15% faster (median 61.5 vs 72.6 cm/360, n = 8 vs 20, permutation p ≈ 0.12). That's the same direction as the model, but not significant. Controllers and sentinels are identical (77 cm, p ≈ 0.69).
+
+### 5. Scoped / ADS multiplier advice
+
+Valorant has separate **Scoped** (Operator 2.5x/5x, Marshal/Outlaw 3.5x, Tour de Force) and **ADS** (rifles, SMGs, Guardian, Headhunter 1.5x) multipliers, both defaulting to 1.0. 1.0 most likely equals a 100% horizontal monitor-distance match (community-verified). See `research/scoped_ads_settings.md`.
+
+**What the tool advises:**
+- **Always start at 1.0.** About 70–80% of pros keep it there.
+- **If you scope a lot** (Jett or Chamber main, Operator/Marshal/Outlaw players): it lists optional lower values.
+  - 75% match: 0.909.
+  - Crosshair (focal-length) match: 0.747 for the Operator, 0.731 for the Marshal/Outlaw.
+- **Chamber:** it adds the Headhunter crosshair-match ADS value, 0.815. This also changes rifle ADS.
+
+All of these are labelled preferences: no study shows any matching method helps.
+
 ### What no longer affects the number, and why
 
 - **Pro settings:** previously the model was forced to equal the pro median. They're now a comparison group only. Pros' choices reflect their pads, arms, habits and team roles, not proof of what's optimal for you.
@@ -96,6 +130,7 @@ Run it yourself with `ValoModel.sensitivityAnalysis(input)`.
 
 ## Validation status
 
+- **Agent effects: unvalidated.** They're derived from ability mechanics with estimated frequencies. The only empirical check is the small, non-significant pro comparison above.
 - **Questionnaire pathway: unvalidated.** No real player performance data was available, so there's no evidence that it beats the old model, the player's current setting, or a simple default.
 - **Measured pathway, checked on simulated players only:**
   - It recovers a planted optimum within about 0.05 octave.
@@ -110,4 +145,7 @@ Run it yourself with `ValoModel.sensitivityAnalysis(input)`.
 - `research/constants_and_ergonomics.md`: game yaw constants, input limits, hand noise, reach, clutching
 - `research/pro_data_audit.json` and `.md`: per-player status, sources, update and verification dates, conflicts
 - `research/pro_roles.md`: roles from VLR.gg agent usage
+- `research/agent_mechanics.json` and `.md`: 30-agent ability catalogue (Riot wiki)
+- `research/agent_sens_data.json` and `.md`: pro agent pools and the agent-vs-sensitivity check
+- `research/scoped_ads_settings.md`: scoped/ADS multipliers, zoom levels, matching formulas, pro usage
 - `research/model_research.md`: earlier background notes (v1)

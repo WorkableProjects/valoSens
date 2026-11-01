@@ -352,7 +352,7 @@ var Q = [
 
   { id: "agents", sec: "Your role", title: "Which agents do you play most?",
     why: "Agents change what your aim has to do. Teleports and dashes mean fast re-orientation, anchors hold angles, and Chamber or Operator players spend more time scoped. Pick your main first. Leave the others blank if you one-trick.",
-    uses: "Builds your task mix from each agent's abilities (main 50%, second 30%, third 20%), replacing the role average. It also sets the scoped-multiplier advice.",
+    uses: "Builds your task mix from each agent's abilities, replacing the role average. Agents are weighted 50/30/20 (rescaled if you pick fewer). It also sets the scoped-multiplier advice.",
     show: function () { return true; },
     render: function (h) {
       var groups = {};
@@ -584,7 +584,7 @@ function renderResult() {
   var R = M.recommend(inp);
   var dpi = inp.dpi, cm = R.cm, sens = M.sensFor(cm, dpi), edpi = dpi * sens;
   var pr = R.profile;
-  var roleName = M.ROLE[inp.role].label, limbName = inp.limb === "unsure" ? "Not sure (treated as wrist + forearm)" : M.LIMB[inp.limb].label;
+  var roleName = R.agents ? R.agents.agents.map(function (a) { return a.name; }).join(" / ") : M.ROLE[inp.role].label, limbName = inp.limb === "unsure" ? "Not sure (treated as wrist + forearm)" : M.LIMB[inp.limb].label;
 
   var dpiRows = [400, 800, 1600, 3200].concat([dpi]).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (a, b) { return a - b; })
     .map(function (d) { var s2 = M.sensFor(cm, d); return '<tr class="' + (d === dpi ? "hl" : "") + '"><td>' + d + (d === dpi ? " (yours)" : "") + '</td><td class="n">' + s2.toFixed(3) + '</td><td class="n">' + Math.round(d * s2) + "</td></tr>"; }).join("");
@@ -602,6 +602,22 @@ function renderResult() {
   var near = R.nearPros.map(function (p) { return "<tr><td>" + esc(p.name) + "</td><td>" + (p.role ? M.ROLE[p.role].label : "unverified") + '</td><td class="n">' + f1(p.cm) + '</td><td class="n">' + Math.round(p.edpi) + "</td></tr>"; }).join("");
 
   // Explanation numbers
+  var agentTxt = "";
+  if (R.agents) {
+    var b0 = M.recommend(Object.assign({}, inp, { agents: null })).cModel;
+    agentTxt = R.agents.agents.map(function (a) {
+      var bits = a.reorient.map(function (r) { return r.ability + " (re-aim ≈" + Math.round(r.theta) + "° in ~" + Math.round(r.rate * 100) + "% of fights)"; });
+      if (a.holdShift > 0) bits.push("anchor kit, more angle-holding");
+      return "<b>" + esc(a.name) + "</b> " + Math.round(a.share * 100) + "%" + (bits.length ? ": " + bits.join("; ") : ": no aim-changing mechanics (utility is placed or steered slowly)");
+    }).join(". ") + ". Compared with your role average, your agents move the model's best setting from " + f1(b0) + " to " + f1(R.cModel) + " cm (" + (R.cModel >= b0 ? "+" : "") + Math.round((R.cModel / b0 - 1) * 100) + "%).";
+  }
+  var sa = R.scopedAdvice, scopedTxt = "Keep the ADS and scoped multipliers at 1.0 to begin with.";
+  if (sa.scoped.alternatives.length || sa.ads.alternatives.length) {
+    scopedTxt = "Start with the scoped and ADS multipliers at 1.0, where most pros keep them.";
+    if (sa.scoped.alternatives.length) scopedTxt += " You " + (sa.scoped.level === "main" ? "scope a lot" : "scope sometimes") + ", so if scoped flicks feel too fast compared with hipfire, try a scoped multiplier of " + sa.scoped.alternatives.map(function (x) { return x.value + " (" + x.label + ")"; }).join(" or ") + ".";
+    if (sa.ads.alternatives.length) scopedTxt += " For Chamber's Headhunter, an ADS multiplier of " + sa.ads.alternatives[0].value + " is the " + sa.ads.alternatives[0].label + ".";
+    scopedTxt += " These are preferences: no study shows one is better.";
+  }
   var mixTxt = pr.mix.map(function (m, j) { return Math.round(m * 100) + "% " + M.TASKS[j].key + " (" + M.TASKS[j].theta + "°)"; }).join(", ");
   var anchorTxt = R.anchor
     ? "Your current " + f1(R.anchor.cm) + " cm costs about " + Math.round(R.anchor.costDiff * 1000) + " ms more per engagement than the model's best (" + f1(R.cModel) + " cm). Anything within " + Math.round(R.tolerance * 1000) + " ms counts as near-optimal, and your comfort rating stretches that to " + Math.round(R.anchor.tolStay * 1000) + " ms for keeping your current setting. Result: " + R.reason + "."
@@ -637,7 +653,7 @@ function renderResult() {
 
     "<h3>Type this into Valorant</h3>" +
     '<div class="scroll-x"><table><thead><tr><th>DPI</th><th class="n">Sensitivity</th><th class="n">eDPI</th></tr></thead><tbody>' + dpiRows + "</tbody></table></div>" +
-    '<p class="sub">cm/360 = 914.4 ÷ (DPI × sens × 0.07). Keep the ADS and scoped multipliers at 1.0 to begin with.</p>' +
+    '<p class="sub">cm/360 = 914.4 ÷ (DPI × sens × 0.07). ' + scopedTxt + '</p>' +
 
     "<h3>Why this number: your cost curve</h3>" +
     '<p class="sub" style="margin-top:0">Each line is the model\'s estimate of extra time per engagement, in seconds. The estimates are unvalidated, so read the shape rather than the exact numbers. Fast settings (left) cost precision because your hand\'s smallest controllable movement becomes large on screen. Slow settings (right) cost speed on big turns, mouse lifts and joint switches. The yellow band (' + bandTxt + " cm) covers settings within " + Math.round(R.tolerance * 1000) + " ms of the minimum. The curve is flat there, so small changes barely matter.</p>" +
@@ -674,7 +690,8 @@ function renderResult() {
     "Model minimum C* = " + f1(R.cModel) + " cm;  near-optimal = within " + Math.round(R.tolerance * 1000) + " ms" +
     "</div>" +
     '<ul class="sub" style="padding-left:1.2em">' +
-    "<li><b>Task mix (" + roleName + "):</b> " + mixTxt + ". These shares are assumptions. Role only nudges them, and removing the role changes the result by a few percent.</li>" +
+    "<li><b>Task mix (" + esc(roleName) + "):</b> " + mixTxt + ". These shares are assumptions." + (R.agents ? "" : " Role only nudges them, and removing the role changes the result by a few percent.") + "</li>" +
+    (R.agents ? "<li><b>Agents:</b> " + agentTxt + " How often each ability forces a fast re-aim, and by how much, are estimates. No usage data exists. In our 28-pro sample, mobility-duelist mains run about 15% faster, which points the same way but isn't statistically significant (p ≈ 0.12).</li>" : "") +
     "<li><b>Aiming joint (" + limbName + "):</b> sets the estimated comfortable reach (" + f1(pr.reach) + " cm each way). Past that, a bigger joint takes over at a small time cost. Joint type changes the result only modestly.</li>" +
     "<li><b>Mousepad:</b> " + f1(getPad()) + " cm wide, so about " + f1(pr.usable) + " cm usable. Lifts are estimated from where your hand starts and how far each turn needs. Surface type isn't used.</li>" +
     "<li><b>NVIDIA study:</b> used only for target switches. It's a small lab study (13 players, small static flicks): about +3.5% flick time per octave² away from the best tested setting. It's not a 20–80 cm rule.</li>" +
