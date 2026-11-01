@@ -33,11 +33,18 @@
   .progress { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--teal); width: 0; transition: width .5s var(--ease); box-shadow: 0 0 12px rgba(42, 214, 176, .6); }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 36px 20px 64px; }
+  .wrap.wide { max-width: none; padding: 32px clamp(16px, 2.6vw, 56px) 64px; }
+  h2[tabindex="-1"]:focus { outline: none; }
 
   /* ---------- questionnaire ---------- */
   .q { max-width: 680px; margin: 4vh auto 0; }
   .q-sec { font: 600 13px/1 var(--head); letter-spacing: .2em; text-transform: uppercase; color: var(--teal); display: flex; gap: 10px; align-items: center; }
   .q-sec span { color: var(--dim); }
+  .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 26px; }
+  .part { font: 600 12px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); padding-top: 9px; border-top: 2px solid var(--line2); transition: color .3s, border-color .3s; }
+  .part b { color: inherit; margin-right: 6px; }
+  .part.done { color: var(--muted); border-top-color: rgba(42, 214, 176, .45); }
+  .part.on { color: var(--ink); border-top-color: var(--teal); }
   .q h2 { font: 700 clamp(30px, 5.4vw, 46px)/1.02 var(--head); text-transform: uppercase; letter-spacing: .01em; margin: 12px 0 10px; }
   .why { color: var(--muted); margin: 0 0 6px; max-width: 60ch; }
   .uses { color: var(--dim); font-size: 13px; margin: 0 0 22px; display: flex; gap: 8px; }
@@ -101,7 +108,9 @@
   .meta { text-align: right; font: 600 12px/1.6 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
   .meta b { color: var(--ink); font-weight: 600; }
 
-  .layout { display: grid; grid-template-columns: 200px minmax(0, 1fr) 340px; gap: 28px; align-items: start; }
+  .layout { display: grid; grid-template-columns: clamp(170px, 12vw, 260px) minmax(0, 1fr) clamp(300px, 22vw, 440px); gap: clamp(20px, 2vw, 40px); align-items: start; }
+  .duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 28px; }
+  @media (min-width: 1500px) { .duo { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
   @media (max-width: 1080px) { .layout { grid-template-columns: 170px minmax(0, 1fr); } .side { grid-column: 2; } }
   @media (max-width: 760px) { .layout { grid-template-columns: minmax(0, 1fr); } .side { grid-column: auto; } }
   .tabs { display: flex; flex-direction: column; gap: 4px; }
@@ -219,7 +228,7 @@
   <div class="crumb" id="crumb">Setup</div>
   <div class="progress" id="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div>
 </header>
-<div class="wrap">
+<div class="wrap" id="wrap">
   <main id="app" aria-live="polite"></main>
 </div>
 
@@ -335,7 +344,7 @@ function parseStats(text) {
 var RANKS = [["unsure", "Not sure / unranked"], ["iron", "Iron"], ["bronze", "Bronze"], ["silver", "Silver"], ["gold", "Gold"], ["plat", "Platinum"], ["diamond", "Diamond"], ["asc", "Ascendant"], ["imm", "Immortal"], ["rad", "Radiant"]];
 
 var Q = [
-  { id: "dpi", sec: "Your sensitivity", title: "What DPI is your mouse set to?",
+  { id: "dpi", part: 1, sec: "Your sensitivity", title: "What DPI is your mouse set to?",
     why: "Your mouse software shows this. It converts the result into the number you type into Valorant.",
     uses: "Converts cm/360 into in-game sensitivity.",
     show: function () { return true; },
@@ -347,7 +356,7 @@ var Q = [
     },
     valid: function () { var d = getDpi(); return d >= 100 && d <= 32000; } },
 
-  { id: "cur", sec: "Your sensitivity", title: "What sensitivity do you use now?",
+  { id: "cur", part: 1, sec: "Your sensitivity", title: "What sensitivity do you use now?",
     why: "If your current setting is already in the near-optimal range, the result keeps it. Otherwise the result moves only as far as it needs to.",
     uses: "The result is the near-optimal setting closest to this one.",
     show: function () { return true; },
@@ -375,7 +384,7 @@ var Q = [
     },
     valid: function () { return S.curMode === "none" || (S.curMode !== null && currentCm() > 3 && currentCm() < 400); } },
 
-  { id: "sat", sec: "Your sensitivity", title: "How well does that sensitivity work for you?",
+  { id: "sat", part: 1, sec: "Your sensitivity", title: "How well does that sensitivity work for you?",
     why: "Comfort is a reason to stay put, but it isn't a measurement of accuracy. A high rating lets a slightly less optimal current setting stay.",
     uses: "Widens the 'close enough to keep' margin, from 1× (rating 1) up to at most 2× (rating 5).",
     show: function () { return S.curMode && S.curMode !== "none"; },
@@ -391,7 +400,7 @@ var Q = [
     },
     valid: function () { return true; } },
 
-  { id: "pad", sec: "Your mousepad setup", title: "How wide is the area your mouse can glide on?",
+  { id: "pad", part: 1, sec: "Your mousepad setup", title: "How wide is the area your mouse can glide on?",
     why: "Measure the usable width left to right in cm. A rough number is fine.",
     uses: "Usable travel = width − mouse width. Expected lifts depend on where your hand starts and how far it has to go.",
     show: function () { return true; },
@@ -406,20 +415,7 @@ var Q = [
     },
     valid: function () { var p = getPad(); return p >= 12 && p <= 200; } },
 
-  { id: "surface", sec: "Your mousepad setup", title: "What kind of surface is it?",
-    why: "More friction makes it easier to stop precisely but slows big movements. Low friction does the opposite.",
-    uses: "Recorded only. There's no reliable data linking surface type to the best sensitivity, so it doesn't change the number.",
-    show: function () { return true; },
-    render: function (h) {
-      choices(h, "surface", [
-        { v: "control", l: "Control", s: "Rough cloth, noticeable stopping power" },
-        { v: "hybrid", l: "Balanced / hybrid", s: "Or not sure" },
-        { v: "speed", l: "Speed", s: "Smooth cloth, glides easily" },
-        { v: "glass", l: "Glass or hard", s: "Very low friction" }], 2);
-    },
-    valid: function () { return !!S.surface; } },
-
-  { id: "limb", sec: "Your mousepad setup", title: "Which joint does most of your aiming?",
+  { id: "limb", part: 1, sec: "Your mousepad setup", title: "Which joint does most of your aiming?",
     why: "Quick test: swipe as if turning 90°. If your forearm stays planted and your hand pivots, that's wrist. If your elbow slides, that's forearm. If your shoulder moves too, that's arm.",
     uses: "Estimates how far you can move comfortably before a bigger joint takes over (about 2.5 cm each way for wrist, 10 cm for arm, mixed styles in between). This is a rough estimate with wide uncertainty.",
     show: function () { return true; },
@@ -433,7 +429,7 @@ var Q = [
     },
     valid: function () { return !!S.limb; } },
 
-  { id: "role", sec: "Your role", title: "What role do you play most?",
+  { id: "role", part: 1, sec: "Your role", title: "What role do you play most?",
     why: "Roles differ a little in their mix of small corrections, target switches and big turns. There's no solid evidence for bigger role effects, so the effect is kept small.",
     uses: "Nudges the assumed task mix by a few percent.",
     show: function () { return true; },
@@ -447,7 +443,7 @@ var Q = [
     },
     valid: function () { return !!S.role; } },
 
-  { id: "agents", sec: "Your role", title: "Which agents do you play most?",
+  { id: "agents", part: 1, sec: "Your role", title: "Which agents do you play most?",
     why: "Agents change what your aim has to do. Teleports and dashes mean fast re-orientation, anchors hold angles, and Chamber or Operator players spend more time scoped. Pick your main first. Leave the others blank if you one-trick.",
     uses: "Builds your task mix from each agent's abilities, replacing the role average. Agents are weighted 50/30/20 (rescaled if you pick fewer). It also sets the scoped-multiplier advice.",
     show: function () { return true; },
@@ -471,7 +467,7 @@ var Q = [
     },
     valid: function () { return true; } },
 
-  { id: "weapon", sec: "Your role", title: "Which weapon do you use most?",
+  { id: "weapon", part: 1, sec: "Your role", title: "Which weapon do you use most?",
     why: "Snipers fight at longer range, which needs finer control. SMGs and shotguns fight close up, where heads are bigger on screen and fights involve more flicking.",
     uses: "Sets typical fight distance (10, 20 or 30 m). Smaller targets on screen shift the flick optimum slightly slower, using the size of the effect NVIDIA measured.",
     show: function () { return true; },
@@ -483,7 +479,7 @@ var Q = [
     },
     valid: function () { return !!S.weapon; } },
 
-  { id: "exp", sec: "Your stats", title: "How long have you played tactical shooters?",
+  { id: "exp", part: 2, sec: "Your experience", title: "How long have you played tactical shooters?",
     why: "Newer players haven't settled on a style yet, so the model is less certain about them.",
     uses: "Shown for context only. It doesn't change the number.",
     show: function () { return true; },
@@ -492,7 +488,7 @@ var Q = [
     },
     valid: function () { return !!S.exp; } },
 
-  { id: "statsGate", sec: "Your stats", title: "Add your season stats?",
+  { id: "statsGate", part: 1, sec: "Your stats", title: "Add your season stats?",
     why: "Stats depend on role, teammates and game sense, so they can't show whether your sensitivity suits your hand. They're kept as a before snapshot only.",
     uses: "Not used in the calculation. They're shown next to typical values for your rank.",
     show: function () { return true; },
@@ -501,7 +497,7 @@ var Q = [
     },
     valid: function () { return !!S.statsGate; } },
 
-  { id: "stats", sec: "Your stats", title: "Enter your stats for this season",
+  { id: "stats", part: 1, sec: "Your stats", title: "Enter your stats for this season",
     why: "Fill in what you have. Compare the same stats after 2–4 weeks on the new setting.",
     uses: "HS%, K/D and ADR are compared with typical values for your rank.",
     show: function () { return S.statsGate === "yes"; },
@@ -558,12 +554,20 @@ function stagger(root) {
   });
 }
 
+var PARTS = ["Sensitivity", "Crosshair", "Highlight color"];
+function partsBar(n) {
+  return el("div", { "class": "parts", "aria-label": "Part " + n + " of 3: " + PARTS[n - 1] }, PARTS.map(function (t, k) {
+    return '<div class="part' + (k + 1 === n ? " on" : k + 1 < n ? " done" : "") + '"><b>' + (k + 1) + "</b>" + t + "</div>";
+  }).join(""));
+}
 function renderQ(dir) {
+  document.getElementById("wrap").classList.remove("wide");
   var list = visible(), i = idxOf(list, currentId), q = list[i];
   currentId = q.id;
   app.innerHTML = "";
-  setProgress(i / list.length * 100, q.sec);
+  setProgress(i / list.length * 100, "Part " + q.part + " · " + PARTS[q.part - 1]);
   var box = el("section", { "class": "q" + (dir === "back" ? " back" : "") });
+  box.appendChild(partsBar(q.part));
   box.appendChild(el("div", { "class": "q-sec" }, String(i + 1).padStart(2, "0") + " <span>/ " + String(list.length).padStart(2, "0") + "</span> &nbsp;" + q.sec));
   box.appendChild(el("h2", { tabindex: "-1", id: "qh" }, q.title));
   box.appendChild(el("p", { "class": "why" }, q.why));
@@ -728,6 +732,7 @@ function renderResult() {
   var dpi = inp.dpi, cm = R.cm, sens = M.sensFor(cm, dpi), edpi = dpi * sens, pr = R.profile;
   var cur = R.anchor ? R.anchor.cm : null;
   setProgress(100, "Result");
+  document.getElementById("wrap").classList.add("wide");
 
   // Factor impact: the model optimum with your answer vs. with a neutral reference answer.
   var REF = { pad: 45, limb: "unsure", agents: null, role: "f", weapon: "rifle" };
