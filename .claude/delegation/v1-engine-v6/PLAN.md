@@ -61,3 +61,4 @@ Specs for wave N+1 are written after wave N is verified, with the actual interfa
   - minimal results changes: bell replaces Distribution panel, 80% range caption, "Why this number", posterior confidence badge, safeRecommend;
   - version 1.0.0, CHANGELOG, README header, legacy/, Pages workflow.
   - The final UI e2e was NOT re-run after these edits; the last e2e run on T13's state reported FAILED (cause not yet identified). T12 (rest) / T14 / wave 4 remain open.
+- 2026-11-02 T12 + T14 finished directly by the planner (minimal versions): aim-test section, evidence table, staged plan, .ics reminder on the results screen; crosshair motion rounds (3 of 8, panning background, reduced-motion fallback, thin×motion / outline×motion covariates with decision rules, session field). xhair 24/24 and session 15/15 pass; UI e2e NOT re-run.

@@ -419,3 +419,4 @@
     .choice:hover, .btn:hover:not(:disabled), .choice:active, .btn:active:not(:disabled), .tab:active { transform: none; }
     .q.ghost { display: none; }
   }
+.vt-mov{color:var(--teal);font-weight:700;letter-spacing:.06em;text-transform:uppercase}

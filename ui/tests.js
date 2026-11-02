@@ -4,7 +4,7 @@ function xRounds() {
   var key = [S.xSeed, S.cvd, S.shape].join("|");
   if (S.xKey !== key || !S.xTest) {
     S.xKey = key; S.xRound = 0;
-    S.xTest = X.xSession({ seed: S.xSeed, cvd: S.cvd, shape: S.shape, rounds: 8, k: 4, seen: S.prior ? V.seenCounts(S.prior) : null }).map(function (r) { return { scene: r.scene, ids: r.ids, pick: undefined }; });
+    S.xTest = X.xSession({ seed: S.xSeed, cvd: S.cvd, shape: S.shape, rounds: 8, k: 4, seen: S.prior ? V.seenCounts(S.prior) : null }).map(function (r) { return { scene: r.scene, ids: r.ids, pick: undefined, motion: !!r.motion, reduced: !!r.motion && REDUCED }; });
   }
   return S.xTest;
 }
@@ -15,9 +15,12 @@ function visTest(host) {
   var head = el("div", { "class": "vt-head" }), grid = el("div", { "class": "vis-grid4", role: "group", "aria-label": "Crosshair options" }), foot = el("div", { "class": "vt-foot" });
   host.appendChild(head); host.appendChild(grid); host.appendChild(foot);
   function answered() { return rounds.filter(function (q) { return q.pick !== undefined; }).length; }
+  var gen = 0;           // bumps on every redraw so old motion loops stop
+  window.__xhMotionLoops = window.__xhMotionLoops || 0;
   function draw() {
-    var r = rounds[S.xRound], sc = X.SCENES[r.scene];
-    head.innerHTML = '<span class="vt-n">Round ' + (S.xRound + 1) + " / " + rounds.length + '</span><span class="vt-scene">' + sc.name + " <small>" + sc.maps + '</small></span><span class="vt-dots" aria-hidden="true">' +
+    gen++;
+    var r = rounds[S.xRound], sc = X.SCENES[r.scene], moving = r.motion && !REDUCED;
+    head.innerHTML = '<span class="vt-n">Round ' + (S.xRound + 1) + " / " + rounds.length + '</span><span class="vt-scene">' + sc.name + " <small>" + sc.maps + "</small>" + (r.motion ? ' <small class="vt-mov">Moving</small>' : "") + '</span><span class="vt-dots" aria-hidden="true">' +
       rounds.map(function (q, i) { return '<i class="' + (i === S.xRound ? "on " : "") + (q.pick !== undefined ? "done" : "") + '"></i>'; }).join("") + "</span>";
     grid.innerHTML = ""; grid.classList.remove("swap"); void grid.offsetWidth; grid.classList.add("swap");
     r.ids.forEach(function (id, k) {
@@ -26,9 +29,21 @@ function visTest(host) {
       var cv = el("canvas"); b.appendChild(cv); b.appendChild(el("span", null, L));
       b.style.setProperty("--i", k); grid.appendChild(b);
       requestAnimationFrame(function () {
-        var c = hidpi(cv, b.clientWidth || 140, 128);
-        paintBg(c.ctx, c.w, c.h, r.scene, (S.xSeed % 997) + S.xRound * 31 + k * 7);
-        drawCross(c.ctx, Math.round(c.w / 2), Math.round(c.h / 2), poolCfgFor(p), 1);
+        var c = hidpi(cv, b.clientWidth || 140, 128), cfg = poolCfgFor(p), seed = (S.xSeed % 997) + S.xRound * 31 + k * 7;
+        if (!moving) { paintBg(c.ctx, c.w, c.h, r.scene, seed); drawCross(c.ctx, Math.round(c.w / 2), Math.round(c.h / 2), cfg, 1); return; }
+        // Motion round: pan a double-width background at 240 px/s, reversing every 1.2 s; crosshair fixed at centre.
+        var dpr = c.ctx.getTransform ? c.ctx.getTransform().a : 1, off = document.createElement("canvas");
+        off.width = Math.round(c.w * 2 * dpr); off.height = Math.round(c.h * dpr);
+        var octx = off.getContext("2d"); octx.scale(dpr, dpr); paintBg(octx, c.w * 2, c.h, r.scene, seed);
+        var myGen = gen, t0 = performance.now(); window.__xhMotionLoops++;
+        (function frame(now) {
+          if (myGen !== gen || !cv.isConnected) { window.__xhMotionLoops--; return; }
+          var t = (now - t0) / 1000, ph = t % 2.4, x = 240 * (ph < 1.2 ? ph : 2.4 - ph);
+          x = x % c.w;
+          c.ctx.drawImage(off, x * dpr, 0, c.w * dpr, c.h * dpr, 0, 0, c.w, c.h);
+          drawCross(c.ctx, Math.round(c.w / 2), Math.round(c.h / 2), cfg, 1);
+          requestAnimationFrame(frame);
+        })(t0);
       });
       b.addEventListener("click", function () { choose(id); });
     });

@@ -43,7 +43,6 @@ Versions before 1.0.0 (3.0 to 5.0) are described in their own README sections, k
 - The original multiplier version moved to `legacy/`.
 
 **Not done in 1.0.0** (see `.claude/delegation/v1-engine-v6/PLAN.md`)
-- Full results redesign (T12 spec: aim-test section, evidence table, .ics reminder).
-- Crosshair motion rounds (T14 spec).
+- (T12 and T14 landed in minimal form; the UI e2e was not re-run after them.)
 - Accessibility, copy and mobile pass; opt-in local memory; "contribute results" export.
 - Real-player validation.

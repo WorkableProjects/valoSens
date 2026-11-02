@@ -85,6 +85,38 @@ function renderResult() {
       '</tbody></table><p class="tip">These don\'t affect your result. Compare them again after 2–4 weeks on the new setting.</p>';
   }
   var near = R.nearPros.map(function (p) { return "<tr><td>" + esc(p.name) + "</td><td>" + (p.role ? M.ROLE[p.role].label : "Unverified") + '</td><td class="n">' + f1(p.cm) + '</td><td class="n">' + Math.round(p.edpi) + "</td></tr>"; }).join("");
+
+  // ---- v1.0: evidence, aim-test summary, retest reminder ----
+  var sAt = function (c) { return (M.s800FromCm(c) * 800 / dpi).toFixed(3); };
+  var post = R.posterior, comp = post ? post.components : null;
+  function evRow(name, c, sdLn, extra) { return "<tr><td>" + name + '</td><td class="n">' + (c ? sAt(c) : "—") + '</td><td class="n">' + (c && sdLn ? sAt(c * Math.exp(1.2816 * sdLn)) + "–" + sAt(c * Math.exp(-1.2816 * sdLn)) : "—") + "</td><td>" + (extra || "") + "</td></tr>"; }
+  var evidenceHtml = comp ? '<div class="sub-t" style="margin-top:22px">How the engine combined the evidence</div><table><thead><tr><th>Source</th><th class="n">Centre (sens @ ' + dpi + ')</th><th class="n">80% range</th><th>Weight</th></tr></thead><tbody>' +
+    evRow("Players like you", comp.prior.centre, comp.prior.sdLn, "prior") +
+    (comp.physics ? evRow("Your setup (physical model)", comp.physics.centre, comp.physics.sdLn, Math.round(comp.physics.weight * 100) + "% vs prior") : "") +
+    (comp.measured ? evRow("Your aim test", comp.measured.centre, Math.sqrt(comp.measured.sdLn * comp.measured.sdLn + 0.0225), "measured") : "") +
+    evRow("<b>Combined (most likely)</b>", post.median, post.sdLn, "") + "</tbody></table>" : "";
+  var aimHtml = "";
+  if (S.aimRes || R.mode === "measured" || R.measured) {
+    var ar = S.aimRes || {}, ch = ar.checks || {}, pu = R.personalUsed || {}, items = [];
+    if (ch.dpi) items.push("Effective DPI <b>" + Math.round(ch.dpi.effDpi) + "</b> (you said " + dpi + ")" + (ch.dpi.accelSuspect ? " · <b>acceleration suspected</b>: turn off Enhance pointer precision" : !ch.dpi.consistent ? " · uneven card swipes" : ""));
+    if (pu.padCm) items.push("Usable pad width <b>" + f1(pu.padCm) + " cm</b>");
+    if (pu.reachCm) items.push("Comfortable reach <b>" + f1(pu.reachCm) + " cm</b>");
+    if (pu.sigma0) items.push("Hand steadiness <b>" + (pu.sigma0 * 10).toFixed(2) + " mm</b>");
+    if (pu.tSub) items.push("Correction time <b>" + Math.round(pu.tSub * 1000) + " ms</b>");
+    if (pu.vPeak) items.push("Peak speed <b>" + Math.round(pu.vPeak) + " cm/s</b>");
+    if (pu.tLift) items.push("Mouse lift <b>" + Math.round(pu.tLift * 1000) + " ms</b>");
+    var mv = R.measured, status = R.note === "aimTooFew" ? "Too few aim-test trials to fit a curve; the result uses your setup and players like you."
+      : mv && mv.validation && mv.validation.curveBeatsFlat ? "Clear difference between tested settings: measured best " + sAt(mv.fittedOptimum) + "."
+      : "No clear difference between tested settings: the result leans on your setup and players like you.";
+    var lv = {}; ((ar.trials) || []).forEach(function (t) { if (!t.warmup) { var k = t.cm.toFixed(1); (lv[k] = lv[k] || []).push(t.time); } });
+    var lvRows = Object.keys(lv).sort(function (a, b) { return a - b; }).map(function (k) { var a = lv[k], m = a.reduce(function (x, y) { return x + y; }, 0) / a.length; return "<tr><td>" + sAt(+k) + '</td><td class="n">' + k + '</td><td class="n">' + m.toFixed(2) + ' s</td><td class="n">' + a.length + "</td></tr>"; }).join("");
+    aimHtml = '<div class="sec-t" style="margin-top:26px">Your aim test</div><div class="panel"><p class="tip" style="font-size:14px">' + esc(status) + "</p>" +
+      (items.length ? '<ul class="plan">' + items.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" : "") +
+      (lvRows ? '<table><thead><tr><th>Sens @ ' + dpi + '</th><th class="n">cm/360</th><th class="n">Mean time</th><th class="n">Trials</th></tr></thead><tbody>' + lvRows + "</tbody></table>" : "") +
+      (mv && mv.warnings && mv.warnings.length ? '<p class="tip" style="font-size:13px;color:var(--muted)">' + mv.warnings.map(esc).join(" ") + "</p>" : "") + "</div>";
+  }
+  var planHtml = R.anchor && R.anchor.stages > 1 ? '<div class="sub-t" style="margin-top:22px">Your staged plan</div><ol class="plan">' + R.anchor.plan.map(function (c, i) { return "<li><b>" + (i === 0 ? "Now" : "After ~" + (3 * i) + " sessions") + ":</b> sens " + sAt(c) + " (" + f1(c) + " cm/360)</li>"; }).join("") + "</ol>" : "";
+  planHtml += '<p style="margin-top:14px"><button type="button" class="btn small" id="icsBtn">Add retest reminder (.ics)</button></p>';
   var cc = costChart(R), bc = bellChart(R, dpi);
   var today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
@@ -211,14 +243,16 @@ function renderResult() {
             '<div class="legend"><span><i style="background:#2ad6b0"></i>\u00b11 SD (0.2\u20130.4)</span><span><i style="background:#2a9fd6"></i>\u00b12 SD (0.1\u20130.5)</span><span><i style="background:#fff"></i>Your target</span><span><i style="background:var(--muted)"></i>Physical model alone</span>' + (bc.cur ? '<span><i style="background:var(--yellow)"></i>Current setting</span>' : "") + (bc.staged ? '<span><i style="background:var(--teal)"></i>This run\u2019s step</span>' : "") + "</div>" +
             '<p class="bell-cap" id="bellCap">Higher sens than <b id="bellPct">' + Math.round(R.bell.percentile * 100) + "</b>% of players (percentile " + Math.round(R.bell.percentile * 100) + ")" + (R.bell.ci80s800 ? ". 80% likely between " + (R.bell.ci80s800[0] * 800 / dpi).toFixed(3) + " and " + (R.bell.ci80s800[1] * 800 / dpi).toFixed(3) + " at " + dpi + " DPI" : "") + ".</p></div>" +
           '<div><div class="sub-t">Why this number</div>' + shiftRows(R) + "</div></div>" +
+          aimHtml +
           '<div class="panel" style="margin-top:18px"><div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div>" +
         "</section>" +
         xhPane + hlPane +
         '<section class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-1" hidden>' +
           '<div class="sec-t">Model <span>estimated extra time per engagement</span></div><div class="panel">' +
           '<div class="chart" id="costChart">' + cc.svg + '<div class="tt"></div></div>' +
+          evidenceHtml +
           '<div class="legend"><span><i style="background:var(--ink)"></i>Total</span><span><i style="background:#2a9fd6"></i>Precision</span><span><i style="background:var(--yellow)"></i>Speed / slow flicks</span><span><i style="background:var(--pink)"></i>Pad / reach</span><span><i style="background:var(--teal)"></i>Your result</span></div>' +
-          '<div class="math">small correction  t_sub·(1−p)/p,  p = erf(W / 2√2·σ0)     σ0 = ' + (pr.sigma * 10).toFixed(2) + " mm\ntarget switch     0.50 s × 0.035 × log2(C / " + f1(pr.cFlick) + ")²\nbig turns         0.30 s·lifts + 0.06 s·P(travel > " + f1(pr.reach) + " cm) + speed limit\ntracking          t_track·(p∞/p − 1),  angular error = √((360·σT/C)² + (k·ω·τ)²)   ω = " + pr.omega.toFixed(1) + "°/s\nusable pad " + f1(pr.usable) + " cm · averaged over " + R.nScenarios + " assumption sets · minimum " + f1(R.cModel) + " cm</div>" +
+          '<div class="math">small correction  t_sub·(1−p)/p,  p = erf(W / 2√2·σ0)     σ0 = ' + (pr.sigma * 10).toFixed(2) + " mm\ntarget switch     0.50 s × 0.035 × log2(C / " + f1(pr.cFlick) + ")²\nbig turns         0.30 s·lifts + 0.004 s/cm·E[travel past " + f1(pr.reach) + " cm] + speed limit\ntracking          t_track·(p∞/p − 1),  angular error = √((360·σT/C)² + (k·ω·τ)²)   ω = " + pr.omega.toFixed(1) + "°/s\nusable pad " + f1(pr.usable) + " cm · averaged over " + R.nScenarios + " assumption sets · minimum " + f1(R.cModel) + " cm</div>" +
           '<ul class="notes"><li><b>Task mix:</b> ' + mixTxt + ".</li>" + (R.agents ? "<li><b>Agents:</b> " + agentTxt + "</li>" : "") +
           "<li><b>Your current setting:</b> " + anchorTxt + "</li>" +
           "<li><b>What costs time at your result:</b> " + driveTxt + ". <b>Hand modifiers:</b> " + modTxt + ". <b>Optimum spread</b> across assumption sets: " + f1(R.optimumSpread[0]) + "–" + f1(R.optimumSpread[1]) + " cm.</li>" +
@@ -242,6 +276,7 @@ function renderResult() {
           "<li><b>Test all three</b> on the same Range or aim-trainer drills. Rotate the order so warm-up doesn't favor one.</li>" +
           "<li><b>Reach check.</b> From the middle of your pad, one comfortable swipe should turn you about 90°.</li>" +
           "<li><b>Commit.</b> Gain changes are learned quickly, within a session or a few days (Krakauer et al. 2000; NVIDIA's players settled within about 250 trials), but switching back and forth slows it down. Stay on one value for several sessions before judging. The 5–10% step size is a rule of thumb, not a measured value.</li></ol>" +
+          planHtml +
           '<div class="sub-t" style="margin-top:22px">DPI</div><p class="tip" style="font-size:14px;color:var(--muted)">' + esc(R.dpiAdvice ? R.dpiAdvice.text : "") + "</p>" +
           '<div class="sub-t" style="margin-top:22px">Scoped and ADS</div><p class="tip" id="scopedTxt" style="font-size:14px;color:var(--muted)">' + scopedTxt + "</p>" + statsHtml + "</div>" +
         "</section>" +
@@ -335,6 +370,15 @@ function renderResult() {
   document.getElementById("copy").addEventListener("click", function () {
     var t = document.getElementById("toast");
     try { navigator.clipboard.writeText(line).then(function () { t.textContent = "Copied."; }, function () { t.textContent = line; }); } catch (e) { t.textContent = line; }
+  });
+  var icsB = document.getElementById("icsBtn");
+  if (icsB) icsB.addEventListener("click", function () {
+    var d = new Date(Date.now() + 7 * 864e5), pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    var day = d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate());
+    var ics = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//valoSens//1.0.0//EN", "BEGIN:VEVENT", "UID:" + Date.now() + "@valosens", "DTSTAMP:" + new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z",
+      "DTSTART;VALUE=DATE:" + day, "SUMMARY:valoSens retest", "DESCRIPTION:Open valoSens\\, import your results file and run the aim test again (sens now " + sens.toFixed(3) + " at " + dpi + " DPI).", "END:VEVENT", "END:VCALENDAR"].join("\r\n");
+    var u = URL.createObjectURL(new Blob([ics], { type: "text/calendar" })), l = document.createElement("a");
+    l.href = u; l.download = "valosens-retest.ics"; document.body.appendChild(l); l.click(); l.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 1000);
   });
   document.getElementById("download").addEventListener("click", function () {
     var t = document.getElementById("toast");

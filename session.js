@@ -60,7 +60,7 @@
       return r && X.SCENES[r.scene] && Array.isArray(r.ids) && r.ids.length >= 2 && r.ids.length <= 6 &&
         r.ids.every(function (id) { return typeof id === "string" && X.POOL_BY[id]; }) &&
         (r.pick === null || r.ids.indexOf(r.pick) >= 0);
-    }).map(function (r) { return { scene: r.scene, ids: r.ids.slice(), pick: r.pick }; });
+    }).map(function (r) { return { scene: r.scene, ids: r.ids.slice(), pick: r.pick, motion: r.motion === true, reduced: r.reduced === true }; });
   }
   function cleanTrials(trials) {
     if (!Array.isArray(trials)) return [];

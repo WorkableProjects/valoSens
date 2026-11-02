@@ -217,6 +217,8 @@
     // Prior exposure from imported sessions (opts.seen) carries over, so a new session favors crosshairs not yet shown.
     var shown = {}, seen = opts.seen || {}; pool.forEach(function (p) { shown[p.id] = seen[p.id] > 0 ? Math.min(20, seen[p.id]) : 0; });
     var scenes = shuffle(["sand", "concrete", "shadow", "ice", "foliage", "smoke", "fire"], r), out = [];
+    // v4 (1.0): motion rounds pan the scene behind the options, as in a flick. Default 3 of 8 (rounds 3, 6, 8).
+    var nMot = opts.motionRounds == null ? 3 : opts.motionRounds, motionIdx = [2, 5, 7].slice(0, Math.max(0, Math.min(3, nMot)));
     for (var i = 0; i < rounds; i++) {
       var order = shuffle(pool.slice(), r).sort(function (a, b) {
         var pa = pref && pref !== "any" && fam(a.shape) === fam(pref) ? -0.5 : 0, pb = pref && pref !== "any" && fam(b.shape) === fam(pref) ? -0.5 : 0;
@@ -227,7 +229,7 @@
       order.forEach(function (p) { if (pick.length < k && shown[p.id] === least && !cols[p.color]) { pick.push(p); cols[p.color] = 1; } });
       order.forEach(function (p) { if (pick.length < k && pick.indexOf(p) < 0) pick.push(p); });
       pick.forEach(function (p) { shown[p.id]++; });
-      out.push({ scene: scenes[i % scenes.length], ids: shuffle(pick.map(function (p) { return p.id; }), r) });
+      out.push({ scene: scenes[i % scenes.length], ids: shuffle(pick.map(function (p) { return p.id; }), r), motion: motionIdx.indexOf(i) >= 0 });
     }
     return out;
   }
@@ -238,13 +240,14 @@
   var BRIGHT = { sand: 1, ice: 1 };
   function featNames() {
     var f = XCOLORS.map(function (c) { return "c:" + c.key; });
-    return f.concat(["outline", "outline×bright", "s:cross", "s:dot", "s:crossDot", "s:micro", "thin"]);
+    return f.concat(["outline", "outline×bright", "s:cross", "s:dot", "s:crossDot", "s:micro", "thin", "thin×motion", "outline×motion"]);
   }
-  function feats(p, scene) {
+  function feats(p, scene, motion) {
     var v = XCOLORS.map(function (c) { return c.key === p.color ? 1 : 0; });
     v.push(p.ol ? 1 : 0, p.ol && BRIGHT[scene] ? 1 : 0);
     ["cross", "dot", "crossDot", "micro"].forEach(function (s) { v.push(p.shape === s ? 1 : 0); });
     v.push(p.t === 1 ? 1 : 0);
+    v.push(motion && p.t === 1 ? 1 : 0, motion && p.ol ? 1 : 0);
     return v;
   }
   function fitChoices(rounds) {
@@ -257,7 +260,7 @@
         var g = b.map(function (x) { return -x; }), H = [];
         for (var i = 0; i < n; i++) { H.push(new Array(n).fill(0)); H[i][i] = -1; }
         used.forEach(function (r) {
-          var X = r.ids.map(function (id) { return feats(POOL_BY[id], r.scene); });
+          var mo = !!r.motion && !r.reduced, X = r.ids.map(function (id) { return feats(POOL_BY[id], r.scene, mo); });
           var u = X.map(function (x) { return x.reduce(function (s, v, j) { return s + v * b[j]; }, 0); });
           var m = Math.max.apply(null, u), e = u.map(function (x) { return Math.exp(x - m); }), Z = e.reduce(function (s, x) { return s + x; }, 0);
           var pr = e.map(function (x) { return x / Z; }), xbar = new Array(n).fill(0);
@@ -276,7 +279,9 @@
     var util = {}; POOL.forEach(function (p) { util[p.id] = feats(p, "concrete").reduce(function (s, v, j) { return s + v * b[j]; }, 0); });
     var fav = null;
     POOL.forEach(function (p) { if (stats[p.id].shown && (!fav || util[p.id] > util[fav])) fav = p.id; });
-    return { n: used.length, rounds: (rounds || []).length, coef: coef, util: util, stats: stats, favorite: used.length ? fav : null };
+    var nMotion = used.filter(function (r) { return r.motion && !r.reduced; }).length;
+    return { n: used.length, rounds: (rounds || []).length, coef: coef, util: util, stats: stats, favorite: used.length ? fav : null,
+      motion: nMotion ? { thin: coef["thin×motion"], outline: coef["outline×motion"], n: nMotion } : null };
   }
   function solve(A, y) {
     var n = y.length, M = A.map(function (r, i) { return r.concat([y[i]]); });
@@ -536,6 +541,8 @@
     var hp = headPx(inp.weapon, "1080");
     var zMax = Math.max(2, Math.round(0.35 * hp)), tMax = Math.max(1, Math.round(0.2 * hp));
     if (g.dot && g.z > zMax) { g.z = zMax; why.push("Dot size " + zMax + ": at " + (RANGE[inp.weapon] || 20) + " m a head is about " + Math.round(hp) + " px wide at 1080p, so a bigger dot would cover most of it."); }
+    // Motion rounds: thin lines lost while the view moves -> one step thicker (still under the head-size cap below).
+    if (fit && fit.motion && fit.motion.thin < -0.5 && g.lines && g.t < tMax) { g.t += 1; why.push("Line thickness " + g.t + ": in the moving rounds you passed over thin lines, so one step thicker keeps it visible mid-flick."); }
     if (g.lines && g.t > tMax) { g.t = tMax; why.push("Line thickness " + tMax + ": thinner lines cover less of a head that's only about " + Math.round(hp) + " px wide at your fight distance."); }
     // Crowding: lines within a few arcminutes of the aim point interfere with a small target (Siderov et al. 2013),
     // so keep a gap of at least 2 when lines are 3+ long.
@@ -556,7 +563,7 @@
   // Outline decision: compare the worst-case scene visibility with and without a black outline.
   function outlineFor(inp, c, fit, dot) {
     var w = xWeights(inp), plain = visAgg(c.hex, w, inp.cvd, "fovea", 0), withO = visAgg(c.hex, w, inp.cvd, "fovea", 1);
-    var gain = withO.worst - plain.worst, u = fit && fit.n ? (fit.coef.outline || 0) + (inp.lose === "bright" ? (fit.coef["outline×bright"] || 0) : 0) : 0;
+    var gain = withO.worst - plain.worst, u = fit && fit.n ? (fit.coef.outline || 0) + (inp.lose === "bright" ? (fit.coef["outline×bright"] || 0) : 0) + (fit.motion && fit.motion.outline > 0.5 ? fit.motion.outline : 0) : 0;
     var worstScene = Object.keys(plain.per).sort(function (a, b) { return plain.per[a] - plain.per[b]; })[0];
     if (inp.lose === "bright" || gain + 0.15 * u > 0.2) return { on: true, opacity: 1, gain: gain,
       why: "Outlines on at full opacity: " + c.name.toLowerCase() + " loses most contrast on " + SCENES[worstScene].name.toLowerCase() + ", and a black outline raises its worst-case visibility by " + Math.round(gain * 100) + " points." };
