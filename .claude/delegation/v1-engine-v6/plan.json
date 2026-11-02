@@ -1,0 +1,13 @@
+{
+  "project": "v1-engine-v6",
+  "mode": "delegate-multi",
+  "base_dir": ".claude/delegation/v1-engine-v6",
+  "tasks": [
+    {"id": "O1", "title": "Engine core: posterior, physics likelihood, progression v2, adjustments", "agent": "opus", "depends_on": [], "owns": ["model.js", "test/model.test.js"], "reads": [], "verify_cmd": "node test/model.test.js"},
+    {"id": "T01", "title": "Simulated player", "agent": "executor-sonnet", "depends_on": [], "owns": ["sim/player.js", "test/sim.test.js"], "reads": ["model.js"], "spec": "tasks/T01.md", "verify_cmd": "node test/sim.test.js"},
+    {"id": "T02", "title": "aim.js test logic", "agent": "executor-sonnet", "depends_on": [], "owns": ["aim.js", "test/aim.test.js"], "reads": ["model.js"], "spec": "tasks/T02.md", "verify_cmd": "node test/aim.test.js"},
+    {"id": "T03", "title": "Split index.html", "agent": "executor-sonnet", "depends_on": [], "owns": ["index.html", "ui/**"], "reads": [], "spec": "tasks/T03.md", "verify_cmd": "node test/ui.e2e.js"},
+    {"id": "T05", "title": "Population and physics datasets", "agent": "executor-sonnet", "depends_on": [], "owns": ["research/population_v6.*", "research/physics_calibration_v6.*", "research/raw_v6/**"], "reads": [], "spec": "tasks/T05.md", "verify_cmd": "python3 -c \"import json;print(len(json.load(open('research/population_v6.json'))['rows']))\""},
+    {"id": "T06", "title": "v6 physics literature", "agent": "executor-sonnet", "depends_on": [], "owns": ["research/engine_v6_physics.md"], "reads": [], "spec": "tasks/T06.md", "verify_cmd": "test -s research/engine_v6_physics.md"}
+  ]
+}
