@@ -1289,7 +1289,7 @@
   }
 
   var api = {
-    VERSION: "1.0.0-dev", ENGINE: ENGINE, PRIOR: PRIOR, posterior: posterior, BELL: BELL, REGION: REGION, AGE: AGE, GLASSES: GLASSES, AGENT_Z: AGENT_Z, bellTarget: bellTarget, s800FromCm: s800FromCm, cmFromS800: cmFromS800, TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
+    VERSION: "1.0.0", ENGINE: ENGINE, PRIOR: PRIOR, posterior: posterior, BELL: BELL, REGION: REGION, AGE: AGE, GLASSES: GLASSES, AGENT_Z: AGENT_Z, bellTarget: bellTarget, s800FromCm: s800FromCm, cmFromS800: cmFromS800, TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
     findAgent: findAgent, agentMix: agentMix, agentsProfile: agentsProfile, matchMultiplier: matchMultiplier, scopedAdvice: scopedAdvice,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,

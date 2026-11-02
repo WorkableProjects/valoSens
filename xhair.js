@@ -637,7 +637,7 @@
     };
   }
 
-  var api = { VERSION: "3.1.0", XCOLORS: XCOLORS, HCOLORS: HCOLORS, XC: XC, HC: HC, PRO: PRO, SCENES: SCENES, SCENE_KEYS: SCENE_KEYS, TEST_HEX: TEST_HEX,
+  var api = { VERSION: "4.0.0", XCOLORS: XCOLORS, HCOLORS: HCOLORS, XC: XC, HC: HC, PRO: PRO, SCENES: SCENES, SCENE_KEYS: SCENE_KEYS, TEST_HEX: TEST_HEX,
     POOL: POOL, POOL_BY: POOL_BY, poolCfg: poolCfg, scaleCfg: scaleCfg, xSession: xSession, fitChoices: fitChoices, allowedColor: allowedColor,
     VT: VT, visionRun: visionRun, _quest: { create: qCreate, update: qUpdate, next: qNext, mean: qMean }, analyzeVision: analyzeVision, rng: rng,
     encode: encode, decode: decode, recommend: recommend, lum: lum, contrast: contrast, clash: clash, simHex: simHex, dE: dE, visAgg: visAgg, headPx: headPx };

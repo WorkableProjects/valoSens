@@ -56,3 +56,8 @@ Specs for wave N+1 are written after wave N is verified, with the actual interfa
   - **Gate (≤ 0.15 octave) NOT met.** Diagnosis: the simulator's truth is reliable (test-retest 0.07 oct), but even with exact true constants the engine physics is 0.42 oct from the sim's optimum (biased fast). The physics model and the simulator disagree structurally; tuning physics to the sim would be circular. Needs real-player data (V3).
 - 2026-11-02 PAUSED (user usage limit). Remaining, specs ready: T12 results redesign (tasks/T12.md, after T13), T14 crosshair motion rounds (tasks/T14.md). Not yet specced: wave 4 (T15 a11y + copy + mobile pass, O4 opt-in local memory and "contribute results" export), wave 5 (T16 README/CHANGELOG/legacy, T17 Pages workflow, O5 final verification and version bump to 1.0.0).
   - Resume: read this log, verify T13 (reports/T13.md; `node test/ui.e2e.js`), then dispatch T12 + T14 in parallel.
+- 2026-11-02 FINISH (user: no delegation, no more tests). Planner finished directly:
+  - T13 committed as left by its agent (no report);
+  - minimal results changes: bell replaces Distribution panel, 80% range caption, "Why this number", posterior confidence badge, safeRecommend;
+  - version 1.0.0, CHANGELOG, README header, legacy/, Pages workflow.
+  - The final UI e2e was NOT re-run after these edits; the last e2e run on T13's state reported FAILED (cause not yet identified). T12 (rest) / T14 / wave 4 remain open.

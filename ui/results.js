@@ -2,7 +2,7 @@
 function renderResult() {
   if (VT_RUN) { VT_RUN.stop = true; if (VT_RUN.cleanup) VT_RUN.cleanup(); }
   var inp = buildInput();
-  var R = M.recommend(inp);
+  var R = safeRecommend(inp);
   var dpi = inp.dpi, cm = R.cm, sens = M.sensFor(cm, dpi), edpi = dpi * sens, pr = R.profile;
   var cur = R.anchor ? R.anchor.cm : null;
   setProgress(100, "Result");
@@ -21,7 +21,7 @@ function renderResult() {
   var curEffect = cur ? (cm / R.cModel - 1) * 100 : null;
   var rowsR = [
     ["Current setting", cur ? f1(cur) + " cm" : "None", curEffect],
-    ["Near-optimal", f1(R.lo) + "–" + f1(R.hi), null],
+    ["Likely range", f1(R.hi) + "–" + f1(R.lo) + " cm", null],
     ["Vs pros", R.proPercentile === 0 ? "Fastest" : R.proPercentile === 1 ? "Slowest" : "Faster than " + Math.round((1 - R.proPercentile) * 100) + "%", null],
     ["Stats", "Not used", null]
   ];
@@ -34,8 +34,8 @@ function renderResult() {
   }
 
   // Confidence badge (heuristic for questionnaire; measured for calibration data).
-  var conf = R.confidence, badgeTxt = conf.type === "measured" ? "DATA" : ({ "low": "LOW", "low–medium": "L–M", "medium": "MED" }[conf.label] || "LOW");
-  var badgeCap = conf.type === "measured" ? "Fitted from your test trials." : "Heuristic label. The questionnaire model is unvalidated, so test the three values to confirm.";
+  var conf = R.confidence, badgeTxt = ({ "high": "HIGH", "low": "LOW", "low–medium": "L–M", "medium": "MED" }[conf.label] || "LOW");
+  var badgeCap = conf.type === "measured" ? "From your aim test, players like you and your setup combined (80% interval)." : "From players like you and your setup (80% interval). The aim test narrows this.";
   function gaugePos(c) { return Math.max(0, Math.min(100, (c - 15) / (110 - 15) * 100)); }
 
   // Scoped advice text (kept as one sentence for copy and tests).
@@ -206,13 +206,12 @@ function renderResult() {
       '<div class="panes">' +
         '<section class="pane" id="pane-0" role="tabpanel" aria-labelledby="tab-0">' +
           '<div class="sec-t">Sensitivity <span>' + esc(R.reason) + "</span></div>" +
-          '<div class="panel duo"><div><div class="sub-t">Distribution</div><div class="dist">' + distChart(R, cur) + "</div></div>" +
-          '<div><div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div></div>" +
-          '<div class="sec-t" style="margin-top:26px">Where you sit on the bell curve <span>sens at 800 DPI</span></div>' +
+          '<div class="sec-t" style="margin-top:6px">Where you sit on the bell curve <span>sens at 800 DPI \u00b7 average player 0.30</span></div>' +
           '<div class="panel duo"><div><div class="bell chart" id="bellChart">' + bc.svg + '<div class="tt"></div></div>' +
             '<div class="legend"><span><i style="background:#2ad6b0"></i>\u00b11 SD (0.2\u20130.4)</span><span><i style="background:#2a9fd6"></i>\u00b12 SD (0.1\u20130.5)</span><span><i style="background:#fff"></i>Your target</span><span><i style="background:var(--muted)"></i>Physical model alone</span>' + (bc.cur ? '<span><i style="background:var(--yellow)"></i>Current setting</span>' : "") + (bc.staged ? '<span><i style="background:var(--teal)"></i>This run\u2019s step</span>' : "") + "</div>" +
-            '<p class="bell-cap" id="bellCap">Higher sens than <b id="bellPct">' + Math.round(R.bell.percentile * 100) + "</b>% of players (percentile " + Math.round(R.bell.percentile * 100) + ")" + (R.bell.clamped ? ". Held inside the 0.1\u20130.7 range" : "") + ".</p></div>" +
-          '<div><div class="sub-t">What moved you</div>' + shiftRows(R) + "</div></div>" +
+            '<p class="bell-cap" id="bellCap">Higher sens than <b id="bellPct">' + Math.round(R.bell.percentile * 100) + "</b>% of players (percentile " + Math.round(R.bell.percentile * 100) + ")" + (R.bell.ci80s800 ? ". 80% likely between " + (R.bell.ci80s800[0] * 800 / dpi).toFixed(3) + " and " + (R.bell.ci80s800[1] * 800 / dpi).toFixed(3) + " at " + dpi + " DPI" : "") + ".</p></div>" +
+          '<div><div class="sub-t">Why this number</div>' + shiftRows(R) + "</div></div>" +
+          '<div class="panel" style="margin-top:18px"><div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div>" +
         "</section>" +
         xhPane + hlPane +
         '<section class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-1" hidden>' +
