@@ -69,7 +69,8 @@ t("a second run starts the staircases near the earlier thresholds and favors uns
   const st = V.visionStart(s1);
   ok(st.yellow < st.red, "yellow should start fainter"); ok(st.yellow < -0.9);
   const first = X.visionRun({ seed: 9, start: st }).nextTrial();
-  ok(Math.abs(first.x - st[first.color]) < 1e-9 || first.catchTrial);
+  // QUEST+ (v6) centres its prior on the earlier threshold and places the first stimulus near it, not exactly on it.
+  ok(Math.abs(first.x - st[first.color]) < 0.4 || first.catchTrial, "first x " + first.x + " vs start " + st[first.color]);
   const partial = [{ ...s1[0], xTest: s1[0].xTest.slice(0, 2) }];            // 8 of 18 crosshairs seen before
   const seen = V.seenCounts(partial), again = X.xSession({ seed: 5, seen });
   const firstTwo = again[0].ids.concat(again[1].ids);
@@ -99,6 +100,70 @@ t("last results entered by hand", () => {
   let threw = 0; try { V.manual({}); } catch (e) { threw++; } try { V.manual({ code: "nope;;" }); } catch (e) { threw++; } eq(threw, 2);
   const back = V.parse(V.serialize(V.build({ prior: [m], answers, xTest: [], hTest: [], agentOk })), agentOk).sessions;
   ok(back.length === 2 && back[0].manual && back[0].result.highlight === "purple", "manual session survives a download");
+});
+// ---- format 2 (aim-test data) ----
+const A = require("../aim.js");
+const mkTrial = (i, o) => ({ cm: 40, task: ["micro", "flick", "turn", "track"][i % 4], time: 0.4 + (i % 7) * 0.05, misses: 0, overshoots: i % 2, session: "s1", order: i,
+  hit: true, angleDeg: 20, targetDeg: 0.716, endErrDeg: 0.2, nSub: 2, peakCmS: 55, pathEff: 0.9, lifts: 0, droppedFrames: 0, warmup: false, ...o });
+const aimData = (n, o) => ({ version: A.VERSION, dpi: { countsPerCm: 31.5, effDpi: 800, ratio: 1, cv: 0.01, consistent: true, accelSuspect: false },
+  pad: { value: 40, sd: 1, n: 5 }, reach: { value: 20, sd: 0.5, n: 5 }, trials: Array.from({ length: n }, (_, i) => mkTrial(i)),
+  personal: { sigma0: { value: 0.03, sd: 0.005, n: 20 }, tSub: { value: 0.18, sd: 0.01, n: 30 }, countsPerCm: { value: 31.5, sd: 0.2, n: 5 }, accel: { suspect: false, ratio: 1 } },
+  rawInput: true, frameMs: 8.3, ...o });
+
+t("format 2: aim data survives build → serialize → parse; engine and new answers kept", () => {
+  const b = V.build({ answers: { ...answers, rank: "gold", aimSkip: false }, xTest: [], hTest: [], aim: aimData(12), engine: 6, agentOk });
+  eq(b.format, 2); eq(b.engine, "6");
+  const p = V.parse(V.serialize(b), agentOk), a = p.latest.aim;
+  eq(p.warnings.length, 0, "no warnings on clean data");
+  eq(a.trials.length, 12); eq(a.version, A.VERSION); eq(a.rawInput, true); eq(a.frameMs, 8.3);
+  eq(a.dpi.effDpi, 800); eq(a.pad.n, 5); eq(a.reach.value, 20); eq(a.personal.sigma0.value, 0.03); eq(a.personal.accel.suspect, false);
+  eq(JSON.stringify(Object.entries(a.trials[3]).sort()), JSON.stringify(Object.entries(mkTrial(3)).sort()));
+  eq(p.latest.answers.rank, "gold"); eq(p.latest.answers.aimSkip, false); eq(p.latest.answers.glasses, undefined);
+  eq(V.build({ answers, xTest: [], hTest: [], agentOk }).engine, undefined);
+});
+t("format 1 files still import, with aim: null on every session", () => {
+  const f1 = { app: "valoSens", format: 1, version: "3.1.0", exported: "2026-09-01T00:00:00.000Z", sessions: [
+    { date: "2026-09-01T00:00:00Z", answers: { glasses: "contacts", cvd: "none" }, xTest: [], hTest: [], frameMs: 16.7, result: { cm: 40 } }, { date: null, answers: {}, xTest: [], hTest: [] }] };
+  const p = V.parse(JSON.stringify(f1), agentOk);
+  eq(p.sessions.length, 2); ok(p.sessions.every(s => s.aim === null), "aim null"); eq(p.sessions[0].answers.glasses, "contacts"); eq(p.sessions[0].result.cm, 40);
+  eq(p.warnings.length, 0);
+  const b = V.build({ prior: p.sessions, answers, xTest: [], hTest: [], aim: aimData(3), agentOk });
+  eq(b.sessions[0].aim, null); eq(b.sessions[2].aim.trials.length, 3);
+  eq(V.parse(V.serialize(b), agentOk).sessions.length, 3);
+});
+t("bad aim fields are dropped and reported", () => {
+  const raw = aimData(4);
+  raw.trials = [mkTrial(0), mkTrial(1, { cm: NaN }), mkTrial(2, { task: "jump" }), mkTrial(3, { id: "x".repeat(1000000) }), mkTrial(4, { hit: "yes" }), mkTrial(5, { time: 31 })];
+  raw.dpi = { ...raw.dpi, effDpi: "800" }; raw.pad = { value: -3, sd: 1, n: 2 }; raw.rawInput = "true";
+  raw.personal.tSub = { value: 0, sd: 0.1, n: 3 }; raw.personal.accel = { suspect: "no", ratio: 1 };
+  const file = { app: "valoSens", format: 2, sessions: [{ aim: raw }] };
+  const p = V.parse(JSON.stringify(file), agentOk), s = p.latest, a = s.aim;
+  eq(a.trials.length, 1); eq(a.trials[0].order, 0);
+  eq(a.dpi, null); eq(a.pad, null); eq(a.rawInput, false); eq(a.reach.n, 5);
+  eq(a.personal.tSub, undefined); eq(a.personal.accel, undefined); eq(a.personal.sigma0.n, 20);
+  for (const k of ["aim.trials", "aim.dpi", "aim.pad", "aim.rawInput", "aim.personal.tSub", "aim.personal.accel"]) ok(s._dropped.indexOf(k) >= 0, "reports " + k);
+  ok(p.warnings.length >= 1);
+  eq(V.parse(JSON.stringify({ app: "valoSens", format: 2, sessions: [{ aim: "junk" }] }), agentOk).latest.aim, null);
+  try { V.parse('{"app":"valoSens","format":3,"sessions":[{}]}', agentOk); throw new Error("accepted"); } catch (e) { ok(/newer version/.test(e.message), e.message); }
+});
+t("pooled returns aimTrials tagged per file session and cur, plus personalLatest", () => {
+  const mk = (n, personal) => V.build({ answers, xTest: [], hTest: [], aim: aimData(n, { personal }), agentOk });
+  let prior = V.parse(V.serialize(mk(5, { tSub: { value: 0.2, sd: 0.01, n: 9 } })), agentOk).sessions;
+  prior = V.parse(V.serialize(V.build({ prior, answers, xTest: [], hTest: [], aim: aimData(3, { personal: null }), agentOk })), agentOk).sessions;
+  eq(prior.length, 2);
+  const P = V.pooled(prior, { xTest: [], hTest: [], aim: { trials: [mkTrial(0), mkTrial(1)], personal: null } });
+  eq(P.aimTrials.length, 10);
+  eq(Array.from(new Set(P.aimTrials.map(x => x.session))).join(), "f0,f1,cur");
+  eq(P.aimTrials.filter(x => x.session === "f0").length, 5); eq(P.aimTrials.filter(x => x.session === "cur").length, 2);
+  eq(P.personalLatest.tSub.value, 0.2, "latest non-null personal");
+  const P2 = V.pooled(prior, { aim: { trials: [], personal: { tSub: { value: 0.25, sd: 0.01, n: 4 } } } });
+  eq(P2.personalLatest.tSub.value, 0.25);
+  const P0 = V.pooled([], null); eq(P0.aimTrials.length, 0); eq(P0.personalLatest, null);
+  eq(V.pooled([{ xTest: [], hTest: [], aim: null }], null).aimTrials.length, 0);
+});
+t("a 601-trial aim session is capped at 600", () => {
+  const p = V.parse(V.serialize(V.build({ answers, xTest: [], hTest: [], aim: aimData(601), agentOk })), agentOk);
+  eq(p.latest.aim.trials.length, 600); eq(V.MAX_AIM_TRIALS, 600);
 });
 console.log("\n" + pass + " passed, " + fail + " failed");
 process.exit(fail ? 1 : 0);

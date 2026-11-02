@@ -199,8 +199,11 @@
                 note: "Typical flick completion time at the best setting in NVIDIA's study." },
     tLift:    { central: 0.30,  low: 0.20,  high: 0.50,  unit: "s",   basis: "estimate",
                 note: "Time lost per mouse lift and re-centre. Casiez et al. 2008: about 24% clutch time raised movement time by 124%; no per-lift time is published for FPS play." },
-    tSwitch:  { central: 0.06,  low: 0.03,  high: 0.12,  unit: "s",   basis: "estimate",
-                note: "Time lost when a movement exceeds the aiming joint's comfortable reach and a bigger joint takes over." },
+    // ---- v6.0 (research/engine_v6_physics.md)
+    kExcess:  { central: 0.004, low: 0.002, high: 0.008, unit: "s/cm", basis: "estimate",
+                note: "v6: time per cm of travel beyond the aiming joint's comfortable reach, covered by a slower, larger joint. Replaces the v5 step-only switch cost, which gave wrist aimers no gradient (they pass 3 cm at almost any sensitivity) and so ranked them slower than arm aimers. No study measures it." },
+    kEnd:     { central: 0.03,  low: 0.015, high: 0.05,  unit: "fraction", basis: "research",
+                note: "v6: signal-dependent endpoint noise after corrections, as a share of movement amplitude (Schmidt et al. 1979; Harris & Wolpert 1998; prior from research/engine_v6_physics.md §1, k_final). Adds to the constant floor sigma0 in quadrature." },
     vPeak:    { central: 150,   low: 100,   high: 250,   unit: "cm/s", basis: "research",
                 note: "Peak hand speed in a large turn. Casiez et al. 2008 measured 1.5 m/s at the 97th percentile (2.4 m/s max) and a 10–14% slowdown near that limit." },
     startSpread: { central: 0.5, low: 0.2,  high: 0.8,   unit: "fraction", basis: "estimate",
@@ -325,9 +328,12 @@
     var role = ROLE[input.role] ? input.role : "f";
     var limbKey = LIMB[input.limb] ? input.limb : "unsure";
     var wpn = WEAPON[input.weapon] || WEAPON.rifle;
-    var usable = Math.max(2, input.pad - P.mouseW);
-    var reachMeasured = finitePos(input.reachCm);
-    var reach = reachMeasured ? input.reachCm : LIMB[limbKey].reach;
+    var ps = input.personal || {};
+    var padM = ps.padCm && ps.padCm.value >= 5 && ps.padCm.value <= 200 ? ps.padCm.value : null;
+    var usable = padM ? padM : Math.max(2, input.pad - P.mouseW);
+    var reachIn = finitePos(input.reachCm) ? input.reachCm : (ps.reachCm && ps.reachCm.value > 0.5 && ps.reachCm.value <= 100 ? ps.reachCm.value : null);
+    var reachMeasured = !!reachIn;
+    var reach = reachMeasured ? reachIn : LIMB[limbKey].reach;
     var reachSd = reachMeasured ? 0.10 : P.reachSd * (limbKey === "unsure" ? 1.4 : 1);
     var w = headDeg(R_REF, P.headM), wWpn = headDeg(wpn.r, P.headM);
     var mix0 = (input.mix && (input.mix.length === 4 || input.mix.length === 5)) ? input.mix.slice()
@@ -337,9 +343,12 @@
     var mix = input.mix && input.mix.length === 5 ? input.mix.slice() : carveTracking(mix4, trackShare);
     // v4.0 skill, grip and mouse modifiers act on copies of the constants used by this profile.
     var ex = EXPERIENCE[input.experience] || EXPERIENCE.exp, gr = GRIP[input.grip] || GRIP.unsure, wf = weightFactors(input.mouseG);
+    // Measured constants (input.personal) already include the player's skill, grip and mouse: no modifiers on top.
+    var meas = function (k) { return !!(ps[k] && ps[k].value > 0); };
     var Q = Object.assign({}, P, {
-      sigma0: P.sigma0 * ex.noise * gr.noise, trackFloor: P.trackFloor * ex.noise * gr.noise,
-      tSub: P.tSub * ex.tSub, tLift: P.tLift * gr.lift * wf.lift, vPeak: P.vPeak * wf.v
+      sigma0: meas("sigma0") ? P.sigma0 : P.sigma0 * ex.noise * gr.noise,
+      trackFloor: P.trackFloor * (meas("sigma0") ? P.sigma0 / PARAMS.sigma0.central : ex.noise * gr.noise),
+      tSub: meas("tSub") ? P.tSub : P.tSub * ex.tSub, tLift: meas("tLift") ? P.tLift : P.tLift * gr.lift * wf.lift, vPeak: meas("vPeak") ? P.vPeak : P.vPeak * wf.v
     });
     var omega = P.strafeV / wpn.r * 180 / Math.PI;      // target angular speed, deg/s
     return {
@@ -380,13 +389,19 @@
     else excess = (a - rLo) * (a - rLo) / (2 * (rHi - rLo));
     return excess / gain;
   }
+  // v6: expected travel past comfortable reach, E[(a - R)+] with R log-normal(ln reach, reachSd) (closed form).
+  function excessBeyondReach(a, pr) {
+    if (a <= 0) return 0;
+    var s = pr.reachSd, d = (Math.log(a) - Math.log(pr.reach)) / s;
+    return a * normCdf(d) - pr.reach * Math.exp(s * s / 2) * normCdf(d - s);
+  }
   function pBeyondReach(a, pr) { return a <= 0 ? 0 : normCdf((Math.log(a) - Math.log(pr.reach)) / pr.reachSd); }
 
   function taskCost(task, C, pr) {
     var P = pr.P, a = C * task.theta / 360;
     if (task.mech === "floor") {
-      var W = C * pr.headDeg / 360;
-      var p = Math.max(1e-6, erf(W / (2 * Math.SQRT2 * P.sigma0)));
+      var W = C * pr.headDeg / 360, sig = Math.sqrt(P.sigma0 * P.sigma0 + Math.pow(P.kEnd * a, 2));
+      var p = Math.max(1e-6, erf(W / (2 * Math.SQRT2 * sig)));
       return { prec: P.tSub * (1 - p) / p, trav: 0, lift: 0 };
     }
     if (task.mech === "flick") {
@@ -404,7 +419,7 @@
     }
     var dur = 1.875 * a / P.vPeak;        // minimum-jerk duration at peak speed vPeak
     var speed = Math.pow(Math.pow(task.mt, 4) + Math.pow(dur, 4), 0.25) - task.mt;
-    return { prec: 0, trav: speed, lift: P.tLift * expectedLifts(a, pr) + P.tSwitch * pBeyondReach(a, pr) };
+    return { prec: 0, trav: speed, lift: P.tLift * expectedLifts(a, pr) + P.kExcess * excessBeyondReach(a, pr) };
   }
   function costAt(C, pr) {
     var out = { prec: 0, trav: 0, lift: 0 };
@@ -417,13 +432,13 @@
   }
 
   // Scenario grid over uncertain constants.
-  function scenarios(base, keys) {
+  function scenarios(base, keys, ranges) {
     var list = [{ P: Object.assign({}, base), w: 1 }];
     keys.forEach(function (k) {
-      var next = [];
+      var next = [], R = (ranges && ranges[k]) || PARAMS[k];
       list.forEach(function (s) {
         [["low", 0.25], ["central", 0.5], ["high", 0.25]].forEach(function (q) {
-          var P = Object.assign({}, s.P); P[k] = PARAMS[k][q[0]];
+          var P = Object.assign({}, s.P); P[k] = R[q[0]];
           next.push({ P: P, w: s.w * q[1] });
         });
       });
@@ -434,41 +449,69 @@
 
   var GRID = (function () { var g = []; for (var x = Math.log(8); x <= Math.log(160) + 1e-9; x += 0.01) g.push(Math.exp(x)); return g; })();
 
+  // v6: each scenario's cost is tabulated once on a coarse log grid (step 0.02) and interpolated with a C1
+  // Catmull-Rom spline. That cuts the cost of a recommendation ~3x and makes per-scenario optima free.
+  var CG = (function () { var g = []; for (var x = Math.log(6); x <= Math.log(200) + 1e-9; x += 0.02) g.push(x); return g; })();
+  var CG0 = CG[0], CGH = 0.02;
+  function spline(arr, x) {
+    var u = (x - CG0) / CGH, i = Math.floor(u);
+    if (i < 1) i = 1; if (i > arr.length - 3) i = arr.length - 3;
+    var t = u - i, p0 = arr[i - 1], p1 = arr[i], p2 = arr[i + 1], p3 = arr[i + 2];
+    if (t < 0 || t > 1) return p1 + (t < 0 ? t * (p2 - p0) / 2 : (t - 0) * (p2 - p1));    // outside the table: linear extension
+    var t2 = t * t, t3 = t2 * t;
+    return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+  }
+  // v6 (S5): constants measured by the aim test replace the population values. Their uncertainty (sd = standard
+  // error) becomes the low/high range for the scenario average (central +- 1.28 sd in log space, i.e. 10th/90th).
+  var PERSONAL_KEYS = { sigma0: [0.003, 0.2], tSub: [0.05, 0.5], vPeak: [30, 600], tLift: [0.06, 1.5] };
+  function personalRanges(personal) {
+    var out = { central: {}, ranges: {}, used: {} };
+    if (!personal || typeof personal !== "object") return out;
+    Object.keys(PERSONAL_KEYS).forEach(function (k) {
+      var e = personal[k], lim = PERSONAL_KEYS[k];
+      if (!e || !(e.value >= lim[0] && e.value <= lim[1])) return;
+      var sdl = Math.min(1, Math.max(0.02, (e.sd > 0 ? e.sd : 0.15 * e.value) / e.value));
+      out.central[k] = e.value; out.used[k] = e.value;
+      out.ranges[k] = { low: e.value * Math.exp(-1.2816 * sdl), central: e.value, high: e.value * Math.exp(1.2816 * sdl) };
+    });
+    return out;
+  }
   function expectedCurve(input, opts) {
     opts = opts || {};
-    var base = Object.assign(central(), opts.params || {});
-    var scen = opts.noUncertainty ? [{ P: base, w: 1 }] : scenarios(base, (opts.uncertain || UNCERTAIN).filter(function (k) { return !(opts.params && k in opts.params); }));
+    var pm = personalRanges(input.personal);
+    var base = Object.assign(central(), pm.central, opts.params || {});
+    var keys = (opts.uncertain || UNCERTAIN).filter(function (k) { return !(opts.params && k in opts.params); });
+    Object.keys(pm.ranges).forEach(function (k) { if (keys.indexOf(k) < 0 && !(opts.params && k in opts.params)) keys.push(k); });
+    // Keep the scenario count bounded (3^6 = 729 max): measured constants replace population uncertainty.
+    if (keys.length > 6) keys = keys.filter(function (k) { return pm.ranges[k] || UNCERTAIN.indexOf(k) < 0; }).concat(UNCERTAIN.filter(function (k) { return !pm.ranges[k]; })).slice(0, 6);
+    var scen = opts.noUncertainty ? [{ P: base, w: 1 }] : scenarios(base, keys, pm.ranges);
     var profs = scen.map(function (s) { return { pr: buildProfile(input, s.P), w: s.w }; });
+    // Tables: weighted components, plus each scenario's total for its own optimum.
+    var T = { prec: [], trav: [], lift: [], total: [] }, per = profs.map(function () { return []; });
+    CG.forEach(function (x, gi) {
+      var C = Math.exp(x), o = { prec: 0, trav: 0, lift: 0, total: 0 };
+      profs.forEach(function (p, k) { var c = costAt(C, p.pr); per[k][gi] = c.total; o.prec += p.w * c.prec; o.trav += p.w * c.trav; o.lift += p.w * c.lift; o.total += p.w * c.total; });
+      T.prec.push(o.prec); T.trav.push(o.trav); T.lift.push(o.lift); T.total.push(o.total);
+    });
     function at(C) {
-      var o = { prec: 0, trav: 0, lift: 0, total: 0 };
-      profs.forEach(function (x) { var c = costAt(C, x.pr); o.prec += x.w * c.prec; o.trav += x.w * c.trav; o.lift += x.w * c.lift; o.total += x.w * c.total; });
-      return o;
+      var x = Math.log(C);
+      return { prec: spline(T.prec, x), trav: spline(T.trav, x), lift: spline(T.lift, x), total: spline(T.total, x) };
     }
-    var vals = GRID.map(function (C) { return at(C).total; });
-    var bi = 0; for (var i = 1; i < vals.length; i++) if (vals[i] < vals[bi]) bi = i;
-    // golden-section refine in log space
-    var lo = Math.log(GRID[Math.max(0, bi - 1)]), hi = Math.log(GRID[Math.min(GRID.length - 1, bi + 1)]);
-    for (var it = 0; it < 50; it++) {
-      var m1 = lo + (hi - lo) * 0.382, m2 = lo + (hi - lo) * 0.618;
-      if (at(Math.exp(m1)).total < at(Math.exp(m2)).total) hi = m2; else lo = m1;
+    function argmin(arr) {
+      var bi = 1; for (var i = 1; i < arr.length - 2; i++) if (arr[i] < arr[bi]) bi = i;
+      var lo = CG[Math.max(1, bi - 1)], hi = CG[Math.min(arr.length - 3, bi + 1)];
+      for (var it = 0; it < 40; it++) { var m1 = lo + (hi - lo) * 0.382, m2 = lo + (hi - lo) * 0.618; if (spline(arr, m1) < spline(arr, m2)) hi = m2; else lo = m1; }
+      return Math.exp((lo + hi) / 2);
     }
-    var cStar = Math.exp((lo + hi) / 2);
-    // Optimum of each scenario (lazy: only the recommendation needs it). Gives the spread of the optimum
-    // implied by the uncertain constants, and how strongly the scenarios agree on a direction.
+    var cStar = Math.min(GRID[GRID.length - 1], Math.max(GRID[0], argmin(T.total)));
     var scenOpt = null;
     function scenarioOptima() {
-      if (scenOpt) return scenOpt;
-      scenOpt = profs.map(function (x) {
-        var best = 0, bv = Infinity;
-        for (var i = 0; i < GRID.length; i += 3) { var v = costAt(GRID[i], x.pr).total; if (v < bv) { bv = v; best = i; } }
-        var a = Math.max(0, best - 3), b = Math.min(GRID.length - 1, best + 3), bi2 = best;
-        for (var j = a; j <= b; j++) if (costAt(GRID[j], x.pr).total < costAt(GRID[bi2], x.pr).total) bi2 = j;
-        return { c: GRID[bi2], w: x.w, pr: x.pr };
-      });
+      if (!scenOpt) scenOpt = profs.map(function (p, k) { return { c: Math.min(GRID[GRID.length - 1], Math.max(GRID[0], argmin(per[k]))), w: p.w, pr: p.pr }; });
       return scenOpt;
     }
     return { at: at, cStar: cStar, jStar: at(cStar).total, profile: buildProfile(input, base), base: base, nScenarios: scen.length, scenarioOptima: scenarioOptima };
   }
+
   function weightedQuantile(items, q) {
     var b = items.slice().sort(function (x, y) { return x.c - y.c; }), tot = b.reduce(function (s, x) { return s + x.w; }, 0), acc = 0;
     for (var i = 0; i < b.length; i++) { acc += b[i].w; if (acc >= q * tot - 1e-12) return b[i].c; }
@@ -546,6 +589,8 @@
         throw new RangeError("mix must be 4 (or 5, with tracking) non-negative shares summing to 1");
     }
     if (input.mouseG != null && !(finitePos(input.mouseG) && input.mouseG >= 20 && input.mouseG <= 250)) throw new RangeError("mouseG must be 20–250 g");
+    if (input.rank != null && ["unsure", "iron", "bronze", "silver", "gold", "plat", "diamond", "asc", "imm", "rad"].indexOf(input.rank) < 0) throw new RangeError("rank must be unsure or iron..rad");
+    if (input.personal != null && typeof input.personal !== "object") throw new TypeError("personal must be an object");
     if (input.grip != null && !GRIP[input.grip]) throw new RangeError("grip must be palm, claw, fingertip or unsure");
     [["region", REGION], ["age", AGE], ["glasses", GLASSES]].forEach(function (g) {
       if (input[g[0]] != null && !Object.prototype.hasOwnProperty.call(g[1], input[g[0]])) throw new RangeError(g[0] + " must be one of " + Object.keys(g[1]).join(", "));
@@ -820,7 +865,7 @@
     } else { cm = best.c; reason = "measured optimum"; }
     return {
       cm: cm, reason: reason, fittedOptimum: best.c, tested: tested, nearOptimal: nearSet, progression: prog,
-      optimumInterval: opts.length ? [quantile(opts, 0.1), quantile(opts, 0.9)] : null,
+      optimumInterval: opts.length ? [quantile(opts, 0.1), quantile(opts, 0.9)] : null, bootOptima: opts,
       bootstrapRuns: B, validation: validation, warnings: warnings, orderCorrelation: orderCorr,
       composite: full.composite, taskWeights: full.w, nTrials: rows.length, options: o
     };
@@ -839,10 +884,10 @@
    * Measured (calibration) results are not touched: real data beats any prior.
    * ========================================================================= */
   var BELL = { mean: 0.3, sd: 0.1, min: 0.1, max: 0.7, dpi: 800,
-    muLn: /*@MULN*/3.8937/*@END*/, sdLn: /*@SDLN*/0.1319/*@END*/, rho: /*@RHO*/0.9894/*@END*/, agentWeight: 0.5 };
+    muLn: /*@MULN*/3.8231/*@END*/, sdLn: /*@SDLN*/0.1103/*@END*/, rho: /*@RHO*/0.9894/*@END*/, agentWeight: 0.5 };
   /*@DEMO*/
   var REGION = {"na":{"label":"North America","z":0.0685,"basis":"research","note":"24 pros (United States and Canada). Median slightly above the overall pro median; NOT lower than APAC (Mann-Whitney z=0.07 vs APAC pooled)."},"latam":{"label":"Latin America","z":-0.0715,"basis":"research","note":"Chile/Argentina/Colombia; small n, shrunk hard."},"br":{"label":"Brazil","z":-0.1415,"basis":"research","note":"Brazil; lowest median but wide spread (one 1.5 outlier clamped to 0.7)."},"eu":{"label":"Europe","z":-0.0215,"basis":"research","note":"UK, Russia, Poland, Nordics, Iberia etc.; sits at the overall median."},"mena":{"label":"Middle East & North Africa","z":0.1085,"basis":"research","note":"Turkey 8 + Morocco 1. Turkey classified as Middle East (assumption); Turkish pros skew high. Weak."},"kr":{"label":"Korea","z":-0.0515,"basis":"research","note":"Korean-born pros; median near overall. Includes one eDPI-800 outlier clamped to 0.7."},"jp":{"label":"Japan","z":-0.0515,"basis":"research","note":"n=4 only; mostly shrinkage."},"cn":{"label":"China","z":-0.0015,"basis":"research","note":"n=4 only (EDG); mostly shrinkage."},"sea":{"label":"Southeast Asia","z":0.0885,"basis":"research","note":"Indonesia, Singapore, Malaysia, Thailand, Philippines, Cambodia; high-sens tail (f0rsakeN, cgrs, xccurate). Wide spread."},"oce":{"label":"Oceania","z":-0.0015,"basis":"estimate","note":"No Oceania pros in the ProSettings list; no data, set to 0."},"unsure":{"label":"Prefer not to say","z":0,"basis":"estimate","note":"Always 0."}};
-  var AGE = {"u16":{"label":"Under 16","z":0.108,"basis":"estimate","note":"Guess, no sensitivity-by-age data found. Young players lack settled settings; literature gives no direction."},"16_19":{"label":"16–19","z":0.058,"basis":"estimate","note":"Guess. Near the peak-speed ages; no data on sens."},"20_24":{"label":"20–24","z":0.008,"basis":"estimate","note":"Reference group."},"25_29":{"label":"25–29","z":-0.042,"basis":"estimate","note":"Guess from literature: response-speed decline from ~24 (Thompson 2014, StarCraft 2) and speed-accuracy trade-off in older users."},"30_34":{"label":"30–34","z":-0.142,"basis":"estimate","note":"Judgement from the same literature; direction of the effect on preferred sens is unproven."},"35p":{"label":"35+","z":-0.242,"basis":"estimate","note":"Judgement. Older users slow down to keep accuracy (Hertzum & Hornbaek 2010). Capped well below 0.4 because no gamer sens data exists."},"unsure":{"label":"Prefer not to say","z":0,"basis":"estimate","note":"Always 0."}};
+  var AGE = {"u16": {"label": "Under 16", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Guess, no sensitivity-by-age data found. Young players lack settled settings; literature gives no direction."}, "16_19": {"label": "16–19", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Guess. Near the peak-speed ages; no data on sens."}, "20_24": {"label": "20–24", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Reference group."}, "25_29": {"label": "25–29", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Guess from literature: response-speed decline from ~24 (Thompson 2014, StarCraft 2) and speed-accuracy trade-off in older users."}, "30_34": {"label": "30–34", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Judgement from the same literature; direction of the effect on preferred sens is unproven."}, "35p": {"label": "35+", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Judgement. Older users slow down to keep accuracy (Hertzum & Hornbaek 2010). Capped well below 0.4 because no gamer sens data exists."}, "unsure": {"label": "Prefer not to say", "z": 0, "basis": "estimate", "note": "Always 0."}};
   var GLASSES = {"none":{"label":"No glasses","z":0,"basis":"estimate","note":"No glasses; reference."},"glasses":{"label":"Glasses","z":0,"basis":"estimate","note":"Literature: spectacle periphery is distorted and wearers shift to head turns over far eye movements, but no study links this to mouse sensitivity or its sign. Left at 0."},"contacts":{"label":"Contact lenses","z":0,"basis":"estimate","note":"No optical periphery distortion, but no sens data either. Left at 0."},"unsure":{"label":"Prefer not to say","z":0,"basis":"estimate","note":"Always 0."}};
   var AGENT_Z = {"Hush":{"z":0.201,"n":0,"basis":"role-only"},"Iso":{"z":0.201,"n":0,"basis":"role-only"},"Jett":{"z":0.24,"n":41,"basis":"research"},"Neon":{"z":0.186,"n":4,"basis":"research"},"Phoenix":{"z":0.201,"n":0,"basis":"role-only"},"Raze":{"z":0.229,"n":13,"basis":"research"},"Reyna":{"z":0.201,"n":0,"basis":"role-only"},"Waylay":{"z":0.114,"n":1,"basis":"research"},"Yoru":{"z":0.156,"n":2,"basis":"research"},"Breach":{"z":-0.104,"n":3,"basis":"research"},"Fade":{"z":-0.061,"n":0,"basis":"role-only"},"Gekko":{"z":-0.061,"n":0,"basis":"role-only"},"KAY/O":{"z":0.219,"n":3,"basis":"research"},"Skye":{"z":-0.084,"n":7,"basis":"research"},"Sova":{"z":-0.126,"n":27,"basis":"research"},"Tejo":{"z":-0.061,"n":0,"basis":"role-only"},"Astra":{"z":-0.137,"n":1,"basis":"research"},"Brimstone":{"z":-0.231,"n":0,"basis":"role-only"},"Clove":{"z":-0.231,"n":0,"basis":"role-only"},"Harbor":{"z":-0.231,"n":0,"basis":"role-only"},"Miks":{"z":-0.231,"n":0,"basis":"role-only"},"Omen":{"z":-0.312,"n":21,"basis":"research"},"Viper":{"z":-0.445,"n":7,"basis":"research"},"Chamber":{"z":0.128,"n":3,"basis":"research"},"Cypher":{"z":0.033,"n":10,"basis":"research"},"Deadlock":{"z":0.106,"n":0,"basis":"role-only"},"Killjoy":{"z":0.126,"n":2,"basis":"research"},"Sage":{"z":0.238,"n":2,"basis":"research"},"Veto":{"z":0.106,"n":0,"basis":"role-only"},"Vyse":{"z":0.106,"n":0,"basis":"role-only"}};
   /*@END*/
@@ -870,6 +915,100 @@
   }
 
   /* =========================================================================
+   * Engine v6: one posterior over log cm/360 (docs/V1_ENGINE_V6_PLAN.md §2)
+   *   log p(x) = log Prior_population(x | region, age, agents)
+   *            + log L_physics(x | answers)     Normal: centre = physics optimum, bias-corrected to the population,
+   *                                             variance = spread of scenario optima + sigmaModel^2
+   *            + log L_measured(x | aim test)   kernel mixture over bootstrap optima (only when the fit is real)
+   * The physics weight comes from sigmaModel (how well physics predicts real players), not from a hand-set rho,
+   * so physical effects are shrunk toward the population instead of amplified (fixes the v5 bell layer).
+   * ========================================================================= */
+  var ENGINE = "6";
+  var PRIOR = { muLn: /*@PMU*/3.9969/*@END*/, sdLn: /*@PSD*/0.4108/*@END*/, sdLnPro: /*@PSDPRO*/0.3333/*@END*/, sigmaModel: /*@SIGMOD*/0.5002/*@END*/, ageSdZ: 0.1,
+    source: /*@PSRC*/"Centre 0.30 sens @800 (team decision). Width: SD of ln cm/360 = 0.4108 for 4590 general players, 0.3333 for 732 pros (research/population_v6). Physics weight from 995 players with known pad width: slope 0.7154 (SE 0.6732), combined with a prior weight N(0.35, 0.20) -> 0.3796."/*@END*/ };
+  var LNGRID = GRID.map(function (c) { return Math.log(c); });
+  function normLogPdf(x, m, s) { var z = (x - m) / s; return -0.5 * z * z - Math.log(s); }
+  function zToLn(z) { return -z * PRIOR.sdLn; }                // + z (faster) = shorter cm/360
+  function priorParts(input) {
+    // Immortal/Radiant or "competitive" players are compared with the pro distribution (narrower); everyone else with general players.
+    var rank = input.rank || (input.stats && input.stats.rank), proLike = rank === "imm" || rank === "rad" || input.experience === "comp";
+    var sd0 = proLike ? PRIOR.sdLnPro : PRIOR.sdLn;
+    var parts = [], mu = PRIOR.muLn, v = sd0 * sd0;
+    [["region", REGION]].forEach(function (g) {
+      var e = input[g[0]] != null && input[g[0]] !== "unsure" && g[1][input[g[0]]];
+      if (e && e.z) { parts.push({ key: g[0], label: e.label, dLn: zToLn(e.z), basis: e.basis }); mu += zToLn(e.z); }
+    });
+    // Age: no sensitivity-by-age data exists, so it only widens the prior (mean shift 0).
+    if (input.age != null && input.age !== "unsure") v += Math.pow(PRIOR.ageSdZ * PRIOR.sdLn, 2);
+    if (input._agentProf) {
+      var za = 0, names = [];
+      input._agentProf.agents.forEach(function (a) { var e = AGENT_Z[a.name]; if (e) za += a.share * e.z; names.push(a.name); });
+      if (za) { parts.push({ key: "agents", label: names.join(", "), dLn: zToLn(BELL.agentWeight * za), basis: "research",
+        note: "Empirical agent trend (147 pros) at half weight: ability mechanics already enter the physics term." }); mu += zToLn(BELL.agentWeight * za); }
+    }
+    return { mu: mu, sd: Math.sqrt(v), parts: parts, group: proLike ? "pro" : "general" };
+  }
+  function physicsLik(E0) {
+    var opt = E0.scenarioOptima(), tw = 0, m = 0, vv = 0;
+    opt.forEach(function (o) { tw += o.w; m += o.w * Math.log(o.c); }); m /= tw;
+    opt.forEach(function (o) { vv += o.w * Math.pow(Math.log(o.c) - m, 2); }); vv /= tw;
+    var centre = Math.log(E0.cStar) - BELL.muLn + PRIOR.muLn;     // bias-corrected: the average profile sits at the population centre
+    return { centre: centre, sd: Math.sqrt(vv + PRIOR.sigmaModel * PRIOR.sigmaModel), scenarioSd: Math.sqrt(vv), raw: E0.cStar };
+  }
+  var MEAS_STRUCT_SD = 0.15;
+  function measuredLik(measured) {
+    if (!measured || !measured.validation.curveBeatsFlat || !measured.bootOptima || !measured.bootOptima.length) return null;
+    var xs = measured.bootOptima.map(function (c) { return Math.log(c); });
+    // Silverman bandwidth over the bootstrap optima, plus a structural width (0.15 ln): the bootstrap only sees trial
+    // noise inside one quadratic, not that the quadratic is an approximation. 0.15 gives ~77% coverage of 80% intervals
+    // on simulated players (test/scorecard.js); 0.10 was overconfident (57-75%).
+    var h = Math.sqrt(Math.pow(Math.max(0.04, 1.06 * (sd(xs) || 0) * Math.pow(xs.length, -0.2)), 2) + MEAS_STRUCT_SD * MEAS_STRUCT_SD);
+    return { xs: xs, h: h, lo: Math.log(measured.tested[0]), hi: Math.log(measured.tested[measured.tested.length - 1]),
+      logAt: function (x) { var s2 = 0; for (var i = 0; i < xs.length; i++) { var z = (x - xs[i]) / h; s2 += Math.exp(-0.5 * z * z); } return Math.log(s2 / xs.length + 1e-300); } };
+  }
+  function summarise(logp) {
+    var mx = Math.max.apply(null, logp), w = logp.map(function (v) { return Math.exp(v - mx); }), tot = w.reduce(function (a, b) { return a + b; }, 0);
+    w = w.map(function (v) { return v / tot; });
+    function q(p) { var acc = 0; for (var i = 0; i < w.length; i++) { acc += w[i]; if (acc >= p) { var prev = acc - w[i]; var f = w[i] > 0 ? (p - prev) / w[i] : 0; return Math.exp(LNGRID[i] - 0.005 + 0.01 * f); } } return GRID[GRID.length - 1]; }
+    var meanLn = 0; w.forEach(function (v, i) { meanLn += v * LNGRID[i]; });
+    var varLn = 0; w.forEach(function (v, i) { varLn += v * Math.pow(LNGRID[i] - meanLn, 2); });
+    return { w: w, median: q(0.5), meanLn: meanLn, sdLn: Math.sqrt(varLn), ci50: [q(0.25), q(0.75)], ci80: [q(0.1), q(0.9)] };
+  }
+  function posterior(input, E0, measured) {
+    var pr = priorParts(input), ph = E0 ? physicsLik(E0) : null, me = measuredLik(measured);
+    var lpPrior = LNGRID.map(function (x) { return normLogPdf(x, pr.mu, pr.sd); });
+    var lpPhys = LNGRID.map(function (x) { return ph ? normLogPdf(x, ph.centre, ph.sd) : 0; });
+    var lpMeas = LNGRID.map(function (x) { return me ? me.logAt(x) : 0; });
+    var lp = LNGRID.map(function (x, i) { return lpPrior[i] + lpPhys[i] + lpMeas[i]; });
+    var post = summarise(lp), priorOnly = summarise(lpPrior), noMeas = me ? summarise(lpPrior.map(function (v, i) { return v + lpPhys[i]; })) : post;
+    // Waterfall in ln units: base prior centre -> each prior shift -> physics -> measured.
+    var steps = [{ key: "population", label: "Players like you (population)", ln: PRIOR.muLn }];
+    var acc = PRIOR.muLn;
+    pr.parts.forEach(function (p) { acc += p.dLn; steps.push({ key: p.key, label: p.label, dLn: p.dLn, basis: p.basis, note: p.note }); });
+    steps.push({ key: "physics", label: "Your setup (physical model)", dLn: Math.log(noMeas.median) - Math.log(priorOnly.median), basis: "model" });
+    if (me) steps.push({ key: "measured", label: "Your aim test", dLn: Math.log(post.median) - Math.log(noMeas.median), basis: "measured" });
+    var wPhys = ph ? (1 / (ph.sd * ph.sd)) / (1 / (ph.sd * ph.sd) + 1 / (pr.sd * pr.sd)) : 0;
+    return { grid: GRID, weights: post.w, median: post.median, meanLn: post.meanLn, sdLn: post.sdLn, ci50: post.ci50, ci80: post.ci80,
+      components: { prior: { centre: Math.exp(pr.mu), sdLn: pr.sd, parts: pr.parts, median: priorOnly.median },
+        physics: ph ? { centre: Math.exp(ph.centre), sdLn: ph.sd, scenarioSdLn: ph.scenarioSd, raw: ph.raw, weight: wPhys } : null,
+        measured: me ? { centre: Math.exp(mean(me.xs)), sdLn: sd(me.xs), bandwidth: me.h, range: [Math.exp(me.lo), Math.exp(me.hi)] } : null },
+      waterfall: steps, sigmaModel: PRIOR.sigmaModel };
+  }
+  // v5-compatible "bell" view of the posterior, so older UI code keeps working (mean/sd in sens at 800 DPI).
+  function bellView(input, post) {
+    var mean0 = s800FromCm(Math.exp(PRIOR.muLn)), sd0 = mean0 * PRIOR.sdLn, s800 = s800FromCm(post.median);
+    var toZ = function (dLn) { return (s800FromCm(Math.exp(PRIOR.muLn + dLn)) - mean0) / sd0; };
+    var shifts = post.waterfall.slice(1).filter(function (s) { return s.key !== "physics"; }).map(function (s) { return { key: s.key, label: s.label, z: toZ(s.dLn), basis: s.basis, note: s.note }; });
+    var phys = post.waterfall.filter(function (s) { return s.key === "physics"; })[0];
+    var zModel = phys ? toZ(phys.dLn) : 0, z = (s800 - mean0) / sd0;
+    return { mean: mean0, sd: sd0, min: BELL.min, max: BELL.max, zModel: zModel, rhoZModel: zModel, shifts: shifts,
+      zRaw: z, z: z, s800: s800, clamped: false, percentile: normCdf(z), cm: post.median,
+      sensAtDpi: input.dpi ? s800 * BELL.dpi / input.dpi : null, cmModel: post.components.physics ? post.components.physics.raw : null,
+      s800Model: post.components.physics ? s800FromCm(post.components.physics.raw) : null,
+      ci80s800: [s800FromCm(post.ci80[1]), s800FromCm(post.ci80[0])] };
+  }
+
+  /* =========================================================================
    * Main entry point
    * input = {
    *   pad (usable width cm, required), dpi?, current?: { cm }, satisfaction? 1..5,
@@ -883,70 +1022,80 @@
     return ap ? Object.assign({}, input, { _agentProf: ap }) : input;
   }
   function recommend(input, opts) {
+    opts = opts || {};
     validateInput(input);
-    input = withAgents(input, opts && opts.agentRules);
+    input = withAgents(input, opts.agentRules);
     var E0 = expectedCurve(input, opts);
     var pr = E0.profile, P = E0.base;
     var tol = P.tolerance;
-    // v5.0: re-centre the physical curve on the bell-curve target (opts.noBell keeps the raw physical optimum).
-    var bell = opts && opts.noBell ? null : bellTarget(input, E0.cStar);
-    var ratio = bell ? E0.cStar / bell.cm : 1;
-    var E = { at: function (C) { return E0.at(C * ratio); }, cStar: E0.cStar / ratio, jStar: E0.jStar,
-      scenarioOptima: function () { return E0.scenarioOptima().map(function (o) { return { c: o.c / ratio, w: o.w, pr: o.pr }; }); } };
-    var band = nearOptimalSet(function (C) { return E.at(C).total; }, E.cStar, E.jStar, tol, GRID[0], GRID[GRID.length - 1]);
-
-    var c0 = input.current ? input.current.cm : null, sat = input.satisfaction || 3;
-    var cm = E.cStar, reason = "model optimum", anchor = null;
-    var optima = E.scenarioOptima();
-    var spread = [weightedQuantile(optima, 0.1), weightedQuantile(optima, 0.9)];
-    if (c0) {
-      // Preference is not performance: satisfaction only raises the re-adaptation cost (fewer, smaller steps), at most 2x.
-      var satMult = 1 + 0.25 * (sat - 1);
-      var cc = clamp(c0, GRID[0], GRID[GRID.length - 1]);
-      var jc = E.at(cc).total;
-      var prog = progression(function (C) { return E.at(C).total; }, cc, E.cStar, {
-        lambda: P.adaptLambda * satMult, jnd: P.jnd, maxStep: P.maxStep, optima: optima });
-      cm = prog.stay ? c0 : prog.cm;
-      reason = prog.reason;
-      anchor = { cm: c0, costDiff: jc - E.jStar, inBand: c0 >= band[0] && c0 <= band[1], stay: prog.stay, tolStay: tol * satMult,
-        satMult: satMult, step: prog.stay ? 0 : cm / c0 - 1, target: prog.target, agreement: prog.agreement, evidenceScale: prog.evidenceScale,
-        stages: prog.stages, plan: prog.plan, gainMs: (jc - E.at(cm).total) * 1000,
-        lifts90: expectedLifts(c0 * 90 / 360, pr), sd: null, weight: prog.stay ? 1 : 0 };
-    }
-
     var measured = null;
     if (input.calibration && input.calibration.trials) {
       measured = calibrate(input.calibration.trials, input, Object.assign({ satisfaction: input.satisfaction }, input.calibration.options));
-      cm = measured.cm; reason = measured.reason;
+    }
+    // v6: posterior over log cm/360. opts.physicsOnly (alias noBell) = raw physical optimum; opts.priorOnly = population only.
+    var physicsOnly = opts.physicsOnly || opts.noBell;
+    var post = physicsOnly ? null : posterior(input, opts.priorOnly ? null : E0, opts.priorOnly ? null : measured);
+    var target = post ? post.median : E0.cStar;
+    var useMeas = !!(post && post.components.measured);
+    if (useMeas) target = clamp(target, measured.tested[0], measured.tested[measured.tested.length - 1]);
+    var ratio = E0.cStar / target;      // the physical cost curve keeps its shape, re-centred on the posterior median
+    var E = { at: function (C) { return E0.at(C * ratio); }, cStar: target, jStar: E0.jStar };
+    var band = nearOptimalSet(function (C) { return E.at(C).total; }, E.cStar, E.jStar, tol, GRID[0], GRID[GRID.length - 1]);
+    // Evidence of direction: posterior mass (v6) or the physics scenario optima (physicsOnly).
+    var optima = post ? GRID.map(function (c, i) { return { c: c, w: post.weights[i] }; }).filter(function (o) { return o.w > 1e-6; })
+      : E0.scenarioOptima().map(function (o) { return { c: o.c, w: o.w }; });
+    var spread = post ? post.ci80 : [weightedQuantile(optima, 0.1), weightedQuantile(optima, 0.9)];
+
+    var c0 = input.current ? input.current.cm : null, sat = input.satisfaction || 3;
+    var cm = target, reason = useMeas ? "measured and modelled best" : post ? "most likely best for you" : "model optimum", anchor = null;
+    if (c0) {
+      // Preference is not performance: satisfaction only raises the re-adaptation cost (fewer, smaller steps), at most 2x.
+      var satMult = 1 + 0.25 * (sat - 1);
+      var lo = useMeas ? measured.tested[0] : GRID[0], hi = useMeas ? measured.tested[measured.tested.length - 1] : GRID[GRID.length - 1];
+      var cc = clamp(c0, lo, hi);
+      var jc = E.at(cc).total;
+      var inLikely = post && cc >= post.ci50[0] && cc <= post.ci50[1];
+      var prog = progression(function (C) { return E.at(C).total; }, cc, target, {
+        lambda: P.adaptLambda * satMult, jnd: P.jnd, maxStep: P.maxStep, optima: optima });
+      if (inLikely) { prog.stay = true; prog.reason = "your current setting is inside the most likely range: keep it"; }
+      // The aim test found no reliable difference between tested settings: the data says keep what you have.
+      if (measured && !useMeas && c0 >= measured.tested[0] && c0 <= measured.tested[measured.tested.length - 1]) { prog.stay = true; cc = c0; prog.reason = "no reliable difference between tested settings: keep current"; }
+      cm = prog.stay ? cc : prog.cm;
+      reason = prog.reason;
+      anchor = { cm: c0, costDiff: jc - E.jStar, inBand: c0 >= band[0] && c0 <= band[1], inLikely: !!inLikely, stay: prog.stay, tolStay: tol * satMult,
+        satMult: satMult, step: prog.stay ? cc / c0 - 1 : cm / c0 - 1, target: prog.target, agreement: prog.agreement, evidenceScale: prog.evidenceScale,
+        stages: prog.stay ? 0 : prog.stages, plan: prog.stay ? [] : prog.plan, gainMs: (jc - E.at(cm).total) * 1000,
+        lifts90: expectedLifts(c0 * 90 / 360, pr), sd: null, weight: prog.stay ? 1 : 0 };
     }
 
     var notes = [];
     if (cm * 90 / 360 > pr.D) notes.push("pad90");
     if (cm < 20) notes.push("fast");
     if (cm > 80) notes.push("slow");
+    if (measured && !useMeas) notes.push("measuredFlat");
 
     var curve = [];
     for (var C = 15; C <= 120; C += 1) { var c = E.at(C); curve.push({ C: C, total: c.total, prec: c.prec, trav: c.trav, lift: c.lift }); }
-    // Per-task cost at the result (central constants), so the UI can show what drives the number.
     var byTask = TASKS.map(function (t, j) { var c = taskCost(t, cm * ratio, pr); return { key: t.key, label: t.label, share: pr.mix[j], cost: pr.mix[j] * (c.prec + c.trav + c.lift) }; });
 
-    var unsure = 0; if (!LIMB[input.limb] || input.limb === "unsure") unsure++; if (!input.role && !input._agentProf) unsure++; if (!input.weapon) unsure++;
-    var confidence = measured
-      ? { type: "measured", label: measured.validation.curveBeatsFlat ? "measured" : "measured, no clear difference", interval: measured.optimumInterval }
-      : { type: "heuristic", label: unsure ? "low" : (input.reachCm ? "medium" : "low–medium"), spread: spread,
-          note: "Questionnaire-only estimates are unvalidated. The label is a heuristic, not a probability. The spread is the 10th–90th percentile of the optimum across the averaged assumption scenarios." };
+    var width = post ? Math.log(post.ci80[1] / post.ci80[0]) / 2 : null;
+    var label = width == null ? "low" : width < 0.12 ? "high" : width < 0.22 ? "medium" : width < 0.32 ? "low–medium" : "low";
+    var confidence = { type: useMeas ? "measured" : (post ? "posterior" : "heuristic"), label: label, interval: spread, spread: spread, halfWidthLn: width,
+      note: useMeas ? "80% interval from the population, your setup and your aim test combined."
+        : "80% interval from the population and your setup. The physical model is not yet validated on real players; the aim test narrows this." };
 
-    var range = measured ? measured.nearOptimal : band;
+    var range = post ? post.ci50 : band;
     var near = PROS.slice().sort(function (a, b) { return Math.abs(Math.log(a.cm / cm)) - Math.abs(Math.log(b.cm / cm)); }).slice(0, 5);
     return {
-      cm: cm, reason: reason, mode: measured ? "measured" : "questionnaire",
-      lo: range[0], hi: range[1], band: band, cModel: E0.cStar, cBell: E.cStar, bell: bell, modelCost: E.at(E.cStar), tolerance: tol,
+      engine: ENGINE, cm: cm, reason: reason, mode: useMeas ? "measured" : "questionnaire",
+      lo: range[0], hi: range[1], band: band, cModel: E0.cStar, cBell: target, target: target, posterior: post,
+      bell: post ? bellView(input, post) : null, modelCost: E.at(E.cStar), tolerance: tol,
       profile: pr, anchor: anchor, stats: statsSignals(input.stats), measured: measured, confidence: confidence,
       agents: input._agentProf || null, scopedAdvice: scopedAdvice(input._agentProf, input.weapon),
       dpiAdvice: input.dpi ? dpiAdvice(cm, input.dpi, input.resWidth) : null,
       notes: notes, curve: curve, byTask: byTask, optimumSpread: spread, nearPros: near,
       proPercentile: PROS.filter(function (p) { return p.cm < cm; }).length / Math.max(1, PROS.length),
-      nScenarios: E0.nScenarios
+      nScenarios: E0.nScenarios, personalUsed: (function () { var u = personalRanges(input.personal).used, pr2 = E0.profile; if (pr2.reachMeasured && input.personal && input.personal.reachCm) u.reachCm = pr2.reach; if (input.personal && input.personal.padCm && input.personal.padCm.value) u.padCm = pr2.usable; return Object.keys(u).length ? u : null; })()
     };
   }
 
@@ -1140,7 +1289,7 @@
   }
 
   var api = {
-    VERSION: "5.0.0", BELL: BELL, REGION: REGION, AGE: AGE, GLASSES: GLASSES, AGENT_Z: AGENT_Z, bellTarget: bellTarget, s800FromCm: s800FromCm, cmFromS800: cmFromS800, TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
+    VERSION: "1.0.0", ENGINE: ENGINE, PRIOR: PRIOR, posterior: posterior, BELL: BELL, REGION: REGION, AGE: AGE, GLASSES: GLASSES, AGENT_Z: AGENT_Z, bellTarget: bellTarget, s800FromCm: s800FromCm, cmFromS800: cmFromS800, TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
     findAgent: findAgent, agentMix: agentMix, agentsProfile: agentsProfile, matchMultiplier: matchMultiplier, scopedAdvice: scopedAdvice,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,

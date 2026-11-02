@@ -123,10 +123,10 @@ t("choice model: consistently picking cyan raises cyan and moves the recommendat
 });
 
 /* ---------- Vision test ---------- */
-t("vision run: interleaved staircases, catch trials, every color sees the same scenes", () => {
+t("vision run: interleaved QUEST+ posteriors, catch trials, every color sees the same scenes", () => {
   const run = simulateVision({ yellow: -1.2, red: -1.2, purple: -1.2 }, 3);
   const real = run.trials.filter(t => !t.catchTrial);
-  eq(real.length, 60); eq(run.trials.filter(t => t.catchTrial).length, 7);
+  eq(real.length, 3 * X.VT.perColor); eq(run.trials.filter(t => t.catchTrial).length, 7);
   const sc = c => real.filter(t => t.color === c).map(t => t.scene).sort().join();
   eq(sc("yellow"), sc("red")); eq(sc("red"), sc("purple"));
   ok(real.every(t => t.rt === undefined), "no reaction times are stored");
@@ -149,7 +149,7 @@ t("vision fit: missed catch trials void the result; dropped frames halve it and 
   eq(lazy.reliable, false); eq(lazy.weight, 0); ok(Object.values(lazy.bonus).every(b => b === 0));
   const run = simulateVision({ yellow: -1.3, red: -0.9, purple: -1 }, 6, { drop: 0.15 });
   const a = X.analyzeVision(run.trials);
-  ok(a.dropped > 0); eq(a.weight, 0.5); eq(a.nTrials, 60, "dropped rounds are repeated");
+  ok(a.dropped > 0); eq(a.weight, 0.5); eq(a.nTrials, 3 * X.VT.perColor, "dropped rounds are repeated");
 });
 t("vision test result changes the highlight; a measured result can outweigh the self-reported color vision type", () => {
   const purpleBest = simulateVision({ yellow: -0.7, red: -0.8, purple: -1.5 }, 11).trials;
@@ -158,6 +158,45 @@ t("vision test result changes the highlight; a measured result can outweigh the 
   const yellowBest = simulateVision({ yellow: -1.4, red: -0.8, purple: -0.9 }, 12).trials;
   eq(X.recommend({ hTest: yellowBest, cvd: "deutan" }).highlight.color.key, "yd");
   eq(X.analyzeVision(purpleBest.slice(0, 8)).ok, false);
+});
+
+
+/* ---------- QUEST+ placement ---------- */
+t("QUEST+: posterior mean moves toward the truth and the next stimulus sits near threshold", () => {
+  const Q = X._quest, q = Q.create(-0.5, 0.5, 0.25, 0.03), r = X.rng(5), truth = -1.3;
+  const xs = []; for (let i = 0; i < 12; i++) { const xi = Q.next(q), x = -2.5 + 0.05 * xi; xs.push(x); Q.update(q, xi, r() < 0.25 + 0.72 / (1 + Math.exp(-8 * (x - truth)))); }
+  const m = Q.mean(q); ok(Math.abs(m.mean - truth) < 0.4, "mean " + m.mean); ok(m.sd < 0.4, "sd " + m.sd);
+  ok(xs.every(x => x >= -2.5 && x <= 0), "stimuli inside grid");
+});
+t("QUEST+: 16 trials per color match the old 20-trial staircase's precision (20% fewer trials)", () => {
+  const med = a => a.slice().sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  const truth = { yellow: -1.3, red: -0.9, purple: -1.0 }, wQ = [], wS = [];
+  for (let i = 1; i <= 30; i++) {
+    const run = simulateVision(truth, 400 + i), a = X.analyzeVision(run.trials);
+    X.VT.colors.forEach(c => wQ.push(2 * a.colors[c].se));
+    // old rule inline: 20 trials per color, −0.05 / +0.15 log10 steps (−0.1 / +0.3 until two reversals)
+    const r = X.rng(i + 777), rows = [];
+    X.VT.colors.forEach(c => {
+      let x = -0.5, last = null, rev = 0;
+      for (let k = 0; k < 20; k++) {
+        const ok_ = r() < 0.25 + 0.72 / (1 + Math.exp(-8 * (x - truth[c]))), dir = ok_ ? -1 : 1;
+        rows.push({ color: c, x, correct: ok_, scene: "sand" });
+        if (last !== null && dir !== last) rev++; last = dir;
+        x = Math.max(-2, Math.min(0, x + (ok_ ? -(rev < 2 ? 0.1 : 0.05) : (rev < 2 ? 0.3 : 0.15))));
+      }
+    });
+    const b = X.analyzeVision(rows); X.VT.colors.forEach(c => wS.push(2 * b.colors[c].se));
+  }
+  const mq = med(wQ), ms = med(wS);
+  console.log("     median CI width: QUEST+ " + X.VT.perColor + "/color " + mq.toFixed(3) + " vs staircase 20/color " + ms.toFixed(3));
+  // At 12/color QUEST+ was ~20% wider (T09 report), so 1.0 uses 16/color: same precision within 5%, 20% fewer trials.
+  ok(mq <= 1.05 * ms, "QUEST+ " + mq + " > 1.05 x staircase " + ms);
+});
+t("QUEST+: dropped trials leave the posterior alone; start option centres the prior", () => {
+  const run = X.visionRun({ seed: 1, start: { yellow: -1.5, red: -1.5, purple: -1.5 } });
+  const t0 = run.nextTrial(); run.record(t0, { dropped: true, shownMs: 58 });
+  const t1 = run.nextTrial(); ok(t1.x < -0.8, "prior at -1.5 should start low, got " + t1.x);
+  const a = X.visionRun({ seed: 1 }).nextTrial(); ok(a.x > -1.2 && a.x < 0, "default start " + a.x);
 });
 
 console.log("\n" + pass + " passed, " + fail + " failed");

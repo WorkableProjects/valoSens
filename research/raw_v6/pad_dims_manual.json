@@ -1,0 +1,11 @@
+{"note":"Manufacturer/retailer-listed sizes seen during this task (WebSearch results / WebFetch). width_cm = the longer side (left-right on a desk). Keys are specs.gg pad names that state the size explicitly.",
+"pads":{
+ "Artisan FX Zero SOFT XL":{"width_cm":49,"height_cm":42,"source_url":"https://jpgamingusa.com/products/artisan-fx-zero-mousepad","quote":"XL (490x420mm)"},
+ "Artisan FX Zero XSOFT XL":{"width_cm":49,"height_cm":42,"source_url":"https://jpgamingusa.com/products/artisan-fx-zero-mousepad","quote":"XL (490x420mm)"},
+ "Artisan FX Zero XSOFT XL Daidai Orange":{"width_cm":49,"height_cm":42,"source_url":"https://jpgamingusa.com/products/artisan-fx-zero-mousepad","quote":"XL (490x420mm)"},
+ "Artisan FX Zero SOFT XL Daidai Orange":{"width_cm":49,"height_cm":42,"source_url":"https://jpgamingusa.com/products/artisan-fx-zero-mousepad","quote":"XL (490x420mm)"},
+ "Artisan FX Zero MID XL":{"width_cm":49,"height_cm":42,"source_url":"https://jpgamingusa.com/products/artisan-fx-zero-mousepad","quote":"XL (490x420mm)"},
+ "SteelSeries QcK Heavy Large":{"width_cm":45,"height_cm":40,"source_url":"https://www.newegg.com/p/N82E16826995181","quote":"Large Size 450 mm x 400 mm x 6 mm (also Walmart, Best Buy, Amazon listings in the same search)"},
+ "SteelSeries QcK Heavy XXL":{"width_cm":90,"height_cm":40,"source_url":"https://steelseries.com/gaming-mousepads/qck-heavy-series","quote":"XXL 900 mm x 400 mm x 4 mm (search-result text; retailer pages agree)"},
+ "Logitech G640":{"width_cm":46,"height_cm":40,"source_url":"https://www.logitechg.com/en-us/shop/p/g640-cloth-gaming-mouse-pad","quote":"Large size, 400 x 460 mm (search-result text; some US retailers list 460x600, treated as a listing error by that result)"}
+}}

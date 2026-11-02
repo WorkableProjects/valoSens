@@ -1,0 +1,24 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: node test/model.test.js
+      - run: node test/xhair.test.js
+      - run: node test/session.test.js
+      - run: node test/aim.test.js
+      - run: node test/sim.test.js
+      - run: node test/snapshot.js --check
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: node test/ui.e2e.js
+      - run: node test/aimtest.e2e.js

@@ -1,0 +1,10 @@
+/* Start screen (three path cards) and the four-part progress bar. */
+.parts { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 560px) { .parts { grid-template-columns: repeat(2, 1fr); row-gap: 12px; } }
+.paths { display: grid; gap: 10px; grid-template-columns: 1fr; }
+.path { display: block; text-align: left; padding: 16px 18px; }
+.path .path-t { display: block; font: 600 12px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--teal); margin: 6px 0 8px; }
+.path-import { background: var(--panel); border: 1px solid var(--line); cursor: default; }
+.path-import:hover { transform: none; }
+.path-import .imp { margin: 12px 0 0; }
+.aim-sum { margin: 0 0 14px; font-size: 15px; }

@@ -1,0 +1,20 @@
+{"source_url":"https://www.vlr.gg/245704/rank-and-sensitivity-survey","accessed":"2026-11-02","note":"Self-reported forum replies (thread ~3 years old). Transcribed by hand from the fetched page; posts without a DPI (gamingtaming, dayyaan1) are skipped.",
+"rows":[
+{"name":"nihso","rank":"immortal","rank_note":"Immo 1 (immo 2 150 rr peak)","dpi":20000,"sens":0.03,"flag":"20k DPI claim, disputed by another commenter ('no shot bro plays with 60 edpi'); kept, flagged"},
+{"name":"dogecoin","rank":null,"rank_note":"unranked (bronze 2 peak)","dpi":800,"sens":0.3},
+{"name":"RealDeal","rank":"immortal","rank_note":"immo3 550rr peak","dpi":1600,"sens":0.193},
+{"name":"ChromeDZN","rank":"platinum","rank_note":"Plat 1 (plat 2 peak)","dpi":1600,"sens":0.108},
+{"name":"Hynix","rank":"diamond","rank_note":"Diamond 3 (Central U.S. servers), Gold 2 (KR servers)","dpi":1600,"sens":0.1},
+{"name":"doomvor","rank":"diamond","rank_note":"Diamond 3 (Asc 1 peak)","dpi":800,"sens":0.4},
+{"name":"JAPANCAFE","rank":null,"rank_note":"unranked (plat1 peak)","dpi":800,"sens":0.32},
+{"name":"SEN_brasileiros","rank":"immortal","rank_note":"immortal3-LowRadiant in every act","dpi":3200,"sens":0.314},
+{"name":"Qwerttyy","rank":"bronze","rank_note":"bronze 2 (peak silver 3)","dpi":800,"sens":0.3},
+{"name":"randomperson","rank":"silver","rank_note":"s2 (g3 peak)","dpi":3200,"sens":0.07},
+{"name":"LeeKeybum","rank":"immortal","rank_note":"immo 2 rn, peaked immo 3 465 rr","dpi":800,"sens":0.325},
+{"name":"jwlsie","rank":"platinum","rank_note":"p3","dpi":1000,"sens":0.381},
+{"name":"Frogzay","rank":"platinum","rank_note":"p1 (former dia2)","dpi":800,"sens":0.32},
+{"name":"PatotheDuck","rank":"immortal","rank_note":"Immo 1 (Immo 2 peak)","dpi":800,"sens":0.295},
+{"name":"ufc","rank":"radiant","rank_note":"Highest rank: Radiant top 10","dpi":1600,"sens":0.15},
+{"name":"acels2","rank":"immortal","rank_note":"imm3","dpi":800,"sens":0.4},
+{"name":"eric_5008","rank":"platinum","rank_note":"plat 3 (peak)","dpi":800,"sens":0.215}
+]}

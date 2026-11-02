@@ -1,4 +1,32 @@
-# valoSens 5.0: Valorant settings finder
+# valoSens 1.0.0: Valorant settings finder (Engine v6)
+
+Open `index.html` in a browser. There's no build step or server, and nothing leaves the page. Pick **Quick** (questionnaire, about 3 minutes) or **Full calibration** (questionnaire, then a 6-minute aim test, then the crosshair and highlight tests).
+
+**How the sensitivity is found (Engine v6).** The result is a probability distribution over cm/360 that combines three sources, each weighted by its reliability:
+1. **Players like you.** 5,330 players (`research/population_v6.md`), centred at 0.30 sens at 800 DPI. The SD of ln is 0.41 for general players and 0.33 for pros. Immortal and Radiant players, and competitive ones, use the pro width.
+2. **Your setup.** The physical cost model (pad, aiming joint, hand noise, lifts, turns, tracking). It counts for about 38%, because pad width barely predicts sensitivity in real data (`scripts/build_prior.js`).
+3. **Your aim test.** A curve fitted to your own trial times, plus your own measured motor constants.
+
+The result is the posterior median, with honest 50% and 80% ranges. If your current setting is outside the likely range, the progression rule moves you toward the median in steps of up to 15%.
+
+**Accuracy (simulated players, `node test/scorecard.js`):** median error is 0.33 octave from the questionnaire, 0.225 with the 6-minute aim test, and 0.20 with 12 minutes. Real-player validation is still needed. See `CHANGELOG.md`.
+
+**Tests:**
+- `node test/model.test.js`
+- `node test/aim.test.js`
+- `node test/sim.test.js`
+- `node test/session.test.js`
+- `node test/xhair.test.js`
+- `node test/snapshot.js --check`
+- `node test/ui.e2e.js`
+- `node test/aimtest.e2e.js`
+
+These need Playwright, and so does the aim-test dev page (`aimtest.html`, add `?auto=1` for a scripted bot).
+
+---
+
+# Earlier versions (history)
+
 
 Version 3.0 is a full release covering all three parts: **1. Sensitivity**, **2. Crosshair** (with a rotating visibility test), and **3. Enemy highlight color** (with a vision-threshold test).
 
