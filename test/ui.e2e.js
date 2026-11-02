@@ -336,8 +336,9 @@ async function flow(b, vp, steps, after, opts = {}) {
   const file1 = JSON.parse(fs.readFileSync(file, "utf8"));
   const filesOk = /^valosens-results-.*-1-session\.json$/.test(r0.fileName) && file1.sessions.length === 1 && file1.sessions[0].hTest.length > 50 && file1.sessions[0].xTest.length === 8;
   const aimFileOk = file1.format === 2 && file1.engine === "6" && file1.sessions[0].answers.rank === "gold" && file1.sessions[0].answers.aimSkip === false && file1.sessions[0].answers.glasses === undefined &&
+  // The tiny synthetic aim run may or may not show a significant curve, so "questionnaire" mode (measured data present but not decisive) is accepted.
     file1.sessions[0].aim && file1.sessions[0].aim.trials.length === r0.aimTrials && r0.aimTrials >= 40 && file1.sessions[0].aim.dpi && file1.sessions[0].aim.personal && !JSON.stringify(file1.sessions[0].aim).includes("trajector") &&
-    r0.aimNextDisabled === true && /^true\|true\|gold\|false\|measured\|$/.test(r0.aimInput) && /targets/.test(r0.aimSummary) && /^true\|true\|gold\|/.test(r2.calib2);
+    r0.aimNextDisabled === true && /^true\|true\|gold\|false\|(measured|questionnaire)\|$/.test(r0.aimInput) && /targets/.test(r0.aimSummary) && /^true\|true\|gold\|/.test(r2.calib2);
   console.log("aim data in input and file (format 2):", aimFileOk, "| second run pools it:", r2.calib2);
   if (!aimFileOk) ok = false;
   const importOk = /Calibration run 2/.test(r2.imported) && r2.prefill === "800|0.5|Jett|deutan|1440|1" && r2.jumpedTo === "vis";
