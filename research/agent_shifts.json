@@ -1,0 +1,359 @@
+{
+ "generated": "2026-11-02",
+ "unit": "SD of bell curve; 1 = 0.1 sens at 800 DPI; + = faster",
+ "overallMedianS800": 0.275,
+ "nPlayers": 147,
+ "roles": {
+  "d": {
+   "z": 0.201,
+   "n": 61,
+   "medianS800": 0.3
+  },
+  "i": {
+   "z": -0.061,
+   "n": 40,
+   "medianS800": 0.2666
+  },
+  "c": {
+   "z": -0.231,
+   "n": 29,
+   "medianS800": 0.24
+  },
+  "s": {
+   "z": 0.106,
+   "n": 17,
+   "medianS800": 0.295
+  }
+ },
+ "agents": {
+  "Hush": {
+   "role": "d",
+   "z": 0.201,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "New 2026 agent, no pro mains in sample; role-only."
+  },
+  "Iso": {
+   "role": "d",
+   "z": 0.201,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "Pool-weighted mean 0.306 from only 0.5 effective players; role-only."
+  },
+  "Jett": {
+   "role": "d",
+   "z": 0.24,
+   "n": 41,
+   "medianS800": 0.3,
+   "basis": "research",
+   "note": "Largest main group (n=41), median 0.30 equals duelist median; Operator is a minority pick per pro pools."
+  },
+  "Neon": {
+   "role": "d",
+   "z": 0.186,
+   "n": 4,
+   "medianS800": 0.29,
+   "basis": "research",
+   "note": "4 mains, median 0.29; pool-weighted mean 0.31 across 6 effective players."
+  },
+  "Phoenix": {
+   "role": "d",
+   "z": 0.201,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; pool-weighted mean 0.31 from 2 effective players; role-only."
+  },
+  "Raze": {
+   "role": "d",
+   "z": 0.229,
+   "n": 13,
+   "medianS800": 0.3,
+   "basis": "research",
+   "note": "13 mains, median 0.30, pool-weighted mean 0.307; same as duelist role."
+  },
+  "Reyna": {
+   "role": "d",
+   "z": 0.201,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  },
+  "Waylay": {
+   "role": "d",
+   "z": 0.114,
+   "n": 1,
+   "medianS800": 0.2,
+   "basis": "research",
+   "note": "Single main (s800 0.20); result mostly shrunk to role. Agent released 2025, little history."
+  },
+  "Yoru": {
+   "role": "d",
+   "z": 0.156,
+   "n": 2,
+   "medianS800": 0.268,
+   "basis": "research",
+   "note": "2 mains, median 0.268; weak evidence."
+  },
+  "Breach": {
+   "role": "i",
+   "z": -0.104,
+   "n": 3,
+   "medianS800": 0.25,
+   "basis": "research",
+   "note": "3 mains, median 0.25; weak evidence."
+  },
+  "Fade": {
+   "role": "i",
+   "z": -0.061,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains in sample (pool-weighted mean 0.29, 5 effective players); role-only."
+  },
+  "Gekko": {
+   "role": "i",
+   "z": -0.061,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  },
+  "KAY/O": {
+   "role": "i",
+   "z": 0.219,
+   "n": 3,
+   "medianS800": 0.39,
+   "basis": "research",
+   "note": "3 mains incl. high-sens players (median 0.39); n too small, shrinkage keeps z near 0.2."
+  },
+  "Skye": {
+   "role": "i",
+   "z": -0.084,
+   "n": 7,
+   "medianS800": 0.2633,
+   "basis": "research",
+   "note": "7 mains, median 0.263; close to initiator role."
+  },
+  "Sova": {
+   "role": "i",
+   "z": -0.126,
+   "n": 27,
+   "medianS800": 0.26,
+   "basis": "research",
+   "note": "27 mains, median 0.26, mean 0.289: slightly slower than overall; difference not significant (p=0.47 median)."
+  },
+  "Tejo": {
+   "role": "i",
+   "z": -0.061,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "New 2025 agent, no mains; role-only."
+  },
+  "Astra": {
+   "role": "c",
+   "z": -0.137,
+   "n": 1,
+   "medianS800": 0.355,
+   "basis": "research",
+   "note": "Single main (s800 0.355) is a noisy outlier; pool-weighted mean 0.274 suggests controller-typical."
+  },
+  "Brimstone": {
+   "role": "c",
+   "z": -0.231,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  },
+  "Clove": {
+   "role": "c",
+   "z": -0.231,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  },
+  "Harbor": {
+   "role": "c",
+   "z": -0.231,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  },
+  "Miks": {
+   "role": "c",
+   "z": -0.231,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "New 2026 agent, no data; role-only."
+  },
+  "Omen": {
+   "role": "c",
+   "z": -0.312,
+   "n": 21,
+   "medianS800": 0.24,
+   "basis": "research",
+   "note": "21 mains, median 0.24 (mean 0.269): controller-typical, lowest well-sampled agent; p~0.18 vs rest."
+  },
+  "Viper": {
+   "role": "c",
+   "z": -0.445,
+   "n": 7,
+   "medianS800": 0.2,
+   "basis": "research",
+   "note": "7 mains, median 0.20 but mean 0.24: median is discretized at round values, so z=-0.445 is probably exaggerated."
+  },
+  "Chamber": {
+   "role": "s",
+   "z": 0.128,
+   "n": 3,
+   "medianS800": 0.295,
+   "basis": "research",
+   "note": "3 mains, median 0.295; Operator is a core pick but sample is tiny."
+  },
+  "Cypher": {
+   "role": "s",
+   "z": 0.033,
+   "n": 10,
+   "medianS800": 0.271,
+   "basis": "research",
+   "note": "10 mains, median 0.271 but mean 0.335 (a few very high-sens players); near sentinel-role average."
+  },
+  "Deadlock": {
+   "role": "s",
+   "z": 0.106,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  },
+  "Killjoy": {
+   "role": "s",
+   "z": 0.126,
+   "n": 2,
+   "medianS800": 0.2975,
+   "basis": "research",
+   "note": "2 mains, median 0.2975; weak evidence."
+  },
+  "Sage": {
+   "role": "s",
+   "z": 0.238,
+   "n": 2,
+   "medianS800": 0.3645,
+   "basis": "research",
+   "note": "2 mains (0.29, 0.44); noisy."
+  },
+  "Veto": {
+   "role": "s",
+   "z": 0.106,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "New 2025 agent, no mains; role-only."
+  },
+  "Vyse": {
+   "role": "s",
+   "z": 0.106,
+   "n": 0,
+   "medianS800": null,
+   "basis": "role-only",
+   "note": "No mains; role-only."
+  }
+ },
+ "roleDetail": {
+  "d": {
+   "z": 0.201,
+   "n": 61,
+   "medianS800": 0.3,
+   "meanS800": 0.3062,
+   "rawZ": 0.25
+  },
+  "i": {
+   "z": -0.061,
+   "n": 40,
+   "medianS800": 0.2666,
+   "meanS800": 0.2905,
+   "rawZ": -0.084
+  },
+  "c": {
+   "z": -0.231,
+   "n": 29,
+   "medianS800": 0.24,
+   "meanS800": 0.2651,
+   "rawZ": -0.35
+  },
+  "s": {
+   "z": 0.106,
+   "n": 17,
+   "medianS800": 0.295,
+   "meanS800": 0.3273,
+   "rawZ": 0.2
+  }
+ },
+ "caveats": [
+  "z is relative to the overall median of PRO players (0.275), not the bell-curve mean 0.3; apply as a shift.",
+  "Agent mains with n=0 have medianS800=null and use role z; basis 'role-only'.",
+  "No effect is statistically significant (duelist vs rest permutation p=0.29-0.31); controller vs rest p~0.06-0.10. Treat all z as weak priors.",
+  "Role/agent z partly duplicates the mechanics already in the physical model (dashes/teleports); consider damping.",
+  "Pros only: sample is not the general player population; settings are snapshots, VLR agent windows are all-time."
+ ],
+ "sources": [
+  {
+   "id": "prosettings_list",
+   "url": "https://prosettings.net/lists/valorant/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "prosettings_players",
+   "url": "https://prosettings.net/players/<slug>/ (one page per added player, listed in the player table)",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "vlr_player_pages",
+   "url": "https://www.vlr.gg/player/<id>/?timespan=all (agent-use tables, ids in the player table)",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "vlr_search",
+   "url": "https://www.vlr.gg/search/?q=<name>&type=players",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "unknownsoldier_2023",
+   "url": "https://note.com/unknownsoldier/n/n122a00405e52?hl=en",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "valorantcalc_agent_guide",
+   "url": "https://valorantcalc.online/how-to-tune-sensitivity-based-on-your-favorite-valorant-agent/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "esportsettings_guide",
+   "url": "https://esportsettings.com/blog/valorant-pro-sensitivity-guide/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "hotspawn_guide",
+   "url": "https://www.hotspawn.com/valorant/guide/best-valorant-sensitivity-settings",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "proconfig_scoped",
+   "url": "https://proconfig.net/stats/valorant-scoped-sensitivity/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "prior_work",
+   "url": "research/agent_sens_data.md (repo file, 28 pros, 2026-11-01)",
+   "accessed": "2026-11-02"
+  }
+ ]
+}

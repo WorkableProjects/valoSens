@@ -16,7 +16,7 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
   - **Region:** 99 pros from ProSettings by country. The "NA plays slower than APAC" idea is **not supported** (NA median 0.286 vs APAC 0.279). Shifts are small (|z| ≤ 0.14) after shrinkage.
   - **Age:** no gamer data on sensitivity by age; motor-control literature only. Shifts are labelled estimates (under 16 +0.10 … 35+ −0.25).
   - **Glasses:** no evidence of any effect, so all shifts are 0. The question is kept so data can be added later.
-  - **Agents:** per-agent empirical trends with empirical-Bayes shrinkage, applied at half weight because ability mechanics already move the physical optimum.
+  - **Agents:** 147 pros and semi-pros (ProSettings settings plus VLR agent pools), shrunk toward their role and then toward the overall median (empirical Bayes). Duelists 0.30, sentinels 0.295, initiators 0.267, controllers 0.24 (median s800). Not significant (duelist vs rest p ≈ 0.3; controller vs rest p ≈ 0.06–0.10). Clearest agents: Jett +0.24 z (n 41), Raze +0.23 (n 13), Omen −0.31 (n 21), Sova −0.13 (n 27); 14 agents have no mains in the sample and use their role's value. Applied at **half weight**, because ability mechanics already move the physical optimum.
 - **New questions:** region, age group and glasses (all optional, "Prefer not to say" adds nothing).
 - **Skip parts:** the crosshair and enemy-highlight parts can each be skipped, and added back from the results screen.
 - **Animations:** shared motion tokens across the app, directional question transitions, button and choice feedback; on the results screen an animated bell-curve chart with "what moved you" bars, chart and number count-ups. All off under `prefers-reduced-motion`.
@@ -82,11 +82,12 @@ Open `index.html` in a browser. It needs no build step or server, and nothing le
 **Files**
 - **Model:** `model.js` (sensitivity), `xhair.js` (crosshair + highlight) and `session.js` (results files); all work in the browser and in Node.
 - **Tests:**
-  - `node test/model.test.js` (52)
+  - `node test/model.test.js` (58)
   - `node test/xhair.test.js` (21, including simulated observers for the vision test)
   - `node test/session.test.js` (9: file round trip, appending sessions, rejecting bad files, sanitising, pooling)
   - `node test/ui.e2e.js` (browser test: both tests, the rotation, the animations, and download → import → second run; needs Playwright)
 - **Pro data:** regenerate with `node scripts/build_pros.js` after editing `research/pro_data_audit.json`.
+- **Bell-curve constants:** regenerate with `node scripts/build_bell.js` after editing `research/demographic_shifts.json` or `research/agent_shifts.json` (`--tables` skips the ~4 min population run).
 - **Agent data:** regenerate with `node scripts/build_agents.js` after editing `research/agent_mechanics.json`.
 - `Valorant sensitivity finder.html` is the original multiplier-based version, kept for reference.
 
@@ -295,6 +296,8 @@ Run it yourself with `ValoModel.sensitivityAnalysis(input)`.
 - `research/pro_roles.md`: roles from VLR.gg agent usage
 - `research/agent_mechanics.json` and `.md`: 30-agent ability catalogue (Riot wiki)
 - `research/agent_sens_data.json` and `.md`: pro agent pools and the agent-vs-sensitivity check
+- `research/demographic_research.md` and `demographic_shifts.json`: region, age and glasses trends (v5)
+- `research/agent_trends_research.md` and `agent_shifts.json`: per-agent sensitivity trends, 147 players (v5)
 - `research/scoped_ads_settings.md`: scoped/ADS multipliers, zoom levels, matching formulas, pro usage
 - `research/model_research.md`: earlier background notes (v1)
 - `research/vision_test_method.md`: design and validation of the highlight vision test (v3)
