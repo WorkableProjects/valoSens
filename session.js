@@ -22,7 +22,9 @@
     stRank: ["unsure", "iron", "bronze", "silver", "gold", "plat", "diamond", "asc", "imm", "rad"],
     cvd: ["none", "deutan", "protan", "rg", "tritan", "unsure"], exp: ["new", "mid", "exp", "comp"], moving: ["still", "moving", "unsure"],
     aim: ["flick", "track", "mix"], shape: ["small", "medium", "dot", "crossDot", "any"], lose: ["bright", "dark", "util", "never"],
-    res: ["1080", "1440", "2160", "stretched"], grip: ["palm", "claw", "fingertip", "unsure"], mouseW: ["light", "mid", "heavy", "xheavy", "unsure"], hCur: ["red", "yd", "yp", "purple", "unsure"], hMaps: ["warm", "dark", "cool", "none"]
+    res: ["1080", "1440", "2160", "stretched"], grip: ["palm", "claw", "fingertip", "unsure"], mouseW: ["light", "mid", "heavy", "xheavy", "unsure"], hCur: ["red", "yd", "yp", "purple", "unsure"], hMaps: ["warm", "dark", "cool", "none"],
+    region: ["na", "latam", "br", "eu", "mena", "kr", "jp", "cn", "sea", "oce", "unsure"],
+    age: ["u16", "16_19", "20_24", "25_29", "30_34", "35p", "unsure"], glasses: ["none", "glasses", "contacts", "unsure"]
   };
   var NUMS = ["dpiCustom", "cur", "measured", "otherSens", "padCustom", "stMatches", "stHs", "stKd", "stAdr"];
   var AGENTS = ["agent1", "agent2", "agent3"];
@@ -43,6 +45,8 @@
     });
     if (isNum(a.sat) && a.sat >= 1 && a.sat <= 5) out.sat = Math.round(a.sat);
     if (typeof a.hKeep === "boolean") out.hKeep = a.hKeep;
+    if (typeof a.xSkip === "boolean") out.xSkip = a.xSkip;
+    if (typeof a.hSkip === "boolean") out.hSkip = a.hSkip;
     if (a.hClutter && typeof a.hClutter === "object") out.hClutter = { fire: a.hClutter.fire === true, purple: a.hClutter.purple === true, yellow: a.hClutter.yellow === true };
     return { answers: out, dropped: dropped };
   }

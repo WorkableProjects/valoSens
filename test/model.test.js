@@ -68,9 +68,9 @@ t("extreme but valid inputs give finite, ordered results", () => {
   for (const pad of [10, 25, 45, 120, 300]) for (const reachCm of [undefined, 0.5, 5, 30, 100]) for (const cur of [null, 1, 20, 60, 1000]) {
     const r = rec({ pad, reachCm, current: cur ? { cm: cur } : null, satisfaction: 5 });
     assert(isFinite(r.cm) && r.cm > 0, JSON.stringify({ pad, reachCm, cur }));
-    assert(r.band[0] <= r.cModel + 1e-9 && r.cModel <= r.band[1] + 1e-9);
-    // v4.0: the result lies between the current setting and the model optimum (or stays).
-    if (cur) { const a = Math.min(cur, r.cModel), b = Math.max(cur, r.cModel); assert(r.cm >= Math.min(a, 8) - 1e-9 && (r.cm <= b + 1e-9 || r.anchor.stay), JSON.stringify({ pad, reachCm, cur, cm: r.cm })); }
+    assert(r.band[0] <= r.cBell + 1e-9 && r.cBell <= r.band[1] + 1e-9);
+    // v4.0/v5.0: the result lies between the current setting and the (bell-curve) target, or stays.
+    if (cur) { const a = Math.min(cur, r.cBell), b = Math.max(cur, r.cBell); assert(r.cm >= Math.min(a, 8) - 1e-9 && (r.cm <= b + 1e-9 || r.anchor.stay), JSON.stringify({ pad, reachCm, cur, cm: r.cm })); }
     else assert(r.lo <= r.cm + 1e-9 && r.cm <= r.hi + 1e-9);
     r.curve.forEach(p => assert(isFinite(p.total) && p.total >= 0));
   }
@@ -147,16 +147,16 @@ t("role and weapon effects stay inside the near-optimal range", () => {
 /* ---------------- Current setting, satisfaction and range rule ---------------- */
 t("a current setting at the model's best is kept", () => {
   const r0 = rec({});
-  const r = rec({ current: { cm: r0.cModel * 1.01 }, satisfaction: 1 });
-  assert.strictEqual(r.cm, r0.cModel * 1.01);
+  const r = rec({ current: { cm: r0.cBell * 1.01 }, satisfaction: 1 });
+  assert.strictEqual(r.cm, r0.cBell * 1.01);
   assert(r.anchor.stay);
 });
 t("v4: a setting inside the near-optimal range still moves when the scenarios agree", () => {
   const r0 = rec({});
   const inside = r0.band[0] * 1.04;                          // inside the band, but well below the optimum
-  assert(inside < r0.cModel);
+  assert(inside < r0.cBell);
   const r = rec({ current: { cm: inside }, satisfaction: 3 });
-  assert(!r.anchor.stay && r.cm > inside && r.cm <= r0.cModel, "moved from " + inside + " to " + r.cm);
+  assert(!r.anchor.stay && r.cm > inside && r.cm <= r0.cBell, "moved from " + inside + " to " + r.cm);
   assert(r.anchor.agreement > 0.7);
 });
 t("v4: the same answers with a different current setting give different results", () => {
@@ -169,12 +169,12 @@ t("v4: large changes are split into stages capped at maxStep, and a re-run conti
   assert(r1.anchor.stages >= 2 && Math.abs(r1.cm / 15 - 1 - cap) < 1e-6);
   assert(Math.abs(r1.anchor.plan[0] - r1.cm) < 1e-9);
   const r2 = rec({ current: { cm: r1.cm } });                 // next session starts from the new setting
-  assert(r2.cm > r1.cm && r2.cm <= r1.cModel + 1e-9);
+  assert(r2.cm > r1.cm && r2.cm <= r1.cBell + 1e-9);
   const slow = rec({ current: { cm: 140 } });
   assert(Math.abs(slow.cm / 140 - 1 / (1 + cap)) < 1e-6);
 });
 t("v4: satisfaction shrinks the step (at most 2x re-adaptation cost) but never blocks a clear move", () => {
-  const r0 = rec({}), c = r0.cModel * 1.12;
+  const r0 = rec({}), c = r0.cBell * 1.12;
   const s1 = rec({ current: { cm: c }, satisfaction: 1 }), s5 = rec({ current: { cm: c }, satisfaction: 5 });
   assert(s1.anchor.satMult === 1 && s5.anchor.satMult === 2);
   assert(Math.abs(Math.log(s5.cm / c)) <= Math.abs(Math.log(s1.cm / c)) + 1e-12);
@@ -185,7 +185,7 @@ t("v4: steps below the JND are not recommended", () => {
   const r0 = rec({});
   const pr = M.progression(C => Math.pow(Math.log(C / 50), 2) * 0.001, 50 * 1.02, 50, { lambda: 0.03, jnd: 0.03, maxStep: 0.15, optima: [{ c: 50, w: 1 }] });
   assert(pr.stay);
-  assert(r0.optimumSpread[0] < r0.cModel && r0.cModel < r0.optimumSpread[1]);
+  assert(r0.optimumSpread[0] < r0.cBell && r0.cBell < r0.optimumSpread[1]);
 });
 t("v4: tracking task, experience, grip and mouse weight act in the expected directions", () => {
   assert.strictEqual(M.TASKS.length, 5);
@@ -393,6 +393,54 @@ t("turn shares are averaged over their uncertainty (5 uncertain constants, 243 s
   assert(hi < lo, "more big turns should favor a faster setting: " + lo + " vs " + hi);
   const pr = M.buildProfile(Object.assign({}, base), Object.assign({}, Object.fromEntries(Object.keys(M.PARAMS).map(k => [k, M.PARAMS[k].central])), { turnScale: 1.5 }));
   assert(Math.abs(pr.mix.reduce((a, b) => a + b, 0) - 1) < 1e-9);
+});
+
+/* ---------------- Bell curve (v5.0) ---------------- */
+t("bell: population of results is ~N(0.3, 0.1) in sens at 800 DPI", () => {
+  const R = M._rng(11), pick = a => a[Math.floor(R() * a.length)], xs = [];
+  for (let i = 0; i < 40; i++) {
+    const r = M.recommend({ dpi: 800, pad: pick([25, 36, 45, 45, 49, 90]), limb: pick(["wrist", "wf", "forearm", "arm"]), role: pick(["d", "i", "c", "s", "f"]),
+      weapon: pick(["rifle", "rifle", "sniper", "close"]), experience: pick(["new", "mid", "exp", "comp"]),
+      region: pick(Object.keys(M.REGION)), age: pick(Object.keys(M.AGE)), glasses: pick(Object.keys(M.GLASSES)) });
+    xs.push(r.bell.s800);
+    assert(Math.abs(M.s800FromCm(r.cm) - r.bell.s800) < 1e-9, "with no current setting the result is the bell target");
+  }
+  const m = xs.reduce((a, b) => a + b, 0) / xs.length, sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) * (b - m), 0) / (xs.length - 1));
+  assert(Math.abs(m - 0.3) < 0.035, "mean " + m);
+  assert(sd > 0.06 && sd < 0.14, "sd " + sd);
+});
+t("bell: result stays inside [0.1, 0.7] and percentile matches z", () => {
+  for (const o of [{ pad: 12, limb: "wrist" }, { pad: 200, limb: "arm" }]) {
+    const b = rec(o).bell;
+    assert(b.s800 >= 0.1 - 1e-12 && b.s800 <= 0.7 + 1e-12, String(b.s800));
+    assert(Math.abs(b.percentile - 0.5 * (1 + M._erf(b.z / Math.SQRT2))) < 1e-12);
+  }
+});
+t("bell: shifts add in SD units (0.1 sens per z)", () => {
+  const a = rec({ region: "unsure" }).bell, keys = Object.keys(M.REGION).filter(k => k !== "unsure");
+  for (const k of keys) {
+    const b = rec({ region: k }).bell;
+    assert(Math.abs((b.s800 - a.s800) - 0.1 * M.REGION[k].z) < 1e-9, k);
+  }
+  const old = rec({ age: "35p" }).bell, young = rec({ age: "u16" }).bell;
+  assert.strictEqual(Math.sign(young.s800 - old.s800), Math.sign(M.AGE.u16.z - M.AGE["35p"].z) || 0);
+});
+t("bell: unknown region / age / glasses are rejected", () => {
+  assert.throws(() => rec({ region: "mars" }), RangeError);
+  assert.throws(() => rec({ age: "99" }), RangeError);
+  assert.throws(() => rec({ glasses: "monocle" }), RangeError);
+});
+t("bell: opts.noBell gives the raw physical optimum; progression heads for the bell target", () => {
+  const raw = rec({}, { noBell: true });
+  assert.strictEqual(raw.bell, null);
+  assert(Math.abs(raw.cm / raw.cModel - 1) < 1e-9);
+  const b = rec({}).bell, cur = b.cm * 1.6, r = rec({ current: { cm: cur } });
+  assert(r.cm < cur, "moves toward the faster bell target");
+  assert(r.anchor.target <= cur && r.anchor.target >= b.cm * 0.98);
+});
+t("bell: agent trend applies at half weight", () => {
+  const r = rec({ agents: ["Jett"] }), s = r.bell.shifts.find(x => x.key === "agents");
+  assert(s && Math.abs(s.z - M.BELL.agentWeight * (M.AGENT_Z.Jett ? M.AGENT_Z.Jett.z : 0)) < 1e-12);
 });
 
 console.log("\n" + n + " passed, " + failed + " failed");

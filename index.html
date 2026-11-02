@@ -15,6 +15,8 @@
     --head: "Barlow Condensed", "DIN Condensed", "Arial Narrow", system-ui, sans-serif;
     --body: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --ease: cubic-bezier(.22, .61, .36, 1);
+    --ease-out: cubic-bezier(.22, .61, .36, 1); --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+    --dur-1: 120ms; --dur-2: 240ms; --dur-3: 480ms;
     color-scheme: dark;
   }
   *, *::before, *::after { box-sizing: border-box; }
@@ -22,7 +24,8 @@
   body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); -webkit-text-size-adjust: 100%; min-height: 100vh;
     background-image: radial-gradient(1200px 600px at 70% -10%, rgba(42, 214, 176, 0.07), transparent 60%), radial-gradient(900px 500px at 0% 110%, rgba(255, 70, 85, 0.05), transparent 60%); }
   button, input, select, textarea { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; animation: focusRing var(--dur-2) var(--ease-out); }
+  @keyframes focusRing { from { outline-color: transparent; outline-offset: 8px; } to { outline-color: var(--focus); outline-offset: 2px; } }
 
   /* top bar */
   .top { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 20px;
@@ -30,7 +33,9 @@
   .brand { font: 700 18px/1 var(--head); letter-spacing: .12em; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
   .brand i { width: 10px; height: 10px; background: var(--red); transform: rotate(45deg); display: inline-block; }
   .top .crumb { font: 600 13px/1 var(--head); letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin-left: auto; }
-  .progress { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--teal); width: 0; transition: width .5s var(--ease); box-shadow: 0 0 12px rgba(42, 214, 176, .6); }
+  .progress { position: absolute; left: 0; bottom: -1px; height: 2px; background: var(--teal); width: 0; transition: width var(--dur-3) var(--ease-out); box-shadow: 0 0 12px rgba(42, 214, 176, .6); overflow: hidden; }
+  .progress::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 70px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .85), transparent); animation: sheen 2.2s linear infinite; }
+  @keyframes sheen { from { transform: translateX(-80px); } to { transform: translateX(100vw); } }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 36px 20px 64px; }
   .wrap.wide { max-width: none; padding: 32px clamp(16px, 2.6vw, 56px) 64px; }
@@ -41,10 +46,15 @@
   .q-sec { font: 600 13px/1 var(--head); letter-spacing: .2em; text-transform: uppercase; color: var(--teal); display: flex; gap: 10px; align-items: center; }
   .q-sec span { color: var(--dim); }
   .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 26px; }
-  .part { font: 600 12px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); padding-top: 9px; border-top: 2px solid var(--line2); transition: color .3s, border-color .3s; }
+  .part { position: relative; font: 600 12px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--dim); padding-top: 9px; border-top: 2px solid var(--line2); transition: color var(--dur-2); }
+  .part::after { content: ""; position: absolute; left: 0; right: 0; top: -2px; height: 2px; background: var(--teal); transform: scaleX(0); transform-origin: left; }
+  .part.done::after, .part.on::after { transform: scaleX(1); animation: fillSeg var(--dur-3) var(--ease-out) backwards; animation-delay: calc(var(--k, 0) * 90ms); }
+  .part.done::after { opacity: .45; }
+  @keyframes fillSeg { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   .part b { color: inherit; margin-right: 6px; }
-  .part.done { color: var(--muted); border-top-color: rgba(42, 214, 176, .45); }
-  .part.on { color: var(--ink); border-top-color: var(--teal); }
+  .part small { font: 600 11px/1 var(--head); letter-spacing: .12em; color: var(--dim); margin-left: 8px; border: 1px solid var(--line2); padding: 2px 5px; }
+  .part.done { color: var(--muted); }
+  .part.on { color: var(--ink); }
   .q h2 { font: 700 clamp(30px, 5.4vw, 46px)/1.02 var(--head); text-transform: uppercase; letter-spacing: .01em; margin: 12px 0 10px; }
   .why { color: var(--muted); margin: 0 0 6px; max-width: 60ch; }
   .uses { color: var(--dim); font-size: 13px; margin: 0 0 22px; display: flex; gap: 8px; }
@@ -56,34 +66,42 @@
   @media (max-width: 560px) { .choices.c2, .choices.c3 { grid-template-columns: 1fr; } }
   .choice { position: relative; overflow: hidden; text-align: left; cursor: pointer; background: var(--panel); border: 1px solid var(--line);
     padding: 13px 16px 13px 18px; display: flex; flex-direction: column; gap: 1px; min-height: 52px;
-    transition: border-color .2s, background .2s, transform .2s var(--ease); }
-  .choice::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--teal); transform: scaleY(0); transition: transform .25s var(--ease); }
-  .choice:hover { border-color: var(--line2); background: rgba(30, 48, 64, .8); }
+    transition: border-color var(--dur-2), background var(--dur-2), transform var(--dur-2) var(--ease-spring), box-shadow var(--dur-2); }
+  .choice::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--teal); transform: scaleY(0); transition: transform var(--dur-2) var(--ease-out); }
+  .choice:hover { border-color: var(--line2); background: rgba(30, 48, 64, .8); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, .25); }
   .choice:hover::before { transform: scaleY(.45); }
   .choice[aria-pressed="true"] { border-color: rgba(42, 214, 176, .55); background: linear-gradient(90deg, rgba(42, 214, 176, .14), rgba(42, 214, 176, .02)); }
   .choice[aria-pressed="true"]::before { transform: scaleY(1); }
-  .choice:active { transform: scale(.99); }
+  .choice:active { transform: scale(.97); }
+  .choice.picked { animation: selPop .36s var(--ease-spring), ringPulse .6s var(--ease-out); }
+  @keyframes selPop { 0% { transform: scale(.96); } 60% { transform: scale(1.02); } 100% { transform: none; } }
+  @keyframes ringPulse { from { box-shadow: 0 0 0 0 rgba(42, 214, 176, .55); } to { box-shadow: 0 0 0 12px rgba(42, 214, 176, 0); } }
   .c-l { font: 600 17px/1.2 var(--head); letter-spacing: .04em; text-transform: uppercase; }
   .c-s { font-size: 13px; color: var(--muted); }
 
   label.f { display: block; font: 600 13px/1 var(--head); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 18px 0 8px; }
   label.f small { font: 400 12px var(--body); letter-spacing: 0; text-transform: none; color: var(--dim); }
   input[type="number"], input[type="text"], select, textarea { background: var(--panel-solid); border: 1px solid var(--line); border-bottom-color: var(--line2);
-    padding: 11px 12px; width: 100%; max-width: 280px; min-height: 46px; border-radius: 0; transition: border-color .2s; }
-  input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--teal); outline: none; }
+    padding: 11px 12px; width: 100%; max-width: 280px; min-height: 46px; border-radius: 0; transition: border-color var(--dur-2), box-shadow var(--dur-2) var(--ease-out); }
+  input[type="number"]:focus, input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--teal); outline: none; box-shadow: inset 0 -2px 0 var(--teal); }
   textarea { max-width: 100%; min-height: 90px; resize: vertical; }
   .row { display: flex; gap: 14px; flex-wrap: wrap; }
   .row > div { flex: 1 1 170px; min-width: 0; }
   input[type="range"] { width: 100%; accent-color: var(--teal); margin: 10px 0 4px; height: 28px; }
+  .tn { display: inline-block; color: var(--teal); font-variant-numeric: tabular-nums; }
+  .tn.tick { animation: tick var(--dur-2) var(--ease-spring); }
+  @keyframes tick { from { transform: translateY(-8px) scale(1.25); opacity: .3; } to { transform: none; opacity: 1; } }
   .ends { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); gap: 12px; }
   details { margin: 16px 0 0; border: 1px solid var(--line); padding: 10px 14px; background: var(--panel); }
   summary { cursor: pointer; font: 600 14px var(--head); letter-spacing: .1em; text-transform: uppercase; }
   details p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
   .tip { color: var(--dim); font-size: 13px; margin: 10px 0 0; }
   .chk { display: flex; align-items: center; gap: 10px; margin: 14px 0 0; background: none; border: 0; padding: 6px 0; cursor: pointer; color: var(--muted); text-align: left; }
-  .chk i { flex: none; width: 18px; height: 18px; border: 1px solid var(--line2); display: grid; place-items: center; }
+  .chk i { flex: none; width: 18px; height: 18px; border: 1px solid var(--line2); display: grid; place-items: center; transition: background var(--dur-2), border-color var(--dur-2), transform var(--dur-2) var(--ease-spring); }
+  .chk:active i { transform: scale(.85); }
+  .chk i::after { content: ""; width: 8px; height: 4px; border: solid #0f1923; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg) scale(0); transition: transform var(--dur-2) var(--ease-spring); }
   .chk[aria-pressed="true"] { color: var(--ink); } .chk[aria-pressed="true"] i { background: var(--teal); border-color: var(--teal); }
-  .chk[aria-pressed="true"] i::after { content: ""; width: 8px; height: 4px; border: solid #0f1923; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
+  .chk[aria-pressed="true"] i::after { transform: translateY(-1px) rotate(-45deg) scale(1); }
   .q-body > .choice + .choice { margin-top: 8px; }
   .q.wideq { max-width: 980px; }
   .vis-row { margin: 0 0 14px; }
@@ -102,13 +120,16 @@
   .dt-res table { margin-top: 12px; }
   i.sw { display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px; }
 
-  .nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; }
+  .nav { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+  .nav .skip { margin: 0 auto; color: var(--muted); padding: 10px 14px; min-height: 40px; font-size: 13px; letter-spacing: .12em; }
+  .nav .skip:hover:not(:disabled) { color: var(--ink); }
+  @media (max-width: 560px) { .nav .skip { order: 3; flex: 1 0 100%; margin: 0; } }
   .btn { cursor: pointer; border: 1px solid var(--line2); background: transparent; padding: 12px 26px; min-height: 46px;
-    font: 700 15px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; transition: background .2s, border-color .2s, opacity .2s, transform .15s; }
-  .btn:hover:not(:disabled) { border-color: var(--muted); }
+    font: 700 15px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; transition: background var(--dur-2), border-color var(--dur-2), opacity var(--dur-2), color var(--dur-2), transform var(--dur-1) var(--ease-out), box-shadow var(--dur-2); }
+  .btn:hover:not(:disabled) { border-color: var(--muted); transform: translateY(-1px); }
   .btn.primary { background: var(--red); border-color: var(--red); color: #fff; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
   .btn.primary:hover:not(:disabled) { background: #ff5a67; }
-  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:active:not(:disabled) { transform: scale(.97); }
   .btn:disabled { opacity: .35; cursor: not-allowed; }
   .btn.small { padding: 9px 16px; min-height: 38px; font-size: 13px; }
 
@@ -116,7 +137,17 @@
   @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
   @keyframes riseBack { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-  .anim { animation: rise .5s var(--ease) both; animation-delay: calc(var(--i, 0) * 45ms); }
+  @keyframes qIn { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: none; } }
+  @keyframes qInBack { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+  @keyframes qOut { to { opacity: 0; transform: translateX(-28px); } }
+  @keyframes qOutBack { to { opacity: 0; transform: translateX(28px); } }
+  #app { position: relative; }
+  .q { animation: qIn var(--dur-3) var(--ease-out) backwards; }
+  .q.back { animation-name: qInBack; }
+  .q.ghost { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; animation: qOut var(--dur-2) var(--ease-out) forwards; }
+  .q.ghost.back { animation-name: qOutBack; }
+  .q.ghost * { animation: none !important; }
+  .anim { animation: rise var(--dur-3) var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 45ms); }
   .back .anim { animation-name: riseBack; }
 
   /* ---------- results ---------- */
@@ -166,17 +197,18 @@
   @media (max-width: 760px) { .layout { grid-template-columns: minmax(0, 1fr); } .side { grid-column: auto; } }
   .tabs { display: flex; flex-direction: column; gap: 4px; }
   @media (max-width: 760px) { .tabs { flex-direction: row; overflow-x: auto; scrollbar-width: none; } }
-  .tab { position: relative; text-align: left; background: none; border: 0; cursor: pointer; padding: 14px 18px; white-space: nowrap;
-    font: 600 16px/1 var(--head); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); transition: color .25s; }
-  .tab::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(42, 214, 176, .55), rgba(42, 214, 176, .25));
-    transform: scaleX(0); transform-origin: left; transition: transform .35s var(--ease); z-index: -1; }
-  .tab::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: var(--teal); opacity: 0; transition: opacity .3s; }
-  .tab { z-index: 0; }
+  .tabs { position: relative; isolation: isolate; }
+  .tab { position: relative; z-index: 0; text-align: left; background: none; border: 0; cursor: pointer; padding: 14px 18px; white-space: nowrap;
+    font: 600 16px/1 var(--head); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); transition: color var(--dur-2), transform var(--dur-1) var(--ease-out); }
+  .tab:active { transform: scale(.97); }
+  .tab-ind { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: -1; pointer-events: none; opacity: 0;
+    background: linear-gradient(90deg, rgba(42, 214, 176, .55), rgba(42, 214, 176, .25));
+    transition: transform var(--dur-3) var(--ease-spring), width var(--dur-3) var(--ease-out), height var(--dur-3) var(--ease-out), opacity var(--dur-2); }
+  .tab-ind.on { opacity: 1; }
+  .tab-ind::after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 3px; background: var(--teal); }
   .tab:hover { color: var(--ink); }
   .tab[aria-selected="true"] { color: #fff; }
-  .tab[aria-selected="true"]::before { transform: scaleX(1); }
-  .tab[aria-selected="true"]::after { opacity: 1; }
-  @media (max-width: 760px) { .tab::after { left: 0; right: 0; top: auto; width: auto; height: 3px; } }
+  @media (max-width: 760px) { .tab-ind::after { left: 0; right: 0; top: auto; width: auto; height: 3px; } }
 
   .sec-t { font: 700 15px/1 var(--head); letter-spacing: .1em; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center;
     padding-bottom: 8px; border-bottom: 1px solid var(--line2); margin: 0 0 10px; gap: 12px; }
@@ -187,6 +219,9 @@
   .sub-t { background: var(--row); padding: 9px 10px; font: 600 14px/1 var(--head); letter-spacing: .1em; text-transform: uppercase; margin: 0 0 4px; }
   .pane[hidden] { display: none; }
   .pane { animation: fade .35s var(--ease) both; }
+  .panes { position: relative; }
+  .pane.leave { position: absolute; left: 0; right: 0; top: 0; pointer-events: none; animation: paneOut var(--dur-2) var(--ease-out) forwards; }
+  @keyframes paneOut { to { opacity: 0; transform: scale(.985); } }
 
   /* distribution */
   .dist { position: relative; margin: 6px 0 20px; }
@@ -306,7 +341,7 @@
   @keyframes sweep { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   @keyframes bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
   @keyframes glow { 0%, 100% { text-shadow: 0 0 0 rgba(42, 214, 176, 0); } 50% { text-shadow: 0 0 28px rgba(42, 214, 176, .65); } }
-  @keyframes paneIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+  @keyframes paneIn { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
   @keyframes dotPop { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
   @keyframes flash { 0% { background: var(--teal); color: #0f1923; } 100% { background: transparent; } }
   .sum-c { animation: cardIn .7s var(--ease) both !important; animation-delay: calc(var(--base) + var(--d, 0s)) !important; overflow: hidden; }
@@ -319,9 +354,9 @@
   .acc-r { animation-delay: calc(var(--base) + 1.1s + var(--i) * 80ms); }
   .acc-r.warnr .ic { background: rgba(242, 208, 107, .14); color: var(--yellow); }
   .pane.play { animation: paneIn .45s var(--ease) both; }
-  .pane.play .sbar, .pane.play .opt, .pane.play .xh-fig, .pane.play .notes li, .pane.play tbody tr { animation: rise .45s var(--ease) both; animation-delay: calc(var(--base) + .1s + var(--i, 0) * 60ms); }
+  .pane.play .sbar, .pane.play .opt, .pane.play .xh-fig, .pane.play .notes li, .pane.play tbody tr { animation: rise .45s var(--ease) backwards; animation-delay: calc(var(--base) + .1s + var(--i, 0) * 60ms); }
   .pane.play .notes li:nth-child(n) { --i: 2; } .pane.play .xh-fig:nth-child(2) { --i: 1; } .pane.play .xh-fig:nth-child(3) { --i: 2; } .pane.play .xh-fig:nth-child(4) { --i: 3; } .pane.play .xh-fig:nth-child(5) { --i: 4; } .pane.play .xh-fig:nth-child(6) { --i: 5; }
-  .pane.play .sb-t i { transform-origin: left; animation: bar .9s var(--ease) both; animation-delay: calc(var(--base) + .25s + var(--i, 0) * 70ms); }
+  .pane.play .sb-t i { transform-origin: left; animation: bar .9s var(--ease) backwards; animation-delay: calc(var(--base) + .25s + var(--i, 0) * 70ms); }
   .sb-t.mid { background: linear-gradient(90deg, var(--line) 0 49.7%, var(--line2) 49.7% 50.3%, var(--line) 50.3%); }
   .sb-t.mid i { transform-origin: center !important; }
   .pane.play circle.pd { transform-box: fill-box; transform-origin: center; animation: dotPop .4s var(--ease) both; animation-delay: calc(.15s + var(--i, 0) * 40ms); }
@@ -329,7 +364,7 @@
   .draw { animation-delay: calc(var(--base) + .15s); }
   .band-in { animation-delay: calc(var(--base) + .7s); } .pin { animation-delay: calc(var(--base) + 1.05s); } .pop { animation-delay: calc(var(--base) + 1.45s); }
   .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 0 0 6px; }
-  .opt { background: rgba(0, 0, 0, .18); border: 1px solid var(--line); padding: 12px; min-width: 0; transition: border-color .2s, transform .2s var(--ease); }
+  .opt { background: rgba(0, 0, 0, .18); border: 1px solid var(--line); padding: 12px; min-width: 0; transition: border-color var(--dur-2), transform var(--dur-2) var(--ease-out); }
   .opt:hover { border-color: var(--line2); transform: translateY(-2px); }
   .opt:first-child { border-color: rgba(42, 214, 176, .5); }
   .opt-k { font: 700 13px/1 var(--head); letter-spacing: .16em; text-transform: uppercase; color: var(--teal); margin: 0 0 8px; }
@@ -337,6 +372,44 @@
   .opt-n { font-size: 13px; color: var(--muted); margin: 8px 0; text-transform: capitalize; }
   .opt .codebox code { font-size: 12px; }
   .copy-code.flash { animation: flash .6s ease; }
+
+  /* ---------- 5.0: skipped parts, impact bars, bell curve ---------- */
+  .sum-c.skipped { border-style: dashed; background: rgba(22, 36, 50, .4); color: var(--muted); }
+  .sum-c.skipped .sum-v { color: var(--dim); }
+  .sum-c.skipped .btn { margin-top: 12px; }
+  .bd-r { position: relative; }
+  .ibar { position: absolute; left: 10px; right: 10px; bottom: 0; height: 2px; transform-origin: left; transform: scaleX(var(--w, 0)); background: var(--teal); opacity: .8; animation: ibarIn var(--dur-3) var(--ease-out) backwards; animation-delay: calc(var(--base) + 1.4s + var(--i) * 60ms); }
+  .ibar.slow { background: var(--pink); }
+  @keyframes ibarIn { from { transform: scaleX(0); } }
+  .bell { position: relative; margin: 6px 0 4px; }
+  .bell svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .bell text { fill: var(--dim); font: 600 12px var(--head); letter-spacing: .06em; }
+  .bell .lbl { fill: var(--ink); } .bell .lbl2 { fill: var(--muted); }
+  .bell .bband { transform-box: fill-box; transform-origin: bottom; opacity: 0; }
+  .bell .mk { opacity: 0; }
+  .pane.play .bell .bband { animation: bandGrow .7s var(--ease-out) forwards; animation-delay: calc(var(--base) + .55s + var(--k, 0) * .12s); }
+  .pane.play .bell .mk { animation: drop .6s var(--ease-spring) forwards; animation-delay: calc(var(--base) + 1.25s + var(--k, 0) * .14s); }
+  .pane.play .bell .gridh, .pane.play .chart .gridh { animation: fade .7s var(--ease-out) backwards; animation-delay: calc(var(--base) + .05s); }
+  @keyframes bandGrow { from { opacity: 0; transform: scaleY(0); } to { opacity: 1; transform: scaleY(1); } }
+  @keyframes drop { from { opacity: 0; transform: translateY(-28px) scale(.6); } to { opacity: 1; transform: none; } }
+  .pulse { transform-box: fill-box; transform-origin: center; opacity: 0; }
+  .pane.play .pulse { animation: pulseRing 1.3s var(--ease-out) 2; animation-delay: calc(var(--base) + 1.3s); }
+  @keyframes pulseRing { 0% { opacity: .8; transform: scale(.5); } 100% { opacity: 0; transform: scale(2.6); } }
+  .bell-cap { margin: 10px 0 18px; color: var(--muted); font-size: 14px; }
+  .bell-cap b { color: var(--teal); font: 700 22px var(--head); font-variant-numeric: tabular-nums; }
+  .shifts { display: grid; gap: 2px; margin: 4px 0 0; padding: 0; list-style: none; }
+  .shift { display: grid; grid-template-columns: minmax(0, 12em) minmax(0, 1fr) 5.6em; align-items: center; gap: 10px; padding: 7px 10px; font-size: 13px; }
+  .shift:nth-child(odd) { background: var(--row); }
+  @media (max-width: 560px) { .shift { grid-template-columns: minmax(0, 1fr) 5.4em; } .shift .sh-t { grid-column: 1 / -1; order: 3; } }
+  .sh-n small { display: block; color: var(--dim); font-size: 12px; }
+  .sh-t { position: relative; height: 8px; background: var(--line); }
+  .sh-t::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--line2); }
+  .sh-t i { position: absolute; top: 0; bottom: 0; }
+  .sh-t i.fast { left: 50%; background: var(--teal); transform-origin: left; }
+  .sh-t i.slow { right: 50%; background: var(--pink); transform-origin: right; }
+  .pane.play .sh-t i { animation: bar .8s var(--ease-out) backwards; animation-delay: calc(var(--base) + 1.3s + var(--i, 0) * 110ms); }
+  .sh-v { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .sh-ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--dim); padding: 0 10px; margin: 6px 0 0; }
 
   /* ---------- results files ---------- */
   .sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); }
@@ -350,8 +423,11 @@
   .btn.dl svg { width: 16px; height: 16px; }
   .dl-s { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: 1ms !important; }
+    *, *::before, *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; transition-delay: 0ms !important; scroll-behavior: auto !important; }
     .draw { stroke-dashoffset: 0; }
+    .progress::after, .pulse { animation: none !important; display: none; }
+    .choice:hover, .btn:hover:not(:disabled), .choice:active, .btn:active:not(:disabled), .tab:active { transform: none; }
+    .q.ghost { display: none; }
   }
 </style>
 </head>
@@ -365,9 +441,9 @@
   <main id="app" aria-live="polite"></main>
 </div>
 
-<script src="model.js?v=3.1.1"></script>
-<script src="xhair.js?v=3.1.1"></script>
-<script src="session.js?v=3.1.1"></script>
+<script src="model.js?v=5.0.0"></script>
+<script src="xhair.js?v=5.0.0"></script>
+<script src="session.js?v=5.0.0"></script>
 <script>
 "use strict";
 var M = window.ValoModel, X = window.ValoXhair, V = window.ValoSession;
@@ -384,11 +460,11 @@ function freshState() {
     dpiSel: null, dpiCustom: "",
     curMode: null, cur: "", measured: "", otherGame: "cs2", otherSens: "", sat: 3,
     padSel: null, padCustom: "", surface: null, limb: null, grip: "unsure", mouseW: "unsure",
-    role: null, agent1: "", agent2: "", agent3: "", weapon: null, exp: null,
+    role: null, agent1: "", agent2: "", agent3: "", weapon: null, region: null, age: null, glasses: null, exp: null,
     statsGate: null, stRank: "unsure", stMatches: "", stHs: "", stKd: "", stAdr: "", stPaste: "",
     cvd: null, moving: null, aim: null, shape: null, lose: null, res: null,
     xSeed: newSeed(), xKey: null, xTest: null, xRound: 0,
-    hCur: null, hKeep: false, hMaps: null, hClutter: {}, hTest: null,
+    hCur: null, hKeep: false, hMaps: null, hClutter: {}, hTest: null, xSkip: false, hSkip: false,
     prior: null, frameMs: null      // prior = sessions imported from a results file (never stored in the browser)
   };
 }
@@ -430,7 +506,8 @@ function buildInput() {
     dpi: getDpi(), current: c ? { cm: c } : null, satisfaction: S.sat,
     pad: getPad(), surface: S.surface, limb: S.limb, role: S.role, weapon: S.weapon, agents: agentsInput(),
     experience: S.exp, stats: statsInput(), resWidth: RES_WIDTH[S.res] || 1920,
-    grip: S.grip || "unsure", mouseG: MOUSE_G[S.mouseW] || null
+    grip: S.grip || "unsure", mouseG: MOUSE_G[S.mouseW] || null,
+    region: S.region || undefined, age: S.age || undefined, glasses: S.glasses || undefined
   };
 }
 
@@ -450,6 +527,7 @@ function choices(host, key, opts, cols, onPick) {
       S[key] = o.v;
       Array.prototype.forEach.call(wrap.children, function (c) { c.setAttribute("aria-pressed", "false"); });
       b.setAttribute("aria-pressed", "true");
+      b.classList.remove("picked"); void b.offsetWidth; b.classList.add("picked");
       if (onPick) onPick(o.v);
       refreshNav();
     });
@@ -762,6 +840,15 @@ function drawMask(ctx, c, sz, seed) {
 
 
 /* ---------- Questions ---------- */
+// Choice lists use the fixed key order; labels come from the model's tables when present.
+var CHOICE_FALLBACK = {
+  region: [["na", "North America"], ["latam", "Latin America"], ["br", "Brazil"], ["eu", "Europe"], ["mena", "Middle East & North Africa"], ["kr", "Korea"], ["jp", "Japan"], ["cn", "China"], ["sea", "Southeast Asia"], ["oce", "Oceania"], ["unsure", "Prefer not to say"]],
+  age: [["u16", "Under 16"], ["16_19", "16–19"], ["20_24", "20–24"], ["25_29", "25–29"], ["30_34", "30–34"], ["35p", "35+"], ["unsure", "Prefer not to say"]],
+  glasses: [["none", "No glasses"], ["glasses", "Glasses"], ["contacts", "Contact lenses"], ["unsure", "Prefer not to say"]]
+};
+function tableChoices(key, table) {
+  return CHOICE_FALLBACK[key].map(function (kv) { var t = table && table[kv[0]]; return { v: kv[0], l: esc((t && t.label) || kv[1]) }; });
+}
 var RANKS = [["unsure", "Not sure / unranked"], ["iron", "Iron"], ["bronze", "Bronze"], ["silver", "Silver"], ["gold", "Gold"], ["plat", "Platinum"], ["diamond", "Diamond"], ["asc", "Ascendant"], ["imm", "Immortal"], ["rad", "Radiant"]];
 
 var Q = [
@@ -813,8 +900,11 @@ var Q = [
       var i = el("input", { type: "range", min: "1", max: "5", step: "1", "aria-label": "Satisfaction from 1 to 5" });
       i.value = S.sat;
       var out = el("p", { "class": "tip", role: "status" });
-      function sync() { out.textContent = "Selected: " + S.sat + " of 5"; }
-      i.addEventListener("input", function () { S.sat = parseInt(i.value, 10); sync(); });
+      function sync(tick) {
+        out.innerHTML = 'Selected: <b class="tn">' + S.sat + "</b> of 5";
+        if (tick && !REDUCED) { var n = out.firstElementChild || out.querySelector(".tn"); n.classList.remove("tick"); void n.offsetWidth; n.classList.add("tick"); }
+      }
+      i.addEventListener("input", function () { S.sat = parseInt(i.value, 10); sync(true); });
       h.appendChild(i);
       h.appendChild(el("div", { "class": "ends" }, "<span>1: I fight it constantly</span><span>5: It feels natural</span>"));
       h.appendChild(out); sync();
@@ -912,6 +1002,27 @@ var Q = [
     },
     valid: function () { return !!S.weapon; } },
 
+  { id: "region", part: 1, sec: "About you", title: "Where do you play from?",
+    why: "Regional pro trends in sensitivity differ a little (setup, desk space, scene habits). This is optional: \"Prefer not to say\" adds no shift.",
+    uses: "Moves your spot on the sensitivity bell curve by a small, researched amount. Never stored or sent anywhere.",
+    show: function () { return true; },
+    render: function (h) { choices(h, "region", tableChoices("region", M.REGION), 2); },
+    valid: function () { return !!S.region; } },
+
+  { id: "age", part: 1, sec: "About you", title: "How old are you?",
+    why: "Fine motor control and hand speed shift slowly with age, and pro sensitivities trend with it. Optional: \"Prefer not to say\" adds no shift.",
+    uses: "A small shift along the sensitivity bell curve. The research behind each group is listed in \"What moved you\" after your result.",
+    show: function () { return true; },
+    render: function (h) { choices(h, "age", tableChoices("age", M.AGE), 2); },
+    valid: function () { return !!S.age; } },
+
+  { id: "glasses", part: 1, sec: "About you", title: "Do you wear glasses or contacts when you play?",
+    why: "Vision correction can change how you see and track targets on screen. Optional: \"Prefer not to say\" adds no shift.",
+    uses: "A small shift along the sensitivity bell curve, shown in \"What moved you\" after your result.",
+    show: function () { return true; },
+    render: function (h) { choices(h, "glasses", tableChoices("glasses", M.GLASSES), 2); },
+    valid: function () { return !!S.glasses; } },
+
   { id: "statsGate", part: 1, sec: "Your stats", title: "Add your season stats?",
     why: "Stats depend on role, teammates and game sense, so they can't show whether your sensitivity suits your hand. They're kept as a before snapshot only.",
     uses: "Not used in the calculation. They're shown next to typical values for your rank.",
@@ -958,7 +1069,7 @@ var Q = [
   { id: "cvd", part: 2, sec: "Color vision", title: "Do you have any color blindness?",
     why: "About 8% of men and 0.5% of women have red-green color blindness. It changes which crosshair and enemy colors stay visible.",
     uses: "Every color is scored as your type of color vision sees it (a published simulation, Machado et al. 2009). Red-green also rules out green, yellow green and red crosshairs. Used in Parts 2 and 3.",
-    show: function () { return true; },
+    show: function () { return !(S.xSkip && S.hSkip); },
     render: function (h) {
       choices(h, "cvd", [
         { v: "none", l: "No" },
@@ -982,7 +1093,7 @@ var Q = [
   { id: "moving", part: 2, sec: "Your experience", title: "Do you often shoot while still moving?",
     why: "In Valorant, shots fired while moving are inaccurate. If you often shoot on the move, crosshair lines that spread while you move give you instant feedback.",
     uses: "\"Often\" turns on movement error as a temporary training aid. Otherwise all error lines stay off, like 99% of pros.",
-    show: function () { return S.exp === "new" || S.exp === "mid"; },
+    show: function () { return (S.exp === "new" || S.exp === "mid") && !S.xSkip; },
     render: function (h) {
       choices(h, "moving", [{ v: "still", l: "No, I stop or counter-strafe" }, { v: "moving", l: "Yes, often" }, { v: "unsure", l: "Not sure" }]);
     },
@@ -991,7 +1102,7 @@ var Q = [
   { id: "aim", part: 2, sec: "Your aim", title: "How do you mostly aim?",
     why: "Flick and tap players want a small, precise point. Players who track or spray benefit from lines that stay visible around a moving target.",
     uses: "Sets line length: about 2–3 for flicking, 4–5 for tracking. This is a heuristic; no study has measured it.",
-    show: function () { return true; },
+    show: function () { return !S.xSkip; },
     render: function (h) {
       choices(h, "aim", [{ v: "flick", l: "Flicks and taps", s: "Snap to the head, 1–2 bullets" }, { v: "track", l: "Tracking and spraying", s: "Follow targets, longer bursts" }, { v: "mix", l: "A mix / not sure" }], 3);
     },
@@ -1000,7 +1111,7 @@ var Q = [
   { id: "shape", part: 2, sec: "Your aim", title: "Which crosshair shape do you prefer?",
     why: "57% of pros use a small cross, 26% a dot, 11% a cross with a dot. Shape is mostly preference, so pick what you like if you already know.",
     uses: "Sets the shape. \"No preference\" picks a cross sized for your aim style.",
-    show: function () { return true; },
+    show: function () { return !S.xSkip; },
     render: function (h) {
       choices(h, "shape", [{ v: "small", l: "Small cross" }, { v: "medium", l: "Bigger cross" }, { v: "dot", l: "Dot only" }, { v: "crossDot", l: "Cross + dot" }, { v: "any", l: "No preference" }], 2);
     },
@@ -1009,7 +1120,7 @@ var Q = [
   { id: "lose", part: 2, sec: "Visibility", title: "When do you lose track of your crosshair?",
     why: "A white or yellow crosshair washes out on bright, sandy walls. A dark outline adds the contrast the color alone lacks.",
     uses: "Weights those scenes more when each color's contrast is computed. \"Bright maps\" also turns outlines on at full opacity.",
-    show: function () { return true; },
+    show: function () { return !S.xSkip; },
     render: function (h) {
       choices(h, "lose", [{ v: "bright", l: "On bright maps", s: "Breeze, Bind, Sunset" }, { v: "dark", l: "In dark corners" }, { v: "util", l: "In smokes and utility" }, { v: "never", l: "Rarely or never" }], 2);
     },
@@ -1018,7 +1129,7 @@ var Q = [
   { id: "res", part: 2, sec: "Visibility", title: "What resolution do you play at?",
     why: "Crosshair values are in screen pixels, so the same numbers look smaller at higher resolutions.",
     uses: "Scales line length, gap and thickness by 1.33 for 1440p and 2 for 4K. Stretched 4:3 shortens the lines by 1.",
-    show: function () { return true; },
+    show: function () { return !S.xSkip; },
     render: function (h) {
       choices(h, "res", [{ v: "1080", l: "1920×1080", s: "Most common" }, { v: "1440", l: "2560×1440" }, { v: "2160", l: "3840×2160 (4K)" }, { v: "stretched", l: "4:3 stretched" }], 2);
     },
@@ -1027,7 +1138,7 @@ var Q = [
   { id: "vis", part: 2, sec: "Visibility test", title: "Which crosshair can you see instantly?",
     why: "Eight rounds, four crosshairs each, over different map scenes. Pick the one you spot without searching. They're drawn at real pixel size for your resolution, in random order. Sit as you normally play.",
     uses: "Your picks are fitted with a choice model (each pick beats the others shown), giving a score for each color, outlines and shape. Optional: skip it and the computed visibility decides.",
-    show: function () { return true; },
+    show: function () { return !S.xSkip; },
     render: function (h) { visTest(h); },
     valid: function () { return true; } },
 
@@ -1035,7 +1146,7 @@ var Q = [
   { id: "hCur", part: 3, sec: "Enemy highlight", title: "Which enemy highlight color do you use now?",
     why: "Settings › General › Accessibility › Enemy Highlight Color. It recolors the outline around enemies.",
     uses: "If you'd rather keep it, it gets a small bonus. Color vision, maps, utility and the test can still outweigh it.",
-    show: function () { return true; },
+    show: function () { return !S.hSkip; },
     render: function (h) {
       choices(h, "hCur", [{ v: "red", l: "Red (Default)" }, { v: "yd", l: "Yellow (Deuteranopia)" }, { v: "yp", l: "Yellow (Protanopia)" }, { v: "purple", l: "Purple (Tritanopia)" }, { v: "unsure", l: "Not sure" }], 2);
       toggle(h, "hKeep", "I'd rather keep it unless there's a clear reason to switch");
@@ -1045,7 +1156,7 @@ var Q = [
   { id: "hMaps", part: 3, sec: "Enemy highlight", title: "Where do you lose sight of enemies most?",
     why: "Yellow is the brightest option and pops in shadows, but it's close in brightness to sandy walls. Purple separates from warm light but sits close to blue maps.",
     uses: "Weights that scene more when each color's contrast is computed (as your color vision sees it).",
-    show: function () { return true; },
+    show: function () { return !S.hSkip; },
     render: function (h) {
       choices(h, "hMaps", [{ v: "warm", l: "Bright, warm maps", s: "Breeze, Bind, Sunset" }, { v: "dark", l: "Dark corners and shadows", s: "Split, Abyss, Lotus interiors" }, { v: "cool", l: "Cool, blue maps", s: "Icebox, Pearl" }, { v: "none", l: "No pattern" }], 2);
     },
@@ -1054,7 +1165,7 @@ var Q = [
   { id: "hClutter", part: 3, sec: "Enemy highlight", title: "Which utility clutters your screen most?",
     why: "An outline that shares a hue with utility blends in exactly when enemies peek through it. Pick any that apply.",
     uses: "Adds that utility to the scenes each color is compared against, so a color that matches it loses contrast.",
-    show: function () { return true; },
+    show: function () { return !S.hSkip; },
     render: function (h) {
       [["fire", "Fire and orange", "Phoenix, Brimstone, Breach"], ["purple", "Purple smokes and blinds", "Omen, Reyna, Astra, Clove, Fade"], ["yellow", "Yellow utility", "Killjoy, Raze, Gekko, Tejo"]].forEach(function (o) {
         toggleChoice(h, o[0], o[1], o[2]);
@@ -1066,7 +1177,7 @@ var Q = [
   { id: "hTest", part: 3, sec: "Vision test", title: "Which enemy was highlighted?",
     why: "Four enemies flash for about 1/17 of a second, then a mask covers them. One had a red, yellow or purple outline. Say where it was. The outline gets fainter when you're right and stronger when you're wrong. 67 rounds, about 2 minutes.",
     uses: "Measures the outline strength each color needs before you can see it (a vision threshold), not your reaction time or input lag. The easiest color gets up to a 2.5-point bonus, shrunk when the estimate is uncertain. Optional.",
-    show: function () { return true; },
+    show: function () { return !S.hSkip; },
     render: function (h) { visionTest(h); },
     valid: function () { return true; } }
 
@@ -1102,12 +1213,17 @@ function applyImport(res) {
   Object.keys(res.latest.answers).forEach(function (k) { S[k] = k === "hClutter" ? Object.assign({}, res.latest.answers[k]) : res.latest.answers[k]; });
   S.prior = res.sessions;
 }
-// Everything before the visibility test is answered and valid, so the player can jump straight to the tests.
-function canSkipToTests() {
-  var l = visible(), k = idxOf(l, "vis");
-  for (var i = 0; i < k; i++) if (!l[i].valid()) return false;
-  return k > 0;
+// Everything before the first test (visibility, else vision when the crosshair part is skipped) is answered and valid,
+// so the player can jump straight to the tests. Returns that test's id, or null if there is none or something is unanswered.
+function testTarget() {
+  var l = visible(), id = null;
+  ["vis", "hTest"].forEach(function (t) { if (!id && l.some(function (q) { return q.id === t; })) id = t; });
+  if (!id) return null;
+  var k = idxOf(l, id);
+  for (var i = 0; i < k; i++) if (!l[i].valid()) return null;
+  return k > 0 ? id : null;
 }
+function canSkipToTests() { return !!testTarget(); }
 function importCard() {
   var card = el("div", { "class": "imp" });
   var input = el("input", { type: "file", accept: ".json,application/json", id: "impFile", "class": "sr" });
@@ -1123,7 +1239,7 @@ function importCard() {
       var row = el("div", { "class": "imp-b" });
       if (canSkipToTests()) {
         var go = el("button", { type: "button", "class": "btn primary small", id: "impGo" }, "Skip to the tests");
-        go.addEventListener("click", function () { currentId = "vis"; renderQ("next"); focusH(); });
+        go.addEventListener("click", function () { currentId = testTarget() || "vis"; renderQ("next"); focusH(); });
         row.appendChild(go);
       }
       var clr = el("button", { type: "button", "class": "btn small", id: "impClear" }, "Remove import");
@@ -1175,8 +1291,8 @@ function manualForm(done, msg) {
   return f;
 }
 function downloadResults(R, XR, sens, dpi) {
-  var b = V.build({ prior: S.prior, answers: S, xTest: answeredRounds(), hTest: S.hTest, frameMs: S.frameMs, version: X.VERSION, agentOk: agentOk,
-    result: { cm: R.cm, sens: sens, dpi: dpi, code: XR.crosshair.code, highlight: XR.highlight.color.key } });
+  var b = V.build({ prior: S.prior, answers: S, xTest: S.xSkip ? [] : answeredRounds(), hTest: S.hSkip ? null : S.hTest, frameMs: S.frameMs, version: X.VERSION, agentOk: agentOk,
+    result: { cm: R.cm, sens: sens, dpi: dpi, code: XR && !S.xSkip ? XR.crosshair.code : undefined, highlight: XR && !S.hSkip ? XR.highlight.color.key : undefined } });
   var blob = new Blob([V.serialize(b)], { type: "application/json" }), a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = V.fileName(b);
   document.body.appendChild(a); a.click();
@@ -1194,16 +1310,44 @@ function stagger(root) {
 }
 
 var PARTS = ["Sensitivity", "Crosshair", "Highlight color"];
+function partSkipped(k) { return k === 2 ? !!S.xSkip : k === 3 ? !!S.hSkip : false; }
 function partsBar(n) {
-  return el("div", { "class": "parts", "aria-label": "Part " + n + " of 3: " + PARTS[n - 1] }, PARTS.map(function (t, k) {
-    return '<div class="part' + (k + 1 === n ? " on" : k + 1 < n ? " done" : "") + '"><b>' + (k + 1) + "</b>" + t + "</div>";
+  return el("div", { "class": "parts", "aria-label": "Part " + n + " of 3: " + PARTS[n - 1] + (partSkipped(n) ? " (skipped)" : "") }, PARTS.map(function (t, k) {
+    var sk = partSkipped(k + 1);
+    return '<div class="part' + (k + 1 === n ? " on" : (k + 1 < n || sk) ? " done" : "") + '" style="--k:' + k + '"><b>' + (k + 1) + "</b>" + t + (sk ? "<small>Skipped</small>" : "") + "</div>";
   }).join(""));
+}
+// First question after `id` (in questionnaire order) that is still shown, or null when the questionnaire is over.
+function nextShownAfter(id) {
+  var at = -1; Q.forEach(function (q, j) { if (q.id === id) at = j; });
+  for (var j = at + 1; j < Q.length; j++) if (Q[j].show()) return Q[j];
+  return null;
+}
+function skipPart(n) {
+  var from = currentId;
+  if (n === 2) S.xSkip = true; else S.hSkip = true;
+  var nx = nextShownAfter(from);
+  if (nx) { currentId = nx.id; renderQ("next"); focusH(); } else renderResult();
+}
+// Bring a skipped part back, keeping every other answer, and open its first question.
+function addPart(n) {
+  if (n === 2) { S.xSkip = false; currentId = "cvd"; } else { S.hSkip = false; currentId = "hCur"; }
+  renderQ("back"); focusH();
 }
 function renderQ(dir) {
   if (VT_RUN) { VT_RUN.stop = true; if (VT_RUN.cleanup) VT_RUN.cleanup(); }
   document.getElementById("wrap").classList.remove("wide");
   var list = visible(), i = idxOf(list, currentId), q = list[i];
   currentId = q.id;
+  // The screen being replaced slides out as an inert copy (no ids, no handlers) while the new one slides in.
+  var old = app.firstElementChild, ghost = null;
+  if (!REDUCED && dir && old && old.classList.contains("q") && !old.classList.contains("ghost") && !old.classList.contains("wideq")) {
+    ghost = old.cloneNode(true);
+    ghost.className = "q ghost" + (dir === "back" ? " back" : "");
+    ghost.setAttribute("aria-hidden", "true"); ghost.setAttribute("inert", "");
+    [ghost].concat(Array.prototype.slice.call(ghost.querySelectorAll("[id]"))).forEach(function (n) { n.removeAttribute("id"); });
+    Array.prototype.forEach.call(ghost.querySelectorAll("input, select, textarea, button"), function (n) { n.tabIndex = -1; });
+  }
   app.innerHTML = "";
   setProgress(i / list.length * 100, "Part " + q.part + " · " + PARTS[q.part - 1]);
   var box = el("section", { "class": "q" + (dir === "back" ? " back" : "") + (q.id === "vis" || q.id === "hTest" ? " wideq" : "") });
@@ -1225,8 +1369,15 @@ function renderQ(dir) {
     var l = visible(), j = idxOf(l, currentId);
     if (j < l.length - 1) { currentId = l[j + 1].id; renderQ("next"); focusH(); } else renderResult();
   });
-  nav.appendChild(back); nav.appendChild(next); box.appendChild(nav);
+  nav.appendChild(back);
+  if ((q.part === 2 && !S.xSkip) || (q.part === 3 && !S.hSkip)) {
+    var sk = el("button", { type: "button", "class": "btn small skip", id: "skipPart" }, q.part === 2 ? "Skip crosshair" : "Skip highlight");
+    sk.addEventListener("click", function () { skipPart(q.part); });
+    nav.appendChild(sk);
+  }
+  nav.appendChild(next); box.appendChild(nav);
   app.appendChild(box);
+  if (ghost) { app.appendChild(ghost); setTimeout(function () { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 300); }
   stagger(box);
   refreshNav();
 }
@@ -1244,13 +1395,14 @@ var ICON = {
 };
 var INTRO_MS = 1300;
 // Draws chart lines in when their pane opens (stroke-dash from the measured path length).
-function drawLines(root) {
+function drawLines(root, base) {
   if (REDUCED) return;
+  base = base || 0;
   root.querySelectorAll("path.ln").forEach(function (p, i) {
     var L = Math.ceil(p.getTotalLength ? p.getTotalLength() : 1000) + 2;
     p.style.strokeDasharray = L; p.style.strokeDashoffset = L; p.style.transition = "none";
     void p.getBoundingClientRect();
-    p.style.transition = "stroke-dashoffset 1.1s cubic-bezier(.22,.61,.36,1) " + (0.1 + i * 0.12) + "s"; p.style.strokeDashoffset = 0;
+    p.style.transition = "stroke-dashoffset 1.1s cubic-bezier(.22,.61,.36,1) " + (base + 0.1 + i * 0.12) + "s"; p.style.strokeDashoffset = 0;
   });
 }
 function countUp(node, to, decimals, ms, delay) {
@@ -1311,6 +1463,88 @@ function distChart(R, cur) {
   return s + "</svg>";
 }
 
+// Bell curve of in-game sens at 800 DPI (mean 0.3, SD 0.1) with the result, the raw physical model and the current setting.
+function normCdf(z) {
+  var t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2);
+  var p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - p : p;
+}
+function fmtSens(v) { return (v < 0 ? "\u2212" : "+") + Math.abs(v).toFixed(2) + " sens"; }
+function bellChart(R, dpi) {
+  var B0 = R.bell, SD = B0.sd, MU = B0.mean, xMin = 0, xMax = 0.7;
+  var W = 560, H = 250, L = 14, Rt = 14, T = 30, B = dpi !== 800 ? 52 : 38, base = H - B, peak = 1 / (SD * Math.sqrt(2 * Math.PI));
+  function x(v) { return L + (Math.min(xMax, Math.max(xMin, v)) - xMin) / (xMax - xMin) * (W - L - Rt); }
+  function pdf(v) { var z = (v - MU) / SD; return Math.exp(-0.5 * z * z) / (SD * Math.sqrt(2 * Math.PI)); }
+  function y(d) { return T + (1 - d / (peak * 1.08)) * (base - T); }
+  function curve(a, b) { var out = [], n = Math.max(2, Math.round((b - a) / 0.005)); for (var i = 0; i <= n; i++) { var v = a + (b - a) * i / n; out.push((i ? "L" : "M") + x(v).toFixed(1) + " " + y(pdf(v)).toFixed(1)); } return out.join(""); }
+  function area(a, b) { return "M" + x(a).toFixed(1) + " " + base + curve(a, b).replace(/^M/, "L") + "L" + x(b).toFixed(1) + " " + base + "Z"; }
+  var cur = R.anchor ? M.s800FromCm(R.anchor.cm) : null;
+  var aria = "Bell curve of in-game sensitivity at 800 DPI, mean 0.3, standard deviation 0.1. Your result is " + B0.s800.toFixed(3) + " at 800 DPI, percentile " + Math.round(B0.percentile * 100) +
+    (Math.abs(M.s800FromCm(R.cm) - B0.s800) > 0.005 ? ". This run's step is " + M.s800FromCm(R.cm).toFixed(3) + " at 800 DPI, toward that target" : "") + ". The raw physical model alone gave " + B0.s800Model.toFixed(3) + (cur ? ". Your current setting is " + cur.toFixed(3) + " at 800 DPI" : "") + ".";
+  var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(aria) + '">';
+  s += '<defs><linearGradient id="b1G" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2ad6b0" stop-opacity=".5"/><stop offset="1" stop-color="#2ad6b0" stop-opacity=".08"/></linearGradient>' +
+    '<linearGradient id="b2G" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a9fd6" stop-opacity=".32"/><stop offset="1" stop-color="#2a9fd6" stop-opacity=".05"/></linearGradient></defs>';
+  [0.25, 0.5, 0.75, 1].forEach(function (f) { s += '<line class="gridh" x1="' + L + '" x2="' + (W - Rt) + '" y1="' + y(peak * f) + '" y2="' + y(peak * f) + '" stroke="var(--line)" stroke-dasharray="2 4"/>'; });
+  s += '<path class="bband" style="--k:0" d="' + area(MU - 2 * SD, MU + 2 * SD) + '" fill="url(#b2G)"/>';
+  s += '<path class="bband" style="--k:1" d="' + area(MU - SD, MU + SD) + '" fill="url(#b1G)"/>';
+  s += '<path class="ln" d="' + curve(xMin, xMax) + '" fill="none" stroke="var(--ink)" stroke-width="2.2"/>';
+  s += '<line x1="' + L + '" x2="' + (W - Rt) + '" y1="' + base + '" y2="' + base + '" stroke="var(--line2)"/>';
+  [0.1, 0.2, 0.3, 0.4, 0.5, 0.6].forEach(function (v) {
+    s += '<line x1="' + x(v) + '" x2="' + x(v) + '" y1="' + base + '" y2="' + (base + 4) + '" stroke="var(--line2)"/><text x="' + x(v) + '" y="' + (base + 17) + '" text-anchor="middle">' + v.toFixed(1) + "</text>";
+    if (dpi !== 800) s += '<text class="lbl2" x="' + x(v) + '" y="' + (base + 31) + '" text-anchor="middle">' + (v * 800 / dpi).toFixed(3) + "</text>";
+  });
+  s += '<text x="' + L + '" y="' + (H - 4) + '">SENS @ 800 DPI' + (dpi !== 800 ? " (TOP) · @ " + dpi + " DPI (BELOW)" : "") + "</text>";
+  // markers: each is a pin from the curve down to the axis plus a labelled dot, dropped in with a spring.
+  function marker(v, k, label, kind) {
+    var px = x(v), py = y(pdf(Math.min(xMax, Math.max(xMin, v)))), g = '<g class="mk" style="--k:' + k + '">';
+    if (kind === "step") {
+      g += '<path d="M' + px + " " + (base - 12) + 'l6 6-6 6-6-6z" fill="var(--teal)"/><line x1="' + px + '" x2="' + px + '" y1="' + (base - 30) + '" y2="' + (base - 13) + '" stroke="var(--teal)" opacity=".6"/>' +
+        '<text class="lbl2" x="' + px + '" y="' + (base - 34) + '" text-anchor="middle">' + label + "</text>";
+    } else if (kind === "cur") {
+      g += '<path d="M' + px + " " + (base - 12) + 'l6 6-6 6-6-6z" fill="var(--yellow)"/><text class="lbl2" x="' + px + '" y="' + (base - 18) + '" text-anchor="middle">' + label + "</text>";
+    } else if (kind === "model") {
+      g += '<line x1="' + px + '" x2="' + px + '" y1="' + py + '" y2="' + base + '" stroke="var(--muted)" stroke-dasharray="3 3" opacity=".6"/><circle cx="' + px + '" cy="' + py + '" r="5" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="2 2" opacity=".75"/>' +
+        '<text class="lbl2" x="' + (px + 8) + '" y="' + (base - 8) + '" text-anchor="start" opacity=".85">' + label + "</text>";
+    } else {
+      g += '<line x1="' + px + '" x2="' + px + '" y1="' + py + '" y2="' + base + '" stroke="#fff" stroke-width="2"/><circle cx="' + px + '" cy="' + py + '" r="6" fill="#fff"/><circle class="pulse" cx="' + px + '" cy="' + py + '" r="10" fill="none" stroke="#fff" stroke-width="2"/>' +
+        '<text class="lbl" x="' + px + '" y="' + (py - 14) + '" text-anchor="middle">' + label + "</text>";
+    }
+    return g + "</g>";
+  }
+  if (cur) s += marker(cur, 0, "NOW " + cur.toFixed(2), "cur");
+  s += marker(B0.s800Model, 1, "MODEL " + B0.s800Model.toFixed(2), "model");
+  // With a current setting the result may be one staged step toward the bell target: show both.
+  var step = M.s800FromCm(R.cm), staged = Math.abs(step - B0.s800) > 0.005;
+  if (staged) s += marker(step, 2, "THIS STEP " + step.toFixed(2), "step");
+  s += marker(B0.s800, 3, (staged ? "TARGET " : "YOU ") + B0.s800.toFixed(2), "you");
+  s += '<line id="bxh" x1="0" x2="0" y1="' + T + '" y2="' + base + '" stroke="var(--muted)" visibility="hidden"/><rect id="bhit" x="' + L + '" y="' + T + '" width="' + (W - L - Rt) + '" height="' + (base - T) + '" fill="transparent"/></svg>';
+  return { svg: s, x: x, W: W, L: L, Rt: Rt, xMin: xMin, xMax: xMax, cur: cur, staged: staged };
+}
+function wireBellHover(host, R, geo) {
+  var svg = host.querySelector("svg"), hit = svg.querySelector("#bhit"), xh = svg.querySelector("#bxh"), tt = host.querySelector(".tt");
+  hit.addEventListener("pointermove", function (ev) {
+    var r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * geo.W;
+    var v = geo.xMin + (px - geo.L) / (geo.W - geo.L - geo.Rt) * (geo.xMax - geo.xMin);
+    v = Math.max(0.01, Math.min(0.7, v));
+    var pct = normCdf((v - R.bell.mean) / R.bell.sd);
+    xh.setAttribute("x1", geo.x(v)); xh.setAttribute("x2", geo.x(v)); xh.setAttribute("visibility", "visible");
+    tt.innerHTML = "<b>" + v.toFixed(3) + " sens @ 800 DPI</b><br>" + M.cmFromS800(v).toFixed(1) + " cm/360 · percentile " + Math.round(pct * 100);
+    tt.style.display = "block";
+    tt.style.left = Math.min(Math.max(0, geo.x(v) / geo.W * r.width + 10), r.width - tt.offsetWidth) + "px"; tt.style.top = "4px";
+  });
+  hit.addEventListener("pointerleave", function () { tt.style.display = "none"; xh.setAttribute("visibility", "hidden"); });
+}
+// "What moved you": one centred diverging bar per shift (left = slower, right = faster). +-1.5 SD fills a half-width.
+function shiftRows(R) {
+  var B0 = R.bell, rows = [{ label: "Your setup (physical model)", z: B0.rhoZModel, note: "From your pad, grip, role, weapon and agents" }].concat(B0.shifts || []);
+  return '<ul class="shifts" aria-label="What moved your sensitivity">' + rows.map(function (r, i) {
+    var z = r.z || 0, w = Math.min(Math.abs(z), 1.5) / 1.5 * 50, v = z * B0.sd;
+    var bar = Math.abs(z) < 0.005 ? "" : '<i class="' + (z > 0 ? "fast" : "slow") + '" style="width:' + w.toFixed(1) + '%"></i>';
+    return '<li class="shift" style="--i:' + i + '"><span class="sh-n">' + esc(r.label) + (r.note ? "<small>" + esc(r.note) + "</small>" : "") + '</span><span class="sh-t" aria-hidden="true">' + bar +
+      '</span><span class="sh-v">' + fmtSens(v) + "</span></li>";
+  }).join("") + '</ul><div class="sh-ends" aria-hidden="true"><span>\u2190 slower</span><span>faster \u2192</span></div>';
+}
+
 function costChart(R) {
   var W = 680, H = 240, L = 40, Rt = 12, T = 12, B = 30, xMin = 15, xMax = 120;
   var pts = R.curve, yMax = 0;
@@ -1321,13 +1555,15 @@ function costChart(R) {
   function path(k) { return pts.map(function (p, i) { return (i ? "L" : "M") + x(p.C).toFixed(1) + " " + y(p[k]).toFixed(1); }).join(""); }
   var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Model cost curve (unvalidated estimate) with minimum near ' + f1(R.cModel) + ' cm/360">';
   s += '<rect x="' + x(R.band[0]) + '" y="' + T + '" width="' + (x(R.band[1]) - x(R.band[0])) + '" height="' + (H - T - B) + '" fill="rgba(210,75,214,.12)"/>';
-  [20, 40, 60, 80, 100, 120].forEach(function (c) { s += '<line x1="' + x(c) + '" x2="' + x(c) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--line)"/><text x="' + x(c) + '" y="' + (H - B + 16) + '" text-anchor="middle">' + c + "</text>"; });
-  for (var k = 0; k <= 3; k++) { var v = yMax * k / 3; s += '<text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v.toFixed(2) + "</text>"; }
+  [20, 40, 60, 80, 100, 120].forEach(function (c) { s += '<line class="gridh" x1="' + x(c) + '" x2="' + x(c) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--line)"/><text x="' + x(c) + '" y="' + (H - B + 16) + '" text-anchor="middle">' + c + "</text>"; });
+  for (var k = 0; k <= 3; k++) { var v = yMax * k / 3; s += '<line class="gridh" x1="' + L + '" x2="' + (W - Rt) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--line)" stroke-dasharray="2 4"/><text x="' + (L - 6) + '" y="' + (y(v) + 4) + '" text-anchor="end">' + v.toFixed(2) + "</text>"; }
   s += '<clipPath id="plot"><rect x="' + L + '" y="' + T + '" width="' + (W - L - Rt) + '" height="' + (H - T - B) + '"/></clipPath><g clip-path="url(#plot)">';
   s += '<path class="ln" d="' + path("prec") + '" fill="none" stroke="#2a9fd6" stroke-width="1.6"/><path class="ln" d="' + path("trav") + '" fill="none" stroke="var(--yellow)" stroke-width="1.6"/>';
   s += '<path class="ln" d="' + path("lift") + '" fill="none" stroke="var(--pink)" stroke-width="1.6"/><path class="ln" d="' + path("total") + '" fill="none" stroke="var(--ink)" stroke-width="2.4"/></g>';
   s += '<line x1="' + x(R.cModel) + '" x2="' + x(R.cModel) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--ink)" stroke-dasharray="3 3"/>';
   s += '<line x1="' + x(R.cm) + '" x2="' + x(R.cm) + '" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--teal)" stroke-width="2"/>';
+  var near = pts.reduce(function (b, p) { return Math.abs(p.C - R.cm) < Math.abs(b.C - R.cm) ? p : b; }, pts[0]), my = y(near.total);
+  s += '<circle cx="' + x(R.cm) + '" cy="' + my + '" r="4.5" fill="var(--teal)" stroke="var(--bg)" stroke-width="1.5"/><circle class="pulse" cx="' + x(R.cm) + '" cy="' + my + '" r="9" fill="none" stroke="var(--teal)" stroke-width="2"/>';
   s += '<line id="xh" x1="0" x2="0" y1="' + T + '" y2="' + (H - B) + '" stroke="var(--muted)" visibility="hidden"/>';
   s += '<rect id="hit" x="' + L + '" y="' + T + '" width="' + (W - L - Rt) + '" height="' + (H - T - B) + '" fill="transparent"/></svg>';
   return { svg: s, x: x, W: W, L: L, Rt: Rt, xMin: xMin, xMax: xMax };
@@ -1351,7 +1587,7 @@ function proChart(R) {
   var H = T + rows.length * rowH + 26;
   function x(c) { return L + (Math.min(xMax, Math.max(xMin, c)) - xMin) / (xMax - xMin) * (W - L - Rt); }
   var s = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="VCT pros by role and cm/360, with your result">';
-  [40, 60, 80, 100].forEach(function (c) { s += '<line x1="' + x(c) + '" x2="' + x(c) + '" y1="' + T + '" y2="' + (T + rows.length * rowH) + '" stroke="var(--line)"/><text x="' + x(c) + '" y="' + (H - 6) + '" text-anchor="middle">' + c + "</text>"; });
+  [40, 60, 80, 100].forEach(function (c) { s += '<line class="gridh" x1="' + x(c) + '" x2="' + x(c) + '" y1="' + T + '" y2="' + (T + rows.length * rowH) + '" stroke="var(--line)"/><text x="' + x(c) + '" y="' + (H - 6) + '" text-anchor="middle">' + c + "</text>"; });
   rows.forEach(function (r, ri) {
     var cy = T + ri * rowH + rowH / 2, placed = [], OFF = [0, -9, 9, -4.5, 4.5, -13, 13];
     s += '<text class="lbl" x="' + (L - 12) + '" y="' + (cy + 4) + '" text-anchor="end">' + r[1].toUpperCase() + "</text>";
@@ -1364,6 +1600,7 @@ function proChart(R) {
     });
   });
   s += '<line x1="' + x(R.cm) + '" x2="' + x(R.cm) + '" y1="' + T + '" y2="' + (T + rows.length * rowH) + '" stroke="var(--teal)" stroke-width="2"/>';
+  s += '<circle cx="' + x(R.cm) + '" cy="' + (T + 5) + '" r="4.5" fill="var(--teal)"/><circle class="pulse" cx="' + x(R.cm) + '" cy="' + (T + 5) + '" r="9" fill="none" stroke="var(--teal)" stroke-width="2"/>';
   return s + "</svg>";
 }
 function wireDotHover(host) {
@@ -1425,6 +1662,11 @@ function drawPreviews(cfg, hex, delay) {
 }
 
 /* ---------- Results ---------- */
+function skippedCard(n) {
+  var name = n === 2 ? "Crosshair" : "Highlight color";
+  return '<div class="sum-c s' + n + ' skipped" data-skipped="' + n + '"><div class="sum-k"><b>' + n + "</b>" + name + '</div><div class="sum-v">Skipped</div>' +
+    '<div class="sum-s">You skipped this part. Nothing was calculated for it.</div><button type="button" class="btn small add-part" data-part="' + n + '">Add it now</button></div>';
+}
 function renderResult() {
   if (VT_RUN) { VT_RUN.stop = true; if (VT_RUN.cleanup) VT_RUN.cleanup(); }
   var inp = buildInput();
@@ -1455,7 +1697,8 @@ function renderResult() {
   if (prevRes && prevRes.cm) rowsR.splice(1, 0, ["Last session", f1(prevRes.cm) + " cm", (cm / prevRes.cm - 1) * 100]);
   function bdCol(rows, off) {
     return '<div><div class="bd-h"><span>Factor</span><span>Value</span><span>Impact</span></div>' +
-      rows.map(function (r, i) { return '<div class="bd-r row-in" style="--i:' + (i + off) + '"><span class="k">' + r[0] + '</span><span class="v">' + esc(r[1]) + "</span>" + impactCell(r[2]) + "</div>"; }).join("") + "</div>";
+      rows.map(function (r, i) { return '<div class="bd-r row-in" style="--i:' + (i + off) + '"><span class="k">' + r[0] + '</span><span class="v">' + esc(r[1]) + "</span>" + impactCell(r[2]) +
+        (r[2] !== null && Math.abs(r[2]) >= 1 ? '<i class="ibar' + (r[2] > 0 ? " slow" : "") + '" style="--w:' + Math.min(1, Math.abs(r[2]) / 30).toFixed(2) + '"></i>' : "") + "</div>"; }).join("") + "</div>";
   }
 
   // Confidence badge (heuristic for questionnaire; measured for calibration data).
@@ -1510,12 +1753,17 @@ function renderResult() {
       '</tbody></table><p class="tip">These don\'t affect your result. Compare them again after 2–4 weeks on the new setting.</p>';
   }
   var near = R.nearPros.map(function (p) { return "<tr><td>" + esc(p.name) + "</td><td>" + (p.role ? M.ROLE[p.role].label : "Unverified") + '</td><td class="n">' + f1(p.cm) + '</td><td class="n">' + Math.round(p.edpi) + "</td></tr>"; }).join("");
-  var cc = costChart(R);
+  var cc = costChart(R), bc = bellChart(R, dpi);
   var today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
-  var XR = X.recommend(xhInput()), xc = XR.crosshair, hl = XR.highlight, gx = xc.geometry;
-  var shapeName = ({ small: "small cross", medium: "cross", dot: "dot", crossDot: "cross + dot" })[gx.shape];
-  var TABS = [["Sensitivity", 0], ["Crosshair", 4], ["Highlight", 5], ["Model", 1], ["Vs pros", 2], ["Test plan", 3]];
+  // Skipped parts are not computed at all: their summary card says "Skipped" and their tabs and rows are left out.
+  var skX = !!S.xSkip, skH = !!S.hSkip;
+  var XR = skX && skH ? null : X.recommend(xhInput());
+  var xc = XR && !skX ? XR.crosshair : null, hl = XR && !skH ? XR.highlight : null;
+  var gx = xc ? xc.geometry : null, shapeName = gx ? ({ small: "small cross", medium: "cross", dot: "dot", crossDot: "cross + dot" })[gx.shape] : "";
+  var TABS = [["Sensitivity", 0]].concat(xc ? [["Crosshair", 4]] : [], hl ? [["Highlight", 5]] : [], [["Model", 1], ["Vs pros", 2], ["Test plan", 3]]);
+  var xhPane = "", hlPane = "";
+  if (xc) {
   function onoff(v) { return v ? "On" : "Off"; }
   var cfg = xc.cfg, xRows = [
     ["Color", '<i class="sw" style="background:' + xc.color.hex + '"></i>' + xc.color.name],
@@ -1548,8 +1796,8 @@ function renderResult() {
       }).join("") + "</div>" +
       '<p class="tip">Outlines: ' + (ft.coef.outline >= 0 ? "+" : "") + ft.coef.outline.toFixed(2) + " · dots vs crosses: " + ((ft.coef["s:dot"] || 0) - (ft.coef["s:cross"] || 0)).toFixed(2) + ". Small samples, so these are shrunk toward zero.</p>";
   }
-  var xhPane =
-    '<section class="pane" id="pane-4" role="tabpanel" aria-labelledby="tab-1" hidden>' +
+  xhPane =
+    '<section class="pane" id="pane-4" role="tabpanel" aria-labelledby="tab-4" hidden>' +
       '<div class="sec-t">Crosshair <span>' + xc.color.name + " " + shapeName + "</span></div>" +
       '<div class="panel"><div class="xh-row">' +
         XSCENES.map(function (b) { return '<figure class="xh-fig"><canvas class="xh-prev" data-bg="' + b + '" aria-label="Crosshair on ' + BGS[b].name + '"></canvas><figcaption>' + BGS[b].name + "</figcaption></figure>"; }).join("") +
@@ -1567,7 +1815,8 @@ function renderResult() {
       "</div>" +
       '<details><summary>Sources</summary><ul class="src"><li>Pro data: own scrape of <a href="https://prosettings.net/lists/valorant/" target="_blank" rel="noopener">ProSettings.net</a> and the <a href="https://www.valorant-spind.de/en/valorant-pro-crosshair-datenbank.html" target="_blank" rel="noopener">Valorant-Spind database</a>, 2026</li><li>Mullen 1985: fine detail is carried by luminance, not color (J. Physiol. 359:381)</li><li>Machado, Oliveira &amp; Fernandes 2009: color-vision simulation (IEEE TVCG 15:1291)</li><li>Abrams &amp; Christ 2003: motion onset captures attention (Psych. Sci. 14:427)</li><li>Siderov, Waugh &amp; Bedell 2013; Pelli &amp; Tillman 2008: crowding near the aim point</li><li>Bradley &amp; Terry 1952; Hunter 2004; Hajek, Oh &amp; Xu 2014: scoring picks from random subsets</li><li>Code format: genesy/crosshair-codes and spartytech/Crosshair-Bridge (Riot does not publish it)</li><li>Full notes: research/crosshair_research.md</li></ul></details>' +
     "</div></section>";
-
+  }
+  if (hl) {
   var hMax = Math.max.apply(null, hl.ranking.map(function (z) { return z.s; })), hMin = Math.min.apply(null, hl.ranking.map(function (z) { return z.s; }));
   var hRows = hl.ranking.map(function (z, i) {
     var w = Math.max(3, (z.s - hMin) / (hMax - hMin || 1) * 100);
@@ -1587,8 +1836,8 @@ function renderResult() {
   else if (A && !A.ok) tRows = '<p class="tip" style="margin-top:16px">Vision test: ' + esc(A.reason) + "</p>";
   var hWhy = hl.why.length ? hl.why : ["no strong reason to move away from the computed ranking"];
   var HSCENES = ["sand", "concrete", "shadow", "smoke"];
-  var hlPane =
-    '<section class="pane" id="pane-5" role="tabpanel" aria-labelledby="tab-2" hidden>' +
+  hlPane =
+    '<section class="pane" id="pane-5" role="tabpanel" aria-labelledby="tab-5" hidden>' +
       '<div class="sec-t">Enemy highlight <span>' + esc(hl.color.name) + "</span></div>" +
       '<div class="panel"><div class="xh-row">' +
         HSCENES.map(function (b) { return '<figure class="xh-fig"><canvas class="hl-prev" data-bg="' + b + '" data-hl="' + hl.color.hex + '" aria-label="Enemy outline on ' + BGS[b].name + '"></canvas><figcaption>' + BGS[b].name + "</figcaption></figure>"; }).join("") +
@@ -1602,6 +1851,7 @@ function renderResult() {
         '<div><div class="sub-t">Ranking</div><div class="sbars">' + hRows + "</div>" +
         '<details><summary>Sources</summary><ul class="src"><li>Mullen &amp; Kingdom 2002; Hansen, Pracejus &amp; Gegenfurtner 2009: red-green contrast fades fastest in peripheral vision</li><li>Kaernbach 1991, weighted up-down staircase (Percept. Psychophys. 49:227)</li><li>Wichmann &amp; Hill 2001, psychometric function fitting</li><li>Vickers, Nettelbeck &amp; Willson 1972; Breitmeyer &amp; Ogmen 2000: masked brief presentations</li><li>Garaizar &amp; Reips 2019; Anwyl-Irvine et al. 2021: browser frame timing</li><li>Machado et al. 2009: color-vision simulation</li><li>Full notes: research/highlight_color_research.md and research/vision_test_method.md</li></ul></details></div>' +
       "</div></div></section>";
+  }
 
   app.style.setProperty("--base", REDUCED ? "0s" : (INTRO_MS / 1000) + "s");
   app.innerHTML =
@@ -1610,25 +1860,30 @@ function renderResult() {
     '<div class="sum">' +
       '<div class="sum-c s1"><div class="sum-k"><b>1</b>Sensitivity</div><div class="res-head">' +
         '<h2 class="big" id="qh" tabindex="-1"><span class="n1" id="sensNum">' + sens.toFixed(3) + '</span><span class="lab">Sens</span><span class="n2"><span id="cmNum">' + f1(cm) + "</span> cm/360</span></h2>" +
-        '<div class="meta">' + esc(today) + "<br>" + (R.mode === "measured" ? "Measured" : "Questionnaire") + "<br><b>" + dpi + " DPI · eDPI " + Math.round(edpi) + "</b></div>" +
+        '<div class="meta">' + esc(today) + "<br>" + (R.mode === "measured" ? "Measured" : "Questionnaire") + "<br><b>" + dpi + ' DPI · eDPI <span id="eNum">' + Math.round(edpi) + "</span></b></div>" +
       "</div></div>" +
-      '<button type="button" class="sum-c s2" data-go="1"><div class="sum-k"><b>2</b>Crosshair</div><div class="sum-b"><canvas class="xh-prev" data-bg="shadow" data-z="3" width="96" height="96" aria-hidden="true"></canvas>' +
-        '<div><div class="sum-v">' + XR.crosshair.color.name + " " + shapeName + '</div><code class="sum-code">' + esc(XR.crosshair.code) + "</code></div></div></button>" +
-      '<button type="button" class="sum-c s3" data-go="2"><div class="sum-k"><b>3</b>Highlight color</div><div class="sum-b"><canvas class="hl-prev" data-hl="' + XR.highlight.color.hex + '" width="96" height="96" aria-hidden="true"></canvas>' +
-        '<div><div class="sum-v" style="color:' + XR.highlight.color.hex + '">' + esc(XR.highlight.color.name) + '</div><div class="sum-s">Settings › General › Accessibility</div></div></div></button>' +
+      (xc ? '<button type="button" class="sum-c s2" data-go="4"><div class="sum-k"><b>2</b>Crosshair</div><div class="sum-b"><canvas class="xh-prev" data-bg="shadow" data-z="3" width="96" height="96" aria-hidden="true"></canvas>' +
+        '<div><div class="sum-v">' + XR.crosshair.color.name + " " + shapeName + '</div><code class="sum-code">' + esc(XR.crosshair.code) + "</code></div></div></button>" : skippedCard(2)) +
+      (hl ? '<button type="button" class="sum-c s3" data-go="5"><div class="sum-k"><b>3</b>Highlight color</div><div class="sum-b"><canvas class="hl-prev" data-hl="' + XR.highlight.color.hex + '" width="96" height="96" aria-hidden="true"></canvas>' +
+        '<div><div class="sum-v" style="color:' + XR.highlight.color.hex + '">' + esc(XR.highlight.color.name) + '</div><div class="sum-s">Settings › General › Accessibility</div></div></div></button>' : skippedCard(3)) +
     "</div>" +
     '<div class="layout">' +
       '<nav class="tabs" role="tablist" aria-label="Result sections">' +
-        TABS.map(function (t, i) { return '<button type="button" class="tab" role="tab" id="tab-' + i + '" aria-controls="pane-' + t[1] + '" aria-selected="' + (i === 0) + '">' + t[0] + "</button>"; }).join("") +
+        '<span class="tab-ind" aria-hidden="true"></span>' + TABS.map(function (t, i) { return '<button type="button" class="tab" role="tab" id="tab-' + t[1] + '" aria-controls="pane-' + t[1] + '" aria-selected="' + (i === 0) + '">' + t[0] + "</button>"; }).join("") +
       "</nav>" +
-      "<div>" +
+      '<div class="panes">' +
         '<section class="pane" id="pane-0" role="tabpanel" aria-labelledby="tab-0">' +
           '<div class="sec-t">Sensitivity <span>' + esc(R.reason) + "</span></div>" +
           '<div class="panel duo"><div><div class="sub-t">Distribution</div><div class="dist">' + distChart(R, cur) + "</div></div>" +
           '<div><div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div></div>" +
+          '<div class="sec-t" style="margin-top:26px">Where you sit on the bell curve <span>sens at 800 DPI</span></div>' +
+          '<div class="panel duo"><div><div class="bell chart" id="bellChart">' + bc.svg + '<div class="tt"></div></div>' +
+            '<div class="legend"><span><i style="background:#2ad6b0"></i>\u00b11 SD (0.2\u20130.4)</span><span><i style="background:#2a9fd6"></i>\u00b12 SD (0.1\u20130.5)</span><span><i style="background:#fff"></i>Your target</span><span><i style="background:var(--muted)"></i>Physical model alone</span>' + (bc.cur ? '<span><i style="background:var(--yellow)"></i>Current setting</span>' : "") + (bc.staged ? '<span><i style="background:var(--teal)"></i>This run\u2019s step</span>' : "") + "</div>" +
+            '<p class="bell-cap" id="bellCap">Higher sens than <b id="bellPct">' + Math.round(R.bell.percentile * 100) + "</b>% of players (percentile " + Math.round(R.bell.percentile * 100) + ")" + (R.bell.clamped ? ". Held inside the 0.1\u20130.7 range" : "") + ".</p></div>" +
+          '<div><div class="sub-t">What moved you</div>' + shiftRows(R) + "</div></div>" +
         "</section>" +
         xhPane + hlPane +
-        '<section class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-3" hidden>' +
+        '<section class="pane" id="pane-1" role="tabpanel" aria-labelledby="tab-1" hidden>' +
           '<div class="sec-t">Model <span>estimated extra time per engagement</span></div><div class="panel">' +
           '<div class="chart" id="costChart">' + cc.svg + '<div class="tt"></div></div>' +
           '<div class="legend"><span><i style="background:var(--ink)"></i>Total</span><span><i style="background:#2a9fd6"></i>Precision</span><span><i style="background:var(--yellow)"></i>Speed / slow flicks</span><span><i style="background:var(--pink)"></i>Pad / reach</span><span><i style="background:var(--teal)"></i>Your result</span></div>' +
@@ -1644,12 +1899,12 @@ function renderResult() {
           '<li>Agents: <a href="https://wiki.playvalorant.com" target="_blank" rel="noopener">Riot\'s official wiki</a>. Pro settings: <a href="https://prosettings.net/lists/valorant/" target="_blank" rel="noopener">ProSettings.net</a>; roles: <a href="https://www.vlr.gg" target="_blank" rel="noopener">VLR.gg</a></li>' +
           "</ul></details></div>" +
         "</section>" +
-        '<section class="pane" id="pane-2" role="tabpanel" aria-labelledby="tab-4" hidden>' +
+        '<section class="pane" id="pane-2" role="tabpanel" aria-labelledby="tab-2" hidden>' +
           '<div class="sec-t">Vs pros <span>' + M.PRO_STATS.n + " VCT 2026 players · comparison only</span></div><div class=\"panel\">" +
           '<div class="chart" id="proChart">' + proChart(R) + '<div class="tt"></div></div>' +
           '<div class="scroll-x" style="margin-top:14px"><table><thead><tr><th>Closest pros</th><th>Role</th><th class="n">cm/360</th><th class="n">eDPI</th></tr></thead><tbody>' + near + "</tbody></table></div></div>" +
         "</section>" +
-        '<section class="pane" id="pane-3" role="tabpanel" aria-labelledby="tab-5" hidden>' +
+        '<section class="pane" id="pane-3" role="tabpanel" aria-labelledby="tab-3" hidden>' +
           '<div class="sec-t">Test plan <span>2–4 weeks</span></div><div class="panel">' +
           '<table><thead><tr><th>Candidate</th><th class="n">cm/360</th><th class="n">Sens @ ' + dpi + "</th></tr></thead><tbody>" + tests + "</tbody></table>" +
           '<ol class="plan"><li><b>Clean input.</b> Turn off "Enhance pointer precision" and any acceleration, and keep your DPI fixed.</li>' +
@@ -1667,14 +1922,14 @@ function renderResult() {
           '<p class="badge-cap">' + badgeCap + "</p></div>" +
         '<div class="sec-t">Settings</div>' +
         '<div class="panel"><div class="acc">' +
-          '<div class="acc-r" style="--i:0"><span class="ic">' + ICON.mouse + '</span><span class="t">Sensitivity <b>' + sens.toFixed(3) + "</b><small>at " + dpi + " DPI</small></span></div>" +
-          '<div class="acc-r" style="--i:1"><span class="ic">' + ICON.ruler + '</span><span class="t">cm/360 <b>' + f1(cm) + "</b><small>range " + f1(R.lo) + "–" + f1(R.hi) + "</small></span></div>" +
+          '<div class="acc-r" style="--i:0"><span class="ic">' + ICON.mouse + '</span><span class="t">Sensitivity <b id="accSens">' + sens.toFixed(3) + "</b><small>at " + dpi + " DPI</small></span></div>" +
+          '<div class="acc-r" style="--i:1"><span class="ic">' + ICON.ruler + '</span><span class="t">cm/360 <b id="accCm">' + f1(cm) + "</b><small>range " + f1(R.lo) + "–" + f1(R.hi) + "</small></span></div>" +
           (R.dpiAdvice ? '<div class="acc-r' + (R.dpiAdvice.level === "skip" ? " warnr" : "") + '" style="--i:1.5"><span class="ic">' + ICON.mouse + '</span><span class="t">DPI <b>' + dpi + "</b><small>" + (R.dpiAdvice.suggest ? "Try " + R.dpiAdvice.suggest.dpi + " at sens " + R.dpiAdvice.suggest.sens.toFixed(3) : R.dpiAdvice.level === "high" ? "800–1600 is enough" : "No pixel skipping") + "</small></span></div>" : "") +
           '<div class="acc-r" style="--i:2"><span class="ic">' + ICON.scope + '</span><span class="t">Scoped <b>1.00</b><small>' + scopedShort + "</small></span></div>" +
           '<div class="acc-r" style="--i:3"><span class="ic">' + ICON.scope + '</span><span class="t">ADS <b>1.00</b><small>' + adsShort + "</small></span></div>" +
-          '<div class="acc-r" style="--i:4"><span class="ic">' + ICON.cross + '</span><span class="t">Crosshair <b>' + XR.crosshair.color.name + '</b><small>' + shapeName + ", code in the Crosshair tab</small></span></div>" +
+          (xc ? '<div class="acc-r" style="--i:4"><span class="ic">' + ICON.cross + '</span><span class="t">Crosshair <b>' + XR.crosshair.color.name + '</b><small>' + shapeName + ", code in the Crosshair tab</small></span></div>" : "") +
           (S.prior ? '<div class="acc-r" style="--i:6"><span class="ic">' + ICON.down2 + '</span><span class="t">Sessions <b>' + (S.prior.length + 1) + "</b><small>" + (S.prior[0].manual && S.prior.length === 1 ? "last results entered by hand" : "pooled test data, from " + esc(S.prior[0].manual ? "entered by hand" : fmtDate(S.prior[0].date))) + "</small></span></div>" : "") +
-          '<div class="acc-r" style="--i:5"><span class="ic"><i class="sw" style="background:' + XR.highlight.color.hex + ';margin:0"></i></span><span class="t">Highlight <b>' + XR.highlight.color.short + '</b><small>' + esc(XR.highlight.color.name) + "</small></span></div>" +
+          (hl ? '<div class="acc-r" style="--i:5"><span class="ic"><i class="sw" style="background:' + XR.highlight.color.hex + ';margin:0"></i></span><span class="t">Highlight <b>' + XR.highlight.color.short + '</b><small>' + esc(XR.highlight.color.name) + "</small></span></div>" : "") +
         "</div>" +
         '<button type="button" class="btn primary dl" id="download">' + ICON.down2 + "Download results</button>" +
         '<p class="dl-s">Saves a results file to your device (sessions in it: ' + ((S.prior ? S.prior.length : 0) + 1) + '). Import it on the first screen next time to pool this run with the next one.</p>' +
@@ -1685,26 +1940,58 @@ function renderResult() {
 
   countUp(document.getElementById("sensNum"), sens, 3, 1100, INTRO_MS);
   countUp(document.getElementById("cmNum"), cm, 1, 1100, INTRO_MS);
-  app.querySelector(".pane:not([hidden])").classList.add("play");
-  var tabs = app.querySelectorAll(".tab");
-  tabs.forEach(function (t, i) {
-    t.addEventListener("click", function () {
-      tabs.forEach(function (u, j) {
-        var pane = document.getElementById("pane-" + TABS[j][1]);
-        u.setAttribute("aria-selected", String(i === j)); pane.hidden = i !== j;
-        if (i === j) { pane.classList.remove("play"); void pane.offsetWidth; pane.classList.add("play"); drawLines(pane); }
-      });
+  countUp(document.getElementById("eNum"), edpi, 0, 1100, INTRO_MS);
+  countUp(document.getElementById("accSens"), sens, 3, 1100, INTRO_MS + 900);
+  countUp(document.getElementById("accCm"), cm, 1, 1100, INTRO_MS + 900);
+  // Bell chart: curve draws in, bands grow, markers drop (CSS under .pane.play), percentile counts up. Replays on every tab open.
+  var bellBase = REDUCED ? 0 : INTRO_MS / 1000;
+  function playBell(base) {
+    var pane = document.getElementById("pane-0"), n = document.getElementById("bellPct");
+    drawLines(pane.querySelector("#bellChart"), base);
+    if (n) countUp(n, Math.round(R.bell.percentile * 100), 0, 1000, (base + 0.9) * 1000);
+  }
+  var firstPane = app.querySelector(".pane:not([hidden])");
+  firstPane.classList.add("play");
+  playBell(bellBase);
+  var tabs = app.querySelectorAll(".tab"), ind = app.querySelector(".tab-ind");
+  function placeInd() {
+    var on = app.querySelector('.tab[aria-selected="true"]');
+    if (!on || !ind) return;
+    ind.style.width = on.offsetWidth + "px"; ind.style.height = on.offsetHeight + "px";
+    ind.style.transform = "translate(" + on.offsetLeft + "px," + on.offsetTop + "px)";
+    ind.classList.add("on");
+  }
+  requestAnimationFrame(placeInd); window.addEventListener("resize", placeInd);
+  function showPane(i) {
+    tabs.forEach(function (u, j) {
+      var pane = document.getElementById("pane-" + TABS[j][1]);
+      u.setAttribute("aria-selected", String(i === j));
+      clearTimeout(pane._lt);
+      if (i === j) {
+        pane.hidden = false; pane.classList.remove("leave");
+        pane.classList.remove("play"); void pane.offsetWidth; pane.classList.add("play"); drawLines(pane);
+        if (pane.id === "pane-0") playBell(0);
+      } else if (!pane.hidden && !pane.classList.contains("leave")) {
+        if (REDUCED) { pane.hidden = true; pane.classList.remove("play"); } else { pane.classList.add("leave"); pane._lt = setTimeout(function () { pane.hidden = true; pane.classList.remove("leave", "play"); }, 170); }
+      }
     });
+    placeInd();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener("click", function () { showPane(i); });
     t.addEventListener("keydown", function (e) {
       if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
       e.preventDefault(); var n = tabs[(i + (e.key === "ArrowDown" || e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length]; n.click(); n.focus();
     });
   });
   wireCostHover(document.getElementById("costChart"), R, cc);
-  drawPreviews(X.decode(xc.code), hl.color.hex, REDUCED ? 0 : INTRO_MS + 300);
+  wireBellHover(document.getElementById("bellChart"), R, bc);
+  var xCfg = xc ? X.decode(xc.code) : null, hHex = hl ? hl.color.hex : null;
+  drawPreviews(xCfg, hHex, REDUCED ? 0 : INTRO_MS + 300);
   setTimeout(function () { app.style.setProperty("--base", "0s"); }, INTRO_MS + 2000);
-  app.querySelectorAll(".sum-c[data-go]").forEach(function (b) { b.addEventListener("click", function () { tabs[+b.getAttribute("data-go")].click(); }); });
-  tabs.forEach(function (t) { t.addEventListener("click", function () { requestAnimationFrame(function () { drawPreviews(X.decode(xc.code), hl.color.hex, 120); }); }); });
+  app.querySelectorAll(".sum-c[data-go]").forEach(function (b) { b.addEventListener("click", function () { var t = document.getElementById("tab-" + b.getAttribute("data-go")); if (t) t.click(); }); });
+  app.querySelectorAll(".add-part").forEach(function (b) { b.addEventListener("click", function () { addPart(+b.getAttribute("data-part")); }); });
+  tabs.forEach(function (t) { t.addEventListener("click", function () { requestAnimationFrame(function () { drawPreviews(xCfg, hHex, 120); }); }); });
   app.querySelectorAll(".copy-code").forEach(function (b) {
     b.addEventListener("click", function () {
       var code = b.getAttribute("data-code"), t = document.getElementById("toast");
@@ -1713,7 +2000,7 @@ function renderResult() {
     });
   });
   wireDotHover(document.getElementById("proChart"));
-  var line = "Valorant: " + dpi + " DPI, sens " + sens.toFixed(3) + " (eDPI " + Math.round(edpi) + ", " + f1(cm) + " cm/360)\nCrosshair: " + XR.crosshair.code + "\nEnemy highlight: " + XR.highlight.color.name;
+  var line = "Valorant: " + dpi + " DPI, sens " + sens.toFixed(3) + " (eDPI " + Math.round(edpi) + ", " + f1(cm) + " cm/360)" + (xc ? "\nCrosshair: " + XR.crosshair.code : "") + (hl ? "\nEnemy highlight: " + XR.highlight.color.name : "");
   document.getElementById("copy").addEventListener("click", function () {
     var t = document.getElementById("toast");
     try { navigator.clipboard.writeText(line).then(function () { t.textContent = "Copied."; }, function () { t.textContent = line; }); } catch (e) { t.textContent = line; }

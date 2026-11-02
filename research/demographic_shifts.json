@@ -1,0 +1,211 @@
+{
+ "generated": "2026-11-02",
+ "unit": "SD of bell curve; 1 = 0.1 sens at 800 DPI; + = faster",
+ "region": {
+  "na": {
+   "label": "North America",
+   "z": 0.07,
+   "n": 24,
+   "medianS800": 0.286,
+   "basis": "research",
+   "note": "24 pros (United States and Canada). Median slightly above the overall pro median; NOT lower than APAC (Mann-Whitney z=0.07 vs APAC pooled)."
+  },
+  "latam": {
+   "label": "Latin America",
+   "z": -0.07,
+   "n": 7,
+   "medianS800": 0.25,
+   "basis": "research",
+   "note": "Chile/Argentina/Colombia; small n, shrunk hard."
+  },
+  "br": {
+   "label": "Brazil",
+   "z": -0.14,
+   "n": 10,
+   "medianS800": 0.235,
+   "basis": "research",
+   "note": "Brazil; lowest median but wide spread (one 1.5 outlier clamped to 0.7)."
+  },
+  "eu": {
+   "label": "Europe",
+   "z": -0.02,
+   "n": 17,
+   "medianS800": 0.27,
+   "basis": "research",
+   "note": "UK, Russia, Poland, Nordics, Iberia etc.; sits at the overall median."
+  },
+  "mena": {
+   "label": "Middle East & North Africa",
+   "z": 0.11,
+   "n": 9,
+   "medianS800": 0.313,
+   "basis": "research",
+   "note": "Turkey 8 + Morocco 1. Turkey classified as Middle East (assumption); Turkish pros skew high. Weak."
+  },
+  "kr": {
+   "label": "Korea",
+   "z": -0.05,
+   "n": 17,
+   "medianS800": 0.263,
+   "basis": "research",
+   "note": "Korean-born pros; median near overall. Includes one eDPI-800 outlier clamped to 0.7."
+  },
+  "jp": {
+   "label": "Japan",
+   "z": -0.05,
+   "n": 4,
+   "medianS800": 0.254,
+   "basis": "research",
+   "note": "n=4 only; mostly shrinkage."
+  },
+  "cn": {
+   "label": "China",
+   "z": 0,
+   "n": 4,
+   "medianS800": 0.285,
+   "basis": "research",
+   "note": "n=4 only (EDG); mostly shrinkage."
+  },
+  "sea": {
+   "label": "Southeast Asia",
+   "z": 0.09,
+   "n": 7,
+   "medianS800": 0.314,
+   "basis": "research",
+   "note": "Indonesia, Singapore, Malaysia, Thailand, Philippines, Cambodia; high-sens tail (f0rsakeN, cgrs, xccurate). Wide spread."
+  },
+  "oce": {
+   "label": "Oceania",
+   "z": 0,
+   "n": 0,
+   "medianS800": null,
+   "basis": "estimate",
+   "note": "No Oceania pros in the ProSettings list; no data, set to 0."
+  },
+  "unsure": {
+   "label": "Prefer not to say",
+   "z": 0,
+   "n": 0,
+   "medianS800": null,
+   "basis": "estimate",
+   "note": "Always 0."
+  }
+ },
+ "age": {
+  "u16": {
+   "label": "Under 16",
+   "z": 0.1,
+   "basis": "estimate",
+   "note": "Guess, no sensitivity-by-age data found. Young players lack settled settings; literature gives no direction."
+  },
+  "16_19": {
+   "label": "16–19",
+   "z": 0.05,
+   "basis": "estimate",
+   "note": "Guess. Near the peak-speed ages; no data on sens."
+  },
+  "20_24": {
+   "label": "20–24",
+   "z": 0,
+   "basis": "estimate",
+   "note": "Reference group."
+  },
+  "25_29": {
+   "label": "25–29",
+   "z": -0.05,
+   "basis": "estimate",
+   "note": "Guess from literature: response-speed decline from ~24 (Thompson 2014, StarCraft 2) and speed-accuracy trade-off in older users."
+  },
+  "30_34": {
+   "label": "30–34",
+   "z": -0.15,
+   "basis": "estimate",
+   "note": "Judgement from the same literature; direction of the effect on preferred sens is unproven."
+  },
+  "35p": {
+   "label": "35+",
+   "z": -0.25,
+   "basis": "estimate",
+   "note": "Judgement. Older users slow down to keep accuracy (Hertzum & Hornbaek 2010). Capped well below 0.4 because no gamer sens data exists."
+  },
+  "unsure": {
+   "label": "Prefer not to say",
+   "z": 0,
+   "basis": "estimate",
+   "note": "Always 0."
+  }
+ },
+ "glasses": {
+  "none": {
+   "label": "No glasses",
+   "z": 0,
+   "basis": "estimate",
+   "note": "No glasses; reference."
+  },
+  "glasses": {
+   "label": "Glasses",
+   "z": 0,
+   "basis": "estimate",
+   "note": "Literature: spectacle periphery is distorted and wearers shift to head turns over far eye movements, but no study links this to mouse sensitivity or its sign. Left at 0."
+  },
+  "contacts": {
+   "label": "Contact lenses",
+   "z": 0,
+   "basis": "estimate",
+   "note": "No optical periphery distortion, but no sens data either. Left at 0."
+  },
+  "unsure": {
+   "label": "Prefer not to say",
+   "z": 0,
+   "basis": "estimate",
+   "note": "Always 0."
+  }
+ },
+ "sources": [
+  {
+   "id": "prosettings_valorant_list",
+   "url": "https://prosettings.net/lists/valorant/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "hertzum_hornbaek_2010",
+   "url": "https://www.tandfonline.com/doi/abs/10.1080/10447318.2010.487198",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "fitts_older_adults",
+   "url": "https://dl.acm.org/doi/pdf/10.5555/1497470.1497502",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "thompson_2014_over_the_hill_at_24",
+   "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0094215",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "spectacle_distortion_sci_rep_2024",
+   "url": "https://www.nature.com/articles/s41598-024-54368-3",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "multifocal_optic_flow_iscience_2021",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8693457/",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "peripheral_degradation_1991",
+   "url": "https://link.springer.com/article/10.1111/j.1475-1313.1991.tb00541.x",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "fogt_2021_esports_vision",
+   "url": "https://onlinelibrary.wiley.com/doi/10.1097/OPX.0000000000001725",
+   "accessed": "2026-11-02"
+  },
+  {
+   "id": "vlr_glasses_thread",
+   "url": "https://www.vlr.gg/510637/glasses-wearers-come",
+   "accessed": "2026-11-02"
+  }
+ ]
+}
