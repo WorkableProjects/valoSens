@@ -47,10 +47,10 @@ t("screenY uses the same focal length, up is smaller y", () => {
 });
 
 /* ---------------- levels and schedule ---------------- */
-t("levelsAround(40): 5 ascending log-spaced values spanning 40*2^-0.6..40*2^0.6", () => {
+t("levelsAround(40): 5 ascending log-spaced values spanning 40*2^-1..40*2^1 (v6 default span ±1 octave)", () => {
   const l = A.levelsAround(40);
   assert.strictEqual(l.length, 5);
-  close(l[0], 40 * 2 ** -0.6, 1e-9); close(l[2], 40, 1e-9); close(l[4], 40 * 2 ** 0.6, 1e-9);
+  close(l[0], 20, 1e-9); close(l[2], 40, 1e-9); close(l[4], 80, 1e-9);
   for (let i = 1; i < 5; i++) assert(l[i] > l[i - 1]);
   const r = []; for (let i = 1; i < 5; i++) r.push(l[i] / l[i - 1]);
   r.forEach(x => close(x, r[0], 1e-9));

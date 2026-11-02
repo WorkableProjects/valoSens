@@ -70,7 +70,7 @@ var AimTest = (function () {
 
     var mix = { micro: DEF_MIX.micro, flick: DEF_MIX.flick, turn: DEF_MIX.turn, track: DEF_MIX.track };
     if (opts.mix) for (var mk in mix) if (opts.mix[mk] != null) mix[mk] = opts.mix[mk];
-    var nLevels = opts.levels || 5, spanOct = opts.spanOct == null ? 0.6 : opts.spanOct;
+    var nLevels = opts.levels || 5, spanOct = opts.spanOct == null ? 1.0 : opts.spanOct;
     var seed = opts.seed == null ? 1 : opts.seed, session = opts.session == null ? "cur" : String(opts.session);
     var source = opts.source || null;
 

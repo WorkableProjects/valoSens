@@ -328,9 +328,12 @@
     var role = ROLE[input.role] ? input.role : "f";
     var limbKey = LIMB[input.limb] ? input.limb : "unsure";
     var wpn = WEAPON[input.weapon] || WEAPON.rifle;
-    var usable = Math.max(2, input.pad - P.mouseW);
-    var reachMeasured = finitePos(input.reachCm);
-    var reach = reachMeasured ? input.reachCm : LIMB[limbKey].reach;
+    var ps = input.personal || {};
+    var padM = ps.padCm && ps.padCm.value >= 5 && ps.padCm.value <= 200 ? ps.padCm.value : null;
+    var usable = padM ? padM : Math.max(2, input.pad - P.mouseW);
+    var reachIn = finitePos(input.reachCm) ? input.reachCm : (ps.reachCm && ps.reachCm.value > 0.5 && ps.reachCm.value <= 100 ? ps.reachCm.value : null);
+    var reachMeasured = !!reachIn;
+    var reach = reachMeasured ? reachIn : LIMB[limbKey].reach;
     var reachSd = reachMeasured ? 0.10 : P.reachSd * (limbKey === "unsure" ? 1.4 : 1);
     var w = headDeg(R_REF, P.headM), wWpn = headDeg(wpn.r, P.headM);
     var mix0 = (input.mix && (input.mix.length === 4 || input.mix.length === 5)) ? input.mix.slice()
@@ -340,9 +343,12 @@
     var mix = input.mix && input.mix.length === 5 ? input.mix.slice() : carveTracking(mix4, trackShare);
     // v4.0 skill, grip and mouse modifiers act on copies of the constants used by this profile.
     var ex = EXPERIENCE[input.experience] || EXPERIENCE.exp, gr = GRIP[input.grip] || GRIP.unsure, wf = weightFactors(input.mouseG);
+    // Measured constants (input.personal) already include the player's skill, grip and mouse: no modifiers on top.
+    var meas = function (k) { return !!(ps[k] && ps[k].value > 0); };
     var Q = Object.assign({}, P, {
-      sigma0: P.sigma0 * ex.noise * gr.noise, trackFloor: P.trackFloor * ex.noise * gr.noise,
-      tSub: P.tSub * ex.tSub, tLift: P.tLift * gr.lift * wf.lift, vPeak: P.vPeak * wf.v
+      sigma0: meas("sigma0") ? P.sigma0 : P.sigma0 * ex.noise * gr.noise,
+      trackFloor: P.trackFloor * (meas("sigma0") ? P.sigma0 / PARAMS.sigma0.central : ex.noise * gr.noise),
+      tSub: meas("tSub") ? P.tSub : P.tSub * ex.tSub, tLift: meas("tLift") ? P.tLift : P.tLift * gr.lift * wf.lift, vPeak: meas("vPeak") ? P.vPeak : P.vPeak * wf.v
     });
     var omega = P.strafeV / wpn.r * 180 / Math.PI;      // target angular speed, deg/s
     return {
@@ -426,13 +432,13 @@
   }
 
   // Scenario grid over uncertain constants.
-  function scenarios(base, keys) {
+  function scenarios(base, keys, ranges) {
     var list = [{ P: Object.assign({}, base), w: 1 }];
     keys.forEach(function (k) {
-      var next = [];
+      var next = [], R = (ranges && ranges[k]) || PARAMS[k];
       list.forEach(function (s) {
         [["low", 0.25], ["central", 0.5], ["high", 0.25]].forEach(function (q) {
-          var P = Object.assign({}, s.P); P[k] = PARAMS[k][q[0]];
+          var P = Object.assign({}, s.P); P[k] = R[q[0]];
           next.push({ P: P, w: s.w * q[1] });
         });
       });
@@ -455,10 +461,30 @@
     var t2 = t * t, t3 = t2 * t;
     return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
   }
+  // v6 (S5): constants measured by the aim test replace the population values. Their uncertainty (sd = standard
+  // error) becomes the low/high range for the scenario average (central +- 1.28 sd in log space, i.e. 10th/90th).
+  var PERSONAL_KEYS = { sigma0: [0.003, 0.2], tSub: [0.05, 0.5], vPeak: [30, 600], tLift: [0.06, 1.5] };
+  function personalRanges(personal) {
+    var out = { central: {}, ranges: {}, used: {} };
+    if (!personal || typeof personal !== "object") return out;
+    Object.keys(PERSONAL_KEYS).forEach(function (k) {
+      var e = personal[k], lim = PERSONAL_KEYS[k];
+      if (!e || !(e.value >= lim[0] && e.value <= lim[1])) return;
+      var sdl = Math.min(1, Math.max(0.02, (e.sd > 0 ? e.sd : 0.15 * e.value) / e.value));
+      out.central[k] = e.value; out.used[k] = e.value;
+      out.ranges[k] = { low: e.value * Math.exp(-1.2816 * sdl), central: e.value, high: e.value * Math.exp(1.2816 * sdl) };
+    });
+    return out;
+  }
   function expectedCurve(input, opts) {
     opts = opts || {};
-    var base = Object.assign(central(), opts.params || {});
-    var scen = opts.noUncertainty ? [{ P: base, w: 1 }] : scenarios(base, (opts.uncertain || UNCERTAIN).filter(function (k) { return !(opts.params && k in opts.params); }));
+    var pm = personalRanges(input.personal);
+    var base = Object.assign(central(), pm.central, opts.params || {});
+    var keys = (opts.uncertain || UNCERTAIN).filter(function (k) { return !(opts.params && k in opts.params); });
+    Object.keys(pm.ranges).forEach(function (k) { if (keys.indexOf(k) < 0 && !(opts.params && k in opts.params)) keys.push(k); });
+    // Keep the scenario count bounded (3^6 = 729 max): measured constants replace population uncertainty.
+    if (keys.length > 6) keys = keys.filter(function (k) { return pm.ranges[k] || UNCERTAIN.indexOf(k) < 0; }).concat(UNCERTAIN.filter(function (k) { return !pm.ranges[k]; })).slice(0, 6);
+    var scen = opts.noUncertainty ? [{ P: base, w: 1 }] : scenarios(base, keys, pm.ranges);
     var profs = scen.map(function (s) { return { pr: buildProfile(input, s.P), w: s.w }; });
     // Tables: weighted components, plus each scenario's total for its own optimum.
     var T = { prec: [], trav: [], lift: [], total: [] }, per = profs.map(function () { return []; });
@@ -563,6 +589,8 @@
         throw new RangeError("mix must be 4 (or 5, with tracking) non-negative shares summing to 1");
     }
     if (input.mouseG != null && !(finitePos(input.mouseG) && input.mouseG >= 20 && input.mouseG <= 250)) throw new RangeError("mouseG must be 20–250 g");
+    if (input.rank != null && ["unsure", "iron", "bronze", "silver", "gold", "plat", "diamond", "asc", "imm", "rad"].indexOf(input.rank) < 0) throw new RangeError("rank must be unsure or iron..rad");
+    if (input.personal != null && typeof input.personal !== "object") throw new TypeError("personal must be an object");
     if (input.grip != null && !GRIP[input.grip]) throw new RangeError("grip must be palm, claw, fingertip or unsure");
     [["region", REGION], ["age", AGE], ["glasses", GLASSES]].forEach(function (g) {
       if (input[g[0]] != null && !Object.prototype.hasOwnProperty.call(g[1], input[g[0]])) throw new RangeError(g[0] + " must be one of " + Object.keys(g[1]).join(", "));
@@ -903,7 +931,7 @@
   function zToLn(z) { return -z * PRIOR.sdLn; }                // + z (faster) = shorter cm/360
   function priorParts(input) {
     // Immortal/Radiant or "competitive" players are compared with the pro distribution (narrower); everyone else with general players.
-    var rank = input.stats && input.stats.rank, proLike = rank === "imm" || rank === "rad" || input.experience === "comp";
+    var rank = input.rank || (input.stats && input.stats.rank), proLike = rank === "imm" || rank === "rad" || input.experience === "comp";
     var sd0 = proLike ? PRIOR.sdLnPro : PRIOR.sdLn;
     var parts = [], mu = PRIOR.muLn, v = sd0 * sd0;
     [["region", REGION]].forEach(function (g) {
@@ -927,10 +955,14 @@
     var centre = Math.log(E0.cStar) - BELL.muLn + PRIOR.muLn;     // bias-corrected: the average profile sits at the population centre
     return { centre: centre, sd: Math.sqrt(vv + PRIOR.sigmaModel * PRIOR.sigmaModel), scenarioSd: Math.sqrt(vv), raw: E0.cStar };
   }
+  var MEAS_STRUCT_SD = 0.15;
   function measuredLik(measured) {
     if (!measured || !measured.validation.curveBeatsFlat || !measured.bootOptima || !measured.bootOptima.length) return null;
     var xs = measured.bootOptima.map(function (c) { return Math.log(c); });
-    var h = Math.max(0.04, 1.06 * (sd(xs) || 0) * Math.pow(xs.length, -0.2));   // Silverman bandwidth, floored at the grid scale
+    // Silverman bandwidth over the bootstrap optima, plus a structural width (0.15 ln): the bootstrap only sees trial
+    // noise inside one quadratic, not that the quadratic is an approximation. 0.15 gives ~77% coverage of 80% intervals
+    // on simulated players (test/scorecard.js); 0.10 was overconfident (57-75%).
+    var h = Math.sqrt(Math.pow(Math.max(0.04, 1.06 * (sd(xs) || 0) * Math.pow(xs.length, -0.2)), 2) + MEAS_STRUCT_SD * MEAS_STRUCT_SD);
     return { xs: xs, h: h, lo: Math.log(measured.tested[0]), hi: Math.log(measured.tested[measured.tested.length - 1]),
       logAt: function (x) { var s2 = 0; for (var i = 0; i < xs.length; i++) { var z = (x - xs[i]) / h; s2 += Math.exp(-0.5 * z * z); } return Math.log(s2 / xs.length + 1e-300); } };
   }
@@ -1063,7 +1095,7 @@
       dpiAdvice: input.dpi ? dpiAdvice(cm, input.dpi, input.resWidth) : null,
       notes: notes, curve: curve, byTask: byTask, optimumSpread: spread, nearPros: near,
       proPercentile: PROS.filter(function (p) { return p.cm < cm; }).length / Math.max(1, PROS.length),
-      nScenarios: E0.nScenarios
+      nScenarios: E0.nScenarios, personalUsed: (function () { var u = personalRanges(input.personal).used, pr2 = E0.profile; if (pr2.reachMeasured && input.personal && input.personal.reachCm) u.reachCm = pr2.reach; if (input.personal && input.personal.padCm && input.personal.padCm.value) u.padCm = pr2.usable; return Object.keys(u).length ? u : null; })()
     };
   }
 

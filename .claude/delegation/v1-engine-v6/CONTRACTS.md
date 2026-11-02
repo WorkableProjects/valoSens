@@ -68,3 +68,23 @@ personal = { sigma0 /* cm */, tSub /* s */, vPeak /* cm/s */, reachCm /* cm */, 
 ```js
 truth = { sigma0, k /* signal-dependent noise, fraction of amplitude */, tSub, vPeak, reachCm, tLift, padCm, countsPerCm, rt /* reaction time s */ }
 ```
+
+## Engine v6 input/output (model.js `recommend`) — added for wave 3
+Input additions (all optional):
+```js
+input.calibration = { trials: [ trial record ... ], options?: {...} }   // aim-test trials (pooled across sessions; session tags distinct)
+input.personal    = personal (see above)                                 // from ValoAim.estimatePersonal or session pooled personalLatest
+input.rank        = "unsure"|"iron"|"bronze"|"silver"|"gold"|"plat"|"diamond"|"asc"|"imm"|"rad"   // imm/rad (or experience "comp") use the pro prior width
+```
+Output fields the UI may use:
+```js
+R.cm, R.reason, R.mode ("questionnaire"|"measured"), R.lo, R.hi (posterior 50% interval, cm/360), R.target (posterior median)
+R.posterior = { median, ci50: [lo, hi], ci80: [lo, hi], sdLn, grid: number[] (cm), weights: number[] (posterior mass per grid cm, sums to 1),
+                components: { prior: { centre, sdLn, median, parts }, physics: { centre, sdLn, weight, raw } | null, measured: { centre, sdLn, range } | null },
+                waterfall: [ { key: "population", label, ln }, { key, label, dLn, basis, note? } ... ] }   // dLn: change in ln cm/360 (negative = faster)
+R.bell = { mean, sd, s800, z, percentile, shifts: [{key,label,z,basis}], zModel, ci80s800: [lo, hi], ... }   // sens @ 800 DPI view; mean = 0.30
+R.confidence = { type: "posterior"|"measured", label: "high"|"medium"|"low–medium"|"low", interval: [cmLo, cmHi] (80%), halfWidthLn, note }
+R.anchor = null | { cm, stay, inLikely, step, stages, plan: [cm...], reason... }
+R.personalUsed = null | { key: value } (constants replaced by the user's measured values)
+R.measured = null | calibrate() output (validation.curveBeatsFlat, tested, warnings, ...)
+```

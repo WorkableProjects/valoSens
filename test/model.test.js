@@ -493,5 +493,24 @@ t("v6: prior widths come from data; Immortal/Radiant/competitive use the pro wid
   assert(/population_v6/.test(M.PRIOR.source));
 });
 
+t("v6: measured personal constants replace population values and narrow the physics spread", () => {
+  const b = { pad: 45, dpi: 800, limb: "wf" };
+  const r0 = M.recommend(b);
+  const noisy = M.recommend(Object.assign({}, b, { personal: { sigma0: { value: 0.035, sd: 0.003, n: 40 } } }));
+  const steady = M.recommend(Object.assign({}, b, { personal: { sigma0: { value: 0.012, sd: 0.002, n: 40 } } }));
+  assert(noisy.cModel > r0.cModel && steady.cModel < r0.cModel, "noisier hand -> slower physical optimum");
+  assert.deepStrictEqual(Object.keys(noisy.personalUsed), ["sigma0"]);
+  const full = M.recommend(Object.assign({}, b, { personal: { sigma0: { value: 0.02, sd: 0.002, n: 40 }, tSub: { value: 0.15, sd: 0.01, n: 9 }, vPeak: { value: 150, sd: 5, n: 12 }, reachCm: { value: 6, sd: 0.4, n: 3 }, padCm: { value: 38, sd: 1, n: 2 } } }));
+  assert(full.posterior.components.physics.scenarioSdLn < r0.posterior.components.physics.scenarioSdLn);
+  assert.strictEqual(full.profile.usable, 38);
+  assert(full.profile.reachMeasured && full.profile.reach === 6);
+  assert(isFinite(M.recommend(Object.assign({}, b, { personal: { sigma0: { value: -1, sd: 0 }, vPeak: { value: 1e9, sd: 1 } } })).cm), "bad personal values are ignored");
+});
+t("v6: rank input chooses the prior width; invalid rank rejected", () => {
+  const g = rec({ experience: "mid", rank: "gold" }), r = rec({ experience: "mid", rank: "imm" });
+  assert(r.posterior.sdLn < g.posterior.sdLn);
+  assert.throws(() => rec({ rank: "goat" }), RangeError);
+});
+
 console.log("\n" + n + " passed, " + failed + " failed");
 if (failed) process.exit(1);

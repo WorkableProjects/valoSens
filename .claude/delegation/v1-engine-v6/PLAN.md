@@ -47,3 +47,10 @@ Specs for wave N+1 are written after wave N is verified, with the actual interfa
 - 2026-11-02 wave 2: T07 DONE (session format 2; 15 tests), T08 DONE (aim-test component; e2e 14 checks; screenshots checked by planner), T09 PARTIAL→fixed by planner (QUEST+ at 12/colour was 20% less precise; planner set 16/colour = same precision as the old 20, tests updated), T10 DONE (CI + snapshot; planner added aimtest e2e to CI), T05 DONE (5,330 population rows; 995 with pad width).
   - O2 DONE: per-scenario cost tables + spline (recommend 330 → ~48 ms; model suite 4 min → 23 s); continuous excess-reach cost replaces the step switch cost (limb order fixed: wrist ≥ wf ≥ forearm ≥ arm); signal-dependent endpoint noise kEnd; scripts/build_prior.js: prior SD 0.41 general / 0.33 pro (rank imm/rad or experience comp), physics weight 0.38 (pad-width slope 0.72 ± 0.67 combined with prior belief 0.35 ± 0.20), sigmaModel 0.50.
   - Team note (Dutch, in docs plan): prior centred at 0.30 @800; bell curve must replace the distribution chart on the results screen → T12.
+- 2026-11-02 wave 3a: T11 DONE (scorecard; planner re-ran it). O3 DONE:
+  - aim.js submovement end = 5% of peak speed (fixed 2 cm/s cut inflated sigma0: 0.034 → 0.0206 vs truth 0.020);
+  - model.js input.personal (sigma0, tSub, vPeak, tLift as scenario ranges; reach, pad), input.rank;
+  - aim-test span ±1 octave (±0.6 left truth outside the tested range for 25% of sim players; measured curve passed its test 9/40 → 29/40);
+  - measured likelihood structural width 0.15 ln (coverage of 80% intervals 57–75% → 77%).
+  - Scorecard (fast, n=60): median error prior 0.39, questionnaire 0.33, +6-min test 0.225, +12-min 0.20 octave; 80% coverage 0.87/0.80/0.77/0.77.
+  - **Gate (≤ 0.15 octave) NOT met.** Diagnosis: the simulator's truth is reliable (test-retest 0.07 oct), but even with exact true constants the engine physics is 0.42 oct from the sim's optimum (biased fast). The physics model and the simulator disagree structurally; tuning physics to the sim would be circular. Needs real-player data (V3).

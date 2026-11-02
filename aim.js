@@ -80,7 +80,7 @@
 
   /* ---------------- test design ---------------- */
   function levelsAround(cmCentre, n, spanOct) {
-    n = n == null ? 5 : n; spanOct = spanOct == null ? 0.6 : spanOct;
+    n = n == null ? 5 : n; spanOct = spanOct == null ? 1.0 : spanOct;   // v6: ±1 octave (planner scorecard check: ±0.6 left the true optimum outside the tested range for 25% of simulated players)
     var out = [];
     for (var i = 0; i < n; i++) {
       var t = n > 1 ? -1 + 2 * i / (n - 1) : 0;
@@ -197,7 +197,9 @@
       });
       subs.forEach(function (sb, i) {
         if (sb.start == null) { var a = sb.peak; while (a > s && sp[a - 1] > V_MIN) a--; sb.start = a; }
-        if (sb.end == null) { var b = sb.peak; while (b < e && sp[b] > V_MIN) b++; sb.end = b; }
+        // End: speed falls below 5% of this submovement's peak (floor 0.05 cm/s). A fixed 2 cm/s cut clipped the slow
+        // tail of small corrections and inflated endpoint scatter (planner check vs sim/player.js, wave 3).
+        if (sb.end == null) { var b = sb.peak, thr = Math.max(0.05, 0.05 * sp[sb.peak]); while (b < e && sp[b] > thr) b++; sb.end = b; }
         sb.durS = t[sb.end] - t[sb.start];
         all.push(sb);
       });
