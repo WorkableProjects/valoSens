@@ -2,15 +2,74 @@
 // Choice lists use the fixed key order; labels come from the model's tables when present.
 var CHOICE_FALLBACK = {
   region: [["na", "North America"], ["latam", "Latin America"], ["br", "Brazil"], ["eu", "Europe"], ["mena", "Middle East & North Africa"], ["kr", "Korea"], ["jp", "Japan"], ["cn", "China"], ["sea", "Southeast Asia"], ["oce", "Oceania"], ["unsure", "Prefer not to say"]],
-  age: [["u16", "Under 16"], ["16_19", "16–19"], ["20_24", "20–24"], ["25_29", "25–29"], ["30_34", "30–34"], ["35p", "35+"], ["unsure", "Prefer not to say"]],
-  glasses: [["none", "No glasses"], ["glasses", "Glasses"], ["contacts", "Contact lenses"], ["unsure", "Prefer not to say"]]
+  age: [["u16", "Under 16"], ["16_19", "16–19"], ["20_24", "20–24"], ["25_29", "25–29"], ["30_34", "30–34"], ["35p", "35+"], ["unsure", "Prefer not to say"]]
 };
 function tableChoices(key, table) {
   return CHOICE_FALLBACK[key].map(function (kv) { var t = table && table[kv[0]]; return { v: kv[0], l: esc((t && t.label) || kv[1]) }; });
 }
 var RANKS = [["unsure", "Not sure / unranked"], ["iron", "Iron"], ["bronze", "Bronze"], ["silver", "Silver"], ["gold", "Gold"], ["plat", "Platinum"], ["diamond", "Diamond"], ["asc", "Ascendant"], ["imm", "Immortal"], ["rad", "Radiant"]];
 
+/* ---------- Start screen and aim-test screen ---------- */
+function startScreen(h) {
+  var grid = el("div", { "class": "paths" });
+  function pathBtn(id, title, time, desc, onPick) {
+    var b = el("button", { type: "button", "class": "choice path", id: id, "aria-pressed": String(S.path === (id === "pathQuick" ? "quick" : "full")) },
+      '<span class="c-l">' + title + '</span><span class="path-t">' + time + '</span><span class="c-s">' + desc + "</span>");
+    b.addEventListener("click", onPick);
+    grid.appendChild(b);
+  }
+  pathBtn("pathQuick", "Quick", "About 3 min", "Questionnaire only. A result from your answers and the player population.", function () {
+    S.path = "quick"; S.aimSkip = true; S.xSkip = true; S.hSkip = true; goNext();
+  });
+  pathBtn("pathFull", "Full calibration", "About 15 min", "Questionnaire, aim test, crosshair and enemy highlight. The most accurate result.", function () {
+    S.path = "full"; S.aimSkip = false; S.xSkip = false; S.hSkip = false; goNext();
+  });
+  var card = el("div", { "class": "path path-import" },
+    '<span class="c-l">Continue from a results file</span><span class="path-t">Second run</span><span class="c-s">Import the file you downloaded last time to pool your earlier data with this run.</span>');
+  card.appendChild(importCard());
+  grid.appendChild(card);
+  h.appendChild(grid);
+}
+function aimScreen(h) {
+  var a = S.aimRes;
+  if (a) {
+    var ck = a.checks && a.checks.dpi, n = (a.trials || []).length;
+    h.appendChild(el("p", { "class": "aim-sum", id: "aimSummary" }, "<b>" + n + " targets</b>" + (ck && ck.effDpi ? ", effective DPI " + Math.round(ck.effDpi) : "") + ". Aim test complete."));
+    var redo = el("button", { type: "button", "class": "btn small", id: "aimRedo" }, "Redo");
+    redo.addEventListener("click", function () { S.aimRes = null; renderQ(); });
+    h.appendChild(redo);
+    return;
+  }
+  h.appendChild(el("p", { "class": "tip" }, "It measures how fast and accurately you move your mouse at several sensitivities. It takes about " + (S.aimThorough ? "12" : "6") + " minutes and needs a mouse. A bank card or ruler helps with a quick hardware check at the start."));
+  toggle(h, "aimThorough", "Thorough: two passes, about 12 minutes");
+  var go = el("button", { type: "button", "class": "btn primary", id: "aimStart", style: "margin-top:14px" }, "Start aim test");
+  go.addEventListener("click", startAimTest);
+  h.appendChild(go);
+}
+function startAimTest() {
+  var R = M.recommend(Object.assign(buildInput(), { calibration: null }));
+  var g = R.posterior.grid, w = R.posterior.weights, lg = g.map(Math.log);
+  var opts = {
+    dpi: getDpi(), centreCm: R.posterior.median, seed: newSeed(), session: "cur", thorough: !!S.aimThorough,
+    density: function (cm) {
+      var l = Math.log(cm), best = 0, bd = Infinity;
+      for (var i = 0; i < lg.length; i++) { var d = Math.abs(lg[i] - l); if (d < bd) { bd = d; best = i; } }
+      return w[best];
+    },
+    source: window.__aimSource || null
+  };
+  if (S.aimMix) opts.mix = S.aimMix;
+  AimTest.start(document.body, opts, function (res) { S.aimRes = res; S.aimSkip = false; goNext(); }, function () { renderQ(); });
+}
+
 var Q = [
+  { id: "start", part: 0, sec: "Start", title: "How would you like to find your sensitivity?",
+    why: "Pick a path. You can skip the aim test, the crosshair and the highlight color at any point.",
+    uses: "The quick path uses the questionnaire only. The full path adds a short aim test that measures how you move your mouse, which tightens the result.",
+    show: function () { return true; },
+    render: function (h) { startScreen(h); },
+    valid: function () { return true; } },
+
   { id: "dpi", part: 1, sec: "Your sensitivity", title: "What DPI is your mouse set to?",
     why: "Your mouse software shows this. It converts the result into the number you type into Valorant.",
     uses: "Converts cm/360 into in-game sensitivity.",
@@ -175,12 +234,12 @@ var Q = [
     render: function (h) { choices(h, "age", tableChoices("age", M.AGE), 2); },
     valid: function () { return !!S.age; } },
 
-  { id: "glasses", part: 1, sec: "About you", title: "Do you wear glasses or contacts when you play?",
-    why: "Vision correction can change how you see and track targets on screen. Optional: \"Prefer not to say\" adds no shift.",
-    uses: "A small shift along the sensitivity bell curve, shown in \"What moved you\" after your result.",
+  { id: "rank", part: 1, sec: "About you", title: "What's your current rank?",
+    why: "Players at different ranks have different typical sensitivities and spread. Optional: \"Not sure / unranked\" uses the general-player range.",
+    uses: "Chooses the group of players your result is compared with, and how wide the starting range is. It never moves the result on its own once you take the aim test.",
     show: function () { return true; },
-    render: function (h) { choices(h, "glasses", tableChoices("glasses", M.GLASSES), 2); },
-    valid: function () { return !!S.glasses; } },
+    render: function (h) { choices(h, "rank", RANKS.map(function (r) { return { v: r[0], l: r[1] }; }), 2); },
+    valid: function () { return !!S.rank; } },
 
   { id: "statsGate", part: 1, sec: "Your stats", title: "Add your season stats?",
     why: "Stats depend on role, teammates and game sense, so they can't show whether your sensitivity suits your hand. They're kept as a before snapshot only.",
@@ -224,10 +283,18 @@ var Q = [
     },
     valid: function () { return okRange(S.stHs, 0, 100) && okRange(S.stKd, 0, 10) && okRange(S.stAdr, 0, 400) && okRange(S.stMatches, 0, 5000); } },
 
-  /* ---------- Part 2: Crosshair ---------- */
-  { id: "cvd", part: 2, sec: "Color vision", title: "Do you have any color blindness?",
+  /* ---------- Part 2: Aim test ---------- */
+  { id: "aimtest", part: 2, sec: "Aim test", title: "Measure how you aim",
+    why: "A short test of your own mouse movement turns the result from a population estimate into one fitted to you. It needs a mouse and a flat surface.",
+    uses: "Your hardware check, speed and accuracy at five sensitivities feed the model directly. Nothing leaves your browser.",
+    show: function () { return !S.aimSkip; },
+    render: function (h) { aimScreen(h); },
+    valid: function () { return !!S.aimRes || !!S.aimSkip; } },
+
+  /* ---------- Part 3: Crosshair ---------- */
+  { id: "cvd", part: 3, sec: "Color vision", title: "Do you have any color blindness?",
     why: "About 8% of men and 0.5% of women have red-green color blindness. It changes which crosshair and enemy colors stay visible.",
-    uses: "Every color is scored as your type of color vision sees it (a published simulation, Machado et al. 2009). Red-green also rules out green, yellow green and red crosshairs. Used in Parts 2 and 3.",
+    uses: "Every color is scored as your type of color vision sees it (a published simulation, Machado et al. 2009). Red-green also rules out green, yellow green and red crosshairs. Used in Parts 3 and 4.",
     show: function () { return !(S.xSkip && S.hSkip); },
     render: function (h) {
       choices(h, "cvd", [
@@ -240,7 +307,7 @@ var Q = [
     },
     valid: function () { return !!S.cvd; } },
 
-  { id: "exp", part: 2, sec: "Your experience", title: "How long have you played tactical shooters?",
+  { id: "exp", part: 3, sec: "Your experience", title: "How long have you played tactical shooters?",
     why: "Newer players can use a crosshair that reacts to movement as a reminder to stop before shooting. Experienced players are better off with a static one.",
     uses: "Decides whether movement error is suggested as a training aid. It also scales the hand-noise estimate in the sensitivity model (newer hands are assumed noisier, which favors slightly slower settings).",
     show: function () { return true; },
@@ -249,7 +316,7 @@ var Q = [
     },
     valid: function () { return !!S.exp; } },
 
-  { id: "moving", part: 2, sec: "Your experience", title: "Do you often shoot while still moving?",
+  { id: "moving", part: 3, sec: "Your experience", title: "Do you often shoot while still moving?",
     why: "In Valorant, shots fired while moving are inaccurate. If you often shoot on the move, crosshair lines that spread while you move give you instant feedback.",
     uses: "\"Often\" turns on movement error as a temporary training aid. Otherwise all error lines stay off, like 99% of pros.",
     show: function () { return (S.exp === "new" || S.exp === "mid") && !S.xSkip; },
@@ -258,7 +325,7 @@ var Q = [
     },
     valid: function () { return !!S.moving; } },
 
-  { id: "aim", part: 2, sec: "Your aim", title: "How do you mostly aim?",
+  { id: "aim", part: 3, sec: "Your aim", title: "How do you mostly aim?",
     why: "Flick and tap players want a small, precise point. Players who track or spray benefit from lines that stay visible around a moving target.",
     uses: "Sets line length: about 2–3 for flicking, 4–5 for tracking. This is a heuristic; no study has measured it.",
     show: function () { return !S.xSkip; },
@@ -267,7 +334,7 @@ var Q = [
     },
     valid: function () { return !!S.aim; } },
 
-  { id: "shape", part: 2, sec: "Your aim", title: "Which crosshair shape do you prefer?",
+  { id: "shape", part: 3, sec: "Your aim", title: "Which crosshair shape do you prefer?",
     why: "57% of pros use a small cross, 26% a dot, 11% a cross with a dot. Shape is mostly preference, so pick what you like if you already know.",
     uses: "Sets the shape. \"No preference\" picks a cross sized for your aim style.",
     show: function () { return !S.xSkip; },
@@ -276,7 +343,7 @@ var Q = [
     },
     valid: function () { return !!S.shape; } },
 
-  { id: "lose", part: 2, sec: "Visibility", title: "When do you lose track of your crosshair?",
+  { id: "lose", part: 3, sec: "Visibility", title: "When do you lose track of your crosshair?",
     why: "A white or yellow crosshair washes out on bright, sandy walls. A dark outline adds the contrast the color alone lacks.",
     uses: "Weights those scenes more when each color's contrast is computed. \"Bright maps\" also turns outlines on at full opacity.",
     show: function () { return !S.xSkip; },
@@ -285,7 +352,7 @@ var Q = [
     },
     valid: function () { return !!S.lose; } },
 
-  { id: "res", part: 2, sec: "Visibility", title: "What resolution do you play at?",
+  { id: "res", part: 3, sec: "Visibility", title: "What resolution do you play at?",
     why: "Crosshair values are in screen pixels, so the same numbers look smaller at higher resolutions.",
     uses: "Scales line length, gap and thickness by 1.33 for 1440p and 2 for 4K. Stretched 4:3 shortens the lines by 1.",
     show: function () { return !S.xSkip; },
@@ -294,15 +361,15 @@ var Q = [
     },
     valid: function () { return !!S.res; } },
 
-  { id: "vis", part: 2, sec: "Visibility test", title: "Which crosshair can you see instantly?",
+  { id: "vis", part: 3, sec: "Visibility test", title: "Which crosshair can you see instantly?",
     why: "Eight rounds, four crosshairs each, over different map scenes. Pick the one you spot without searching. They're drawn at real pixel size for your resolution, in random order. Sit as you normally play.",
     uses: "Your picks are fitted with a choice model (each pick beats the others shown), giving a score for each color, outlines and shape. Optional: skip it and the computed visibility decides.",
     show: function () { return !S.xSkip; },
     render: function (h) { visTest(h); },
     valid: function () { return true; } },
 
-  /* ---------- Part 3: Highlight color ---------- */
-  { id: "hCur", part: 3, sec: "Enemy highlight", title: "Which enemy highlight color do you use now?",
+  /* ---------- Part 4: Highlight color ---------- */
+  { id: "hCur", part: 4, sec: "Enemy highlight", title: "Which enemy highlight color do you use now?",
     why: "Settings › General › Accessibility › Enemy Highlight Color. It recolors the outline around enemies.",
     uses: "If you'd rather keep it, it gets a small bonus. Color vision, maps, utility and the test can still outweigh it.",
     show: function () { return !S.hSkip; },
@@ -312,7 +379,7 @@ var Q = [
     },
     valid: function () { return !!S.hCur; } },
 
-  { id: "hMaps", part: 3, sec: "Enemy highlight", title: "Where do you lose sight of enemies most?",
+  { id: "hMaps", part: 4, sec: "Enemy highlight", title: "Where do you lose sight of enemies most?",
     why: "Yellow is the brightest option and pops in shadows, but it's close in brightness to sandy walls. Purple separates from warm light but sits close to blue maps.",
     uses: "Weights that scene more when each color's contrast is computed (as your color vision sees it).",
     show: function () { return !S.hSkip; },
@@ -321,7 +388,7 @@ var Q = [
     },
     valid: function () { return !!S.hMaps; } },
 
-  { id: "hClutter", part: 3, sec: "Enemy highlight", title: "Which utility clutters your screen most?",
+  { id: "hClutter", part: 4, sec: "Enemy highlight", title: "Which utility clutters your screen most?",
     why: "An outline that shares a hue with utility blends in exactly when enemies peek through it. Pick any that apply.",
     uses: "Adds that utility to the scenes each color is compared against, so a color that matches it loses contrast.",
     show: function () { return !S.hSkip; },
@@ -333,7 +400,7 @@ var Q = [
     },
     valid: function () { return true; } },
 
-  { id: "hTest", part: 3, sec: "Vision test", title: "Which enemy was highlighted?",
+  { id: "hTest", part: 4, sec: "Vision test", title: "Which enemy was highlighted?",
     why: "Four enemies flash for about 1/17 of a second, then a mask covers them. One had a red, yellow or purple outline. Say where it was. The outline gets fainter when you're right and stronger when you're wrong. 67 rounds, about 2 minutes.",
     uses: "Measures the outline strength each color needs before you can see it (a vision threshold), not your reaction time or input lag. The easiest color gets up to a 2.5-point bonus, shrunk when the estimate is uncertain. Optional.",
     show: function () { return !S.hSkip; },

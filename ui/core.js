@@ -19,11 +19,12 @@ function freshState() {
     cvd: null, moving: null, aim: null, shape: null, lose: null, res: null,
     xSeed: newSeed(), xKey: null, xTest: null, xRound: 0,
     hCur: null, hKeep: false, hMaps: null, hClutter: {}, hTest: null, xSkip: false, hSkip: false,
+    rank: null, path: null, aimSkip: false, aimThorough: false, aimRes: null, aimMix: null,   // aimRes = the aim test's result (S.aim is the aim-style answer)
     prior: null, frameMs: null      // prior = sessions imported from a results file (never stored in the browser)
   };
 }
 var S = freshState();
-var currentId = "dpi";
+var currentId = "start";
 
 function num(v) { var n = parseFloat(v); return isFinite(n) ? n : NaN; }
 function pos(v) { var n = num(v); return n > 0 ? n : NaN; }
@@ -54,15 +55,49 @@ function agentsInput() {
 }
 var MOUSE_G = { light: 50, mid: 62, heavy: 80, xheavy: 100 };
 var RES_WIDTH = { "1080": 1920, "1440": 2560, "2160": 3840, stretched: 1440 };
+// The aim test result in the session-file shape (format 2). No trajectories: they are too large for the file.
+function aimForFile() {
+  var a = S.aimRes;
+  if (!a) return null;
+  var ck = a.checks || {};
+  return { version: (window.ValoAim && window.ValoAim.VERSION) || null, dpi: ck.dpi || null, pad: ck.pad || null, reach: ck.reach || null,
+    trials: a.trials || [], personal: a.personal || null, rawInput: typeof a.rawInput === "boolean" ? a.rawInput : null, frameMs: a.frameMs != null ? a.frameMs : null };
+}
+// Calibration needs at least 3 tested levels with 8+ scored trials each; fewer would make recommend() throw.
+function enoughAimTrials(trials) {
+  var n = {};
+  trials.forEach(function (t) { if (!t.warmup) n[t.cm] = (n[t.cm] || 0) + 1; });
+  return Object.keys(n).filter(function (k) { return n[k] >= 8; }).length >= 3;
+}
+function effectiveRank() {
+  if (S.rank && S.rank !== "unsure") return S.rank;
+  if (S.stRank && S.stRank !== "unsure") return S.stRank;
+  return S.rank || undefined;
+}
 function buildInput() {
-  var c = currentCm();
-  return {
+  var c = currentCm(), ar = S.aimSkip ? null : S.aimRes;
+  var P = V.pooled(S.prior, { aim: ar && aimForFile() });
+  var inp = {
     dpi: getDpi(), current: c ? { cm: c } : null, satisfaction: S.sat,
     pad: getPad(), surface: S.surface, limb: S.limb, role: S.role, weapon: S.weapon, agents: agentsInput(),
     experience: S.exp, stats: statsInput(), resWidth: RES_WIDTH[S.res] || 1920,
     grip: S.grip || "unsure", mouseG: MOUSE_G[S.mouseW] || null,
-    region: S.region || undefined, age: S.age || undefined, glasses: S.glasses || undefined
+    region: S.region || undefined, age: S.age || undefined, rank: effectiveRank()
   };
+  if (P.aimTrials.length && enoughAimTrials(P.aimTrials)) inp.calibration = { trials: P.aimTrials };
+  var personal = ar && ar.personal ? ar.personal : P.personalLatest;
+  if (personal) inp.personal = personal;
+  return inp;
+}
+// recommend() that survives too few calibration trials: retries without them and flags result.note = "aimTooFew".
+function safeRecommend(input) {
+  try { return M.recommend(input); }
+  catch (e) {
+    if (!input || !input.calibration) throw e;
+    var R = M.recommend(Object.assign({}, input, { calibration: null }));
+    R.note = "aimTooFew";
+    return R;
+  }
 }
 
 /* ---------- DOM helpers ---------- */

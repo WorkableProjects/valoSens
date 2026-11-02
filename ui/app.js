@@ -5,6 +5,10 @@ var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: r
 function visible() { return Q.filter(function (q) { return q.show(); }); }
 function idxOf(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return i; return 0; }
 function qNow() { return Q.filter(function (q) { return q.id === currentId; })[0]; }
+function goNext() {
+  var l = visible(), j = idxOf(l, currentId);
+  if (j < l.length - 1) { currentId = l[j + 1].id; renderQ("next"); focusH(); } else renderResult();
+}
 function refreshNav() { var q = qNow(); var nx = document.getElementById("next"); if (nx && q) nx.disabled = !q.valid(); }
 function focusH() { var h = document.getElementById("qh"); if (h) { h.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: REDUCED ? "auto" : "smooth" }); } }
 function setProgress(p, label) {
@@ -27,7 +31,7 @@ function importFile(file, done) {
 function applyImport(res) {
   S = freshState();
   Object.keys(res.latest.answers).forEach(function (k) { S[k] = k === "hClutter" ? Object.assign({}, res.latest.answers[k]) : res.latest.answers[k]; });
-  S.prior = res.sessions;
+  S.prior = res.sessions;   // answers also carry rank and aimSkip (session.js keeps both)
 }
 // Everything before the first test (visibility, else vision when the crosshair part is skipped) is answered and valid,
 // so the player can jump straight to the tests. Returns that test's id, or null if there is none or something is unanswered.
@@ -36,7 +40,7 @@ function testTarget() {
   ["vis", "hTest"].forEach(function (t) { if (!id && l.some(function (q) { return q.id === t; })) id = t; });
   if (!id) return null;
   var k = idxOf(l, id);
-  for (var i = 0; i < k; i++) if (!l[i].valid()) return null;
+  for (var i = 0; i < k; i++) if (l[i].id !== "aimtest" && !l[i].valid()) return null;   // the aim test is never required to jump to the tests
   return k > 0 ? id : null;
 }
 function canSkipToTests() { return !!testTarget(); }
@@ -108,6 +112,7 @@ function manualForm(done, msg) {
 }
 function downloadResults(R, XR, sens, dpi) {
   var b = V.build({ prior: S.prior, answers: S, xTest: S.xSkip ? [] : answeredRounds(), hTest: S.hSkip ? null : S.hTest, frameMs: S.frameMs, version: X.VERSION, agentOk: agentOk,
+    aim: S.aimSkip ? null : aimForFile(), engine: M.ENGINE,
     result: { cm: R.cm, sens: sens, dpi: dpi, code: XR && !S.xSkip ? XR.crosshair.code : undefined, highlight: XR && !S.hSkip ? XR.highlight.color.key : undefined } });
   var blob = new Blob([V.serialize(b)], { type: "application/json" }), a = document.createElement("a");
   a.href = URL.createObjectURL(blob); a.download = V.fileName(b);
@@ -125,10 +130,13 @@ function stagger(root) {
   });
 }
 
-var PARTS = ["Sensitivity", "Crosshair", "Highlight color"];
-function partSkipped(k) { return k === 2 ? !!S.xSkip : k === 3 ? !!S.hSkip : false; }
+var PARTS = ["Sensitivity", "Aim test", "Crosshair", "Highlight color"];
+// Part numbers here: 1 sensitivity, 2 aim test, 3 crosshair, 4 highlight.
+function partSkipped(k) { return k === 2 ? !!S.aimSkip : k === 3 ? !!S.xSkip : k === 4 ? !!S.hSkip : false; }
+function aimSkipped() { return !!S.aimSkip; }
 function partsBar(n) {
-  return el("div", { "class": "parts", "aria-label": "Part " + n + " of 3: " + PARTS[n - 1] + (partSkipped(n) ? " (skipped)" : "") }, PARTS.map(function (t, k) {
+  if (!n) return null;
+  return el("div", { "class": "parts", "aria-label": "Part " + n + " of " + PARTS.length + ": " + PARTS[n - 1] + (partSkipped(n) ? " (skipped)" : "") }, PARTS.map(function (t, k) {
     var sk = partSkipped(k + 1);
     return '<div class="part' + (k + 1 === n ? " on" : (k + 1 < n || sk) ? " done" : "") + '" style="--k:' + k + '"><b>' + (k + 1) + "</b>" + t + (sk ? "<small>Skipped</small>" : "") + "</div>";
   }).join(""));
@@ -139,17 +147,20 @@ function nextShownAfter(id) {
   for (var j = at + 1; j < Q.length; j++) if (Q[j].show()) return Q[j];
   return null;
 }
+// n uses the part numbers above (2 aim test, 3 crosshair, 4 highlight).
 function skipPart(n) {
   var from = currentId;
-  if (n === 2) S.xSkip = true; else S.hSkip = true;
+  if (n === 2) S.aimSkip = true; else if (n === 3) S.xSkip = true; else S.hSkip = true;
   var nx = nextShownAfter(from);
   if (nx) { currentId = nx.id; renderQ("next"); focusH(); } else renderResult();
 }
 // Bring a skipped part back, keeping every other answer, and open its first question.
+// n is the legacy numbering results.js passes (2 crosshair, 3 highlight); addAimPart() brings the aim test back.
 function addPart(n) {
   if (n === 2) { S.xSkip = false; currentId = "cvd"; } else { S.hSkip = false; currentId = "hCur"; }
   renderQ("back"); focusH();
 }
+function addAimPart() { S.aimSkip = false; currentId = "aimtest"; renderQ("back"); focusH(); }
 function renderQ(dir) {
   if (VT_RUN) { VT_RUN.stop = true; if (VT_RUN.cleanup) VT_RUN.cleanup(); }
   document.getElementById("wrap").classList.remove("wide");
@@ -165,14 +176,13 @@ function renderQ(dir) {
     Array.prototype.forEach.call(ghost.querySelectorAll("input, select, textarea, button"), function (n) { n.tabIndex = -1; });
   }
   app.innerHTML = "";
-  setProgress(i / list.length * 100, "Part " + q.part + " · " + PARTS[q.part - 1]);
+  setProgress(i / list.length * 100, q.part ? "Part " + q.part + " · " + PARTS[q.part - 1] : "Start");
   var box = el("section", { "class": "q" + (dir === "back" ? " back" : "") + (q.id === "vis" || q.id === "hTest" ? " wideq" : "") });
-  box.appendChild(partsBar(q.part));
+  var pb = partsBar(q.part); if (pb) box.appendChild(pb);
   box.appendChild(el("div", { "class": "q-sec" }, String(i + 1).padStart(2, "0") + " <span>/ " + String(list.length).padStart(2, "0") + "</span> &nbsp;" + q.sec));
   box.appendChild(el("h2", { tabindex: "-1", id: "qh" }, q.title));
   box.appendChild(el("p", { "class": "why" }, q.why));
   box.appendChild(el("p", { "class": "uses" }, q.uses));
-  if (i === 0) box.appendChild(importCard());
   var body = el("div", { "class": "q-body" }); box.appendChild(body);
   q.render(body);
   var last = i === list.length - 1;
@@ -182,12 +192,11 @@ function renderQ(dir) {
   back.addEventListener("click", function () { var l = visible(), j = idxOf(l, currentId); if (j > 0) { currentId = l[j - 1].id; renderQ("back"); focusH(); } });
   var next = el("button", { type: "button", "class": "btn primary", id: "next" }, last ? "Calculate" : "Next");
   next.addEventListener("click", function () {
-    var l = visible(), j = idxOf(l, currentId);
-    if (j < l.length - 1) { currentId = l[j + 1].id; renderQ("next"); focusH(); } else renderResult();
+    goNext();
   });
   nav.appendChild(back);
-  if ((q.part === 2 && !S.xSkip) || (q.part === 3 && !S.hSkip)) {
-    var sk = el("button", { type: "button", "class": "btn small skip", id: "skipPart" }, q.part === 2 ? "Skip crosshair" : "Skip highlight");
+  if ((q.part === 2 && !S.aimSkip) || (q.part === 3 && !S.xSkip) || (q.part === 4 && !S.hSkip)) {
+    var sk = el("button", { type: "button", "class": "btn small skip", id: "skipPart" }, q.part === 2 ? "Skip aim test" : q.part === 3 ? "Skip crosshair" : "Skip highlight");
     sk.addEventListener("click", function () { skipPart(q.part); });
     nav.appendChild(sk);
   }
