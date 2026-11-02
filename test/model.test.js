@@ -59,8 +59,8 @@ t("recommend() rejects invalid inputs", () => {
 t("missing optional inputs fall back to defaults", () => {
   const r = M.recommend({ pad: 45 });
   assert(isFinite(r.cm) && r.lo <= r.cm && r.cm <= r.hi);
-  assert.strictEqual(r.confidence.type, "heuristic");
-  assert.strictEqual(r.confidence.label, "low");
+  assert.strictEqual(r.confidence.type, "posterior");
+  assert(r.confidence.interval[0] < r.cm && r.cm < r.confidence.interval[1]);
 });
 
 /* ---------------- Numerical behaviour ---------------- */
@@ -160,8 +160,8 @@ t("v4: a setting inside the near-optimal range still moves when the scenarios ag
   assert(r.anchor.agreement > 0.7);
 });
 t("v4: the same answers with a different current setting give different results", () => {
-  const a = rec({ current: { cm: 30 } }).cm, b = rec({ current: { cm: 70 } }).cm;
-  assert(a > 30 && b < 70 && a !== b);
+  const a = rec({ current: { cm: 25 } }).cm, b = rec({ current: { cm: 110 } }).cm;
+  assert(a > 25 && b < 110 && a !== b);
 });
 t("v4: large changes are split into stages capped at maxStep, and a re-run continues the plan", () => {
   const cap = M.PARAMS.maxStep.central;
@@ -200,10 +200,11 @@ t("v4: tracking task, experience, grip and mouse weight act in the expected dire
   assert.throws(() => rec({ grip: "banana" }), RangeError);
   assert.throws(() => rec({ mouseG: 5 }), RangeError);
 });
-t("questionnaire confidence is a heuristic label, not a number", () => {
+t("v6: questionnaire confidence is a posterior 80% interval with a plain label", () => {
   const r = rec({});
-  assert.strictEqual(r.confidence.type, "heuristic");
-  assert.strictEqual(typeof r.confidence.label, "string");
+  assert.strictEqual(r.confidence.type, "posterior");
+  assert(["high", "medium", "low–medium", "low"].includes(r.confidence.label));
+  assert(r.posterior.ci80[0] < r.posterior.ci50[0] && r.posterior.ci50[1] < r.posterior.ci80[1]);
 });
 
 /* ---------------- Sensitivity analysis ---------------- */
@@ -396,51 +397,76 @@ t("turn shares are averaged over their uncertainty (5 uncertain constants, 243 s
 });
 
 /* ---------------- Bell curve (v5.0) ---------------- */
-t("bell: population of results is ~N(0.3, 0.1) in sens at 800 DPI", () => {
+/* ---------------- Engine v6 posterior ---------------- */
+const lnSd = a => { const l = a.map(Math.log), m = l.reduce((x, y) => x + y, 0) / l.length; return Math.sqrt(l.reduce((x, y) => x + (y - m) * (y - m), 0) / (l.length - 1)); };
+t("v6: with no answers beyond the pad, the result sits near the population median", () => {
+  const r = M.recommend({ pad: 45 }), pri = r.posterior.components.prior;
+  assert(Math.abs(Math.log(r.cm / Math.exp(M.PRIOR.muLn))) < 0.15, r.cm);
+  assert(Math.abs(Math.log(pri.median / Math.exp(M.PRIOR.muLn))) < 0.01);
+});
+t("v6: prior only = population; physics only = raw physical optimum", () => {
+  const p = rec({}, { priorOnly: true }), raw = rec({}, { physicsOnly: true }), raw2 = rec({}, { noBell: true });
+  assert(Math.abs(Math.log(p.cm) - M.PRIOR.muLn) < 0.01, p.cm);
+  assert(Math.abs(raw.cm / raw.cModel - 1) < 1e-9 && raw.posterior === null && raw.bell === null);
+  assert.strictEqual(raw.cm, raw2.cm);
+});
+t("v6: physical effects are shrunk toward the population, never amplified (fixes the v5 bell layer)", () => {
+  const f = (o, opts) => M.recommend(Object.assign({ dpi: 800, limb: "wrist" }, o), opts).cm;
+  const rawSwing = Math.log(f({ pad: 90 }, { physicsOnly: true }) / f({ pad: 25 }, { physicsOnly: true }));
+  const swing = Math.log(f({ pad: 90 }) / f({ pad: 25 }));
+  assert(Math.sign(swing) === Math.sign(rawSwing) && Math.abs(swing) < Math.abs(rawSwing), swing + " vs raw " + rawSwing);
+  const w = M.recommend({ pad: 45 }).posterior.components.physics.weight;
+  assert(Math.abs(Math.abs(swing) / Math.abs(rawSwing) - w) < 0.08, "shrinkage ~ physics weight " + w);
+});
+t("v6: the physics weight follows sigmaModel (0 -> physics decides, large -> prior decides)", () => {
+  const keep = M.PRIOR.sigmaModel, raw = rec({}, { physicsOnly: true }).cModel;
+  try {
+    M.PRIOR.sigmaModel = 0.01; const a = rec({}).cm;
+    M.PRIOR.sigmaModel = 50; const b = rec({}).cm;
+    const physCentre = Math.exp(Math.log(raw) - M.BELL.muLn + M.PRIOR.muLn);
+    assert(Math.abs(Math.log(a / physCentre)) < Math.abs(Math.log(b / physCentre)));
+    assert(Math.abs(Math.log(b) - M.PRIOR.muLn) < 0.02, b);
+  } finally { M.PRIOR.sigmaModel = keep; }
+});
+t("v6: population spread of questionnaire results is narrower than the population itself", () => {
   const R = M._rng(11), pick = a => a[Math.floor(R() * a.length)], xs = [];
-  for (let i = 0; i < 40; i++) {
-    const r = M.recommend({ dpi: 800, pad: pick([25, 36, 45, 45, 49, 90]), limb: pick(["wrist", "wf", "forearm", "arm"]), role: pick(["d", "i", "c", "s", "f"]),
-      weapon: pick(["rifle", "rifle", "sniper", "close"]), experience: pick(["new", "mid", "exp", "comp"]),
-      region: pick(Object.keys(M.REGION)), age: pick(Object.keys(M.AGE)), glasses: pick(Object.keys(M.GLASSES)) });
-    xs.push(r.bell.s800);
-    assert(Math.abs(M.s800FromCm(r.cm) - r.bell.s800) < 1e-9, "with no current setting the result is the bell target");
-  }
-  const m = xs.reduce((a, b) => a + b, 0) / xs.length, sd = Math.sqrt(xs.reduce((a, b) => a + (b - m) * (b - m), 0) / (xs.length - 1));
-  assert(Math.abs(m - 0.3) < 0.035, "mean " + m);
-  assert(sd > 0.06 && sd < 0.14, "sd " + sd);
+  for (let i = 0; i < 30; i++) xs.push(M.recommend({ dpi: 800, pad: pick([25, 36, 45, 49, 90]), limb: pick(["wrist", "wf", "forearm", "arm"]),
+    role: pick(["d", "i", "c", "s", "f"]), weapon: pick(["rifle", "sniper", "close"]), experience: pick(["new", "mid", "exp", "comp"]), region: pick(Object.keys(M.REGION)) }).cm);
+  const s = lnSd(xs);
+  assert(s > 0.01 && s < M.PRIOR.sdLn, "sd " + s);
 });
-t("bell: result stays inside [0.1, 0.7] and percentile matches z", () => {
-  for (const o of [{ pad: 12, limb: "wrist" }, { pad: 200, limb: "arm" }]) {
-    const b = rec(o).bell;
-    assert(b.s800 >= 0.1 - 1e-12 && b.s800 <= 0.7 + 1e-12, String(b.s800));
-    assert(Math.abs(b.percentile - 0.5 * (1 + M._erf(b.z / Math.SQRT2))) < 1e-12);
-  }
-});
-t("bell: shifts add in SD units (0.1 sens per z)", () => {
-  const a = rec({ region: "unsure" }).bell, keys = Object.keys(M.REGION).filter(k => k !== "unsure");
-  for (const k of keys) {
-    const b = rec({ region: k }).bell;
-    assert(Math.abs((b.s800 - a.s800) - 0.1 * M.REGION[k].z) < 1e-9, k);
-  }
-  const old = rec({ age: "35p" }).bell, young = rec({ age: "u16" }).bell;
-  assert.strictEqual(Math.sign(young.s800 - old.s800), Math.sign(M.AGE.u16.z - M.AGE["35p"].z) || 0);
-});
-t("bell: unknown region / age / glasses are rejected", () => {
+t("v6: region shifts the prior; age only widens it; glasses do nothing", () => {
+  const a = rec({ region: "unsure" }), b = rec({ region: "br" });
+  assert(Math.sign(Math.log(a.cm / b.cm)) === Math.sign(M.REGION.br.z) || M.REGION.br.z === 0);
+  const y = rec({ age: "u16" }), o = rec({ age: "35p" }), n0 = rec({});
+  assert(Math.abs(y.cm / o.cm - 1) < 1e-9, "age has no mean effect");
+  assert(y.posterior.sdLn >= n0.posterior.sdLn - 1e-12);
+  assert.strictEqual(rec({ glasses: "glasses" }).cm, n0.cm);
   assert.throws(() => rec({ region: "mars" }), RangeError);
   assert.throws(() => rec({ age: "99" }), RangeError);
   assert.throws(() => rec({ glasses: "monocle" }), RangeError);
 });
-t("bell: opts.noBell gives the raw physical optimum; progression heads for the bell target", () => {
-  const raw = rec({}, { noBell: true });
-  assert.strictEqual(raw.bell, null);
-  assert(Math.abs(raw.cm / raw.cModel - 1) < 1e-9);
-  const b = rec({}).bell, cur = b.cm * 1.6, r = rec({ current: { cm: cur } });
-  assert(r.cm < cur, "moves toward the faster bell target");
-  assert(r.anchor.target <= cur && r.anchor.target >= b.cm * 0.98);
+t("v6: agent trend enters the prior at half weight, listed in the waterfall", () => {
+  const r = rec({ agents: ["Jett"] }), s = r.posterior.waterfall.find(x => x.key === "agents");
+  assert(s && Math.abs(s.dLn + M.BELL.agentWeight * M.AGENT_Z.Jett.z * M.PRIOR.sdLn) < 1e-9);
 });
-t("bell: agent trend applies at half weight", () => {
-  const r = rec({ agents: ["Jett"] }), s = r.bell.shifts.find(x => x.key === "agents");
-  assert(s && Math.abs(s.z - M.BELL.agentWeight * (M.AGENT_Z.Jett ? M.AGENT_Z.Jett.z : 0)) < 1e-12);
+t("v6: progression heads for the posterior median; inside the 50% range it stays", () => {
+  const b = rec({}), cur = b.cm * 1.6, r = rec({ current: { cm: cur } });
+  assert(r.cm < cur && r.anchor.target <= cur && r.anchor.target >= b.cm * 0.98);
+  const inside = rec({ current: { cm: b.posterior.ci50[0] * 1.01 } });
+  assert(inside.anchor.stay && inside.anchor.inLikely);
+});
+t("v6: bell view stays consistent for the v5 UI", () => {
+  const r = rec({ region: "na", agents: ["Omen"] }), b = r.bell;
+  assert(Math.abs(M.s800FromCm(r.cm) - b.s800) < 1e-9 && Math.abs(b.percentile - 0.5 * (1 + M._erf(b.z / Math.SQRT2))) < 1e-12);
+  assert(b.ci80s800[0] < b.s800 && b.s800 < b.ci80s800[1]);
+});
+t("v6: measured data narrows the posterior and dominates when clear", () => {
+  const trials = simulate({ trueOpt: { micro: 30, flick: 30, turn: 30 }, curv: 0.15, sessions: 3, cms: [20, 28, 40, 56], seed: 3 });
+  const q = M.recommend(cinp), m = M.recommend(Object.assign({}, cinp, { calibration: { trials } }));
+  assert(m.posterior.components.measured, "measured likelihood used");
+  assert(m.posterior.sdLn < q.posterior.sdLn);
+  assert(Math.abs(Math.log2(m.cm / 30)) < 0.3, m.cm);
 });
 
 console.log("\n" + n + " passed, " + failed + " failed");

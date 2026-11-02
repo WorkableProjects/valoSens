@@ -39,3 +39,8 @@ Specs for wave N+1 are written after wave N is verified, with the actual interfa
 
 ## Log
 - 2026-11-02: plan written; wave 1 dispatched.
+- 2026-11-02 wave 1: T01 DONE (8 tests; verified), T02 DONE (20 tests; verified), T03 DONE (e2e passed on re-run by planner with the v6 engine), T06 DONE (DOIs spot-checked), O1 DONE (model 62 tests).
+  - Integration check T01→T02: lifts and times agree exactly; nSub agrees in ~50–70% of trials; estimatePersonal recovers vPeak/tSub/tLift closely but sigma0 high (0.034 vs 0.020 truth with 25 micro trials). → O3.
+  - Note for T08: a browser recorder must emit zero-movement samples every frame, or pauses read as lifts (sim emits stationary samples).
+  - O1 behaviour change: questionnaire-only results now shrink toward the population median (physics weight ≈ 0.37 with sigmaModel 0.40); spread of results is much narrower than v5. The aim test is what individualises.
+  - recommend() is ~330 ms in Node (243 scenarios evaluated twice) → O2 must cache per-scenario cost vectors.
