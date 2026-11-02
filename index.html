@@ -1497,7 +1497,10 @@ function bellChart(R, dpi) {
   // markers: each is a pin from the curve down to the axis plus a labelled dot, dropped in with a spring.
   function marker(v, k, label, kind) {
     var px = x(v), py = y(pdf(Math.min(xMax, Math.max(xMin, v)))), g = '<g class="mk" style="--k:' + k + '">';
-    if (kind === "cur") {
+    if (kind === "step") {
+      g += '<path d="M' + px + " " + (base - 12) + 'l6 6-6 6-6-6z" fill="var(--teal)"/><line x1="' + px + '" x2="' + px + '" y1="' + (base - 30) + '" y2="' + (base - 13) + '" stroke="var(--teal)" opacity=".6"/>' +
+        '<text class="lbl2" x="' + px + '" y="' + (base - 34) + '" text-anchor="middle">' + label + "</text>";
+    } else if (kind === "cur") {
       g += '<path d="M' + px + " " + (base - 12) + 'l6 6-6 6-6-6z" fill="var(--yellow)"/><text class="lbl2" x="' + px + '" y="' + (base - 18) + '" text-anchor="middle">' + label + "</text>";
     } else if (kind === "model") {
       g += '<line x1="' + px + '" x2="' + px + '" y1="' + py + '" y2="' + base + '" stroke="var(--muted)" stroke-dasharray="3 3" opacity=".6"/><circle cx="' + px + '" cy="' + py + '" r="5" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="2 2" opacity=".75"/>' +
@@ -1512,10 +1515,10 @@ function bellChart(R, dpi) {
   s += marker(B0.s800Model, 1, "MODEL " + B0.s800Model.toFixed(2), "model");
   // With a current setting the result may be one staged step toward the bell target: show both.
   var step = M.s800FromCm(R.cm), staged = Math.abs(step - B0.s800) > 0.005;
-  if (staged) s += marker(step, 2, "THIS STEP " + step.toFixed(2), "cur");
+  if (staged) s += marker(step, 2, "THIS STEP " + step.toFixed(2), "step");
   s += marker(B0.s800, 3, (staged ? "TARGET " : "YOU ") + B0.s800.toFixed(2), "you");
   s += '<line id="bxh" x1="0" x2="0" y1="' + T + '" y2="' + base + '" stroke="var(--muted)" visibility="hidden"/><rect id="bhit" x="' + L + '" y="' + T + '" width="' + (W - L - Rt) + '" height="' + (base - T) + '" fill="transparent"/></svg>';
-  return { svg: s, x: x, W: W, L: L, Rt: Rt, xMin: xMin, xMax: xMax, cur: cur };
+  return { svg: s, x: x, W: W, L: L, Rt: Rt, xMin: xMin, xMax: xMax, cur: cur, staged: staged };
 }
 function wireBellHover(host, R, geo) {
   var svg = host.querySelector("svg"), hit = svg.querySelector("#bhit"), xh = svg.querySelector("#bxh"), tt = host.querySelector(".tt");
@@ -1875,7 +1878,7 @@ function renderResult() {
           '<div><div class="sub-t">Breakdown</div><div class="bd">' + bdCol(rowsL, 0) + bdCol(rowsR, 4) + "</div></div></div>" +
           '<div class="sec-t" style="margin-top:26px">Where you sit on the bell curve <span>sens at 800 DPI</span></div>' +
           '<div class="panel duo"><div><div class="bell chart" id="bellChart">' + bc.svg + '<div class="tt"></div></div>' +
-            '<div class="legend"><span><i style="background:#2ad6b0"></i>\u00b11 SD (0.2\u20130.4)</span><span><i style="background:#2a9fd6"></i>\u00b12 SD (0.1\u20130.5)</span><span><i style="background:#fff"></i>Your target</span><span><i style="background:var(--muted)"></i>Physical model alone</span>' + (bc.cur ? '<span><i style="background:var(--yellow)"></i>Current setting</span>' : "") + "</div>" +
+            '<div class="legend"><span><i style="background:#2ad6b0"></i>\u00b11 SD (0.2\u20130.4)</span><span><i style="background:#2a9fd6"></i>\u00b12 SD (0.1\u20130.5)</span><span><i style="background:#fff"></i>Your target</span><span><i style="background:var(--muted)"></i>Physical model alone</span>' + (bc.cur ? '<span><i style="background:var(--yellow)"></i>Current setting</span>' : "") + (bc.staged ? '<span><i style="background:var(--teal)"></i>This run\u2019s step</span>' : "") + "</div>" +
             '<p class="bell-cap" id="bellCap">Higher sens than <b id="bellPct">' + Math.round(R.bell.percentile * 100) + "</b>% of players (percentile " + Math.round(R.bell.percentile * 100) + ")" + (R.bell.clamped ? ". Held inside the 0.1\u20130.7 range" : "") + ".</p></div>" +
           '<div><div class="sub-t">What moved you</div>' + shiftRows(R) + "</div></div>" +
         "</section>" +
