@@ -80,6 +80,14 @@ t("pooled data reaches the recommendation", () => {
   const P = V.pooled(s1, { hTest: visionTrials({ yellow: -0.7, red: -0.8, purple: -1.6 }, 6) });
   eq(X.recommend({ hTest: P.hTest }).highlight.color.key, "purple");
 });
+t("5.0 answers (region, age, glasses, skip flags) round-trip; an invalid region is dropped", () => {
+  const a5 = { ...answers, region: "kr", age: "20_24", glasses: "contacts", xSkip: true, hSkip: false };
+  const s = V.parse(V.serialize(V.build({ answers: a5, xTest: [], hTest: [], agentOk })), agentOk).latest;
+  eq(s.answers.region, "kr"); eq(s.answers.age, "20_24"); eq(s.answers.glasses, "contacts"); eq(s.answers.xSkip, true); eq(s.answers.hSkip, false);
+  const bad = V.parse(JSON.stringify({ app: "valoSens", format: 1, sessions: [{ answers: { region: "mars", age: "20_24", glasses: "<b>", xSkip: "yes" } }] }), agentOk);
+  eq(bad.latest.answers.region, undefined); eq(bad.latest.answers.glasses, undefined); eq(bad.latest.answers.age, "20_24"); eq(bad.latest.answers.xSkip, undefined);
+  ok(bad.warnings.length >= 1, "dropped values are reported");
+});
 t("caps the number of sessions kept", () => {
   let prior = [];
   for (let i = 0; i < 15; i++) prior = V.parse(V.serialize(V.build({ prior, answers, xTest: [], hTest: [], agentOk })), agentOk).sessions;
