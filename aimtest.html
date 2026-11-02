@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>valoSens aim test (dev page)</title>
+<link rel="stylesheet" href="ui/styles.css">
+<link rel="stylesheet" href="ui/aimtest.css">
+<style>
+  .dev { max-width: 560px; margin: 0 auto; padding: 32px 16px 64px; }
+  .dev label { display: block; margin: 12px 0 4px; color: var(--muted); }
+  .dev input[type=number] { width: 100%; min-height: 40px; padding: 0 10px; background: var(--panel-solid); border: 1px solid var(--line2); }
+  .dev .go { margin-top: 18px; min-height: 44px; padding: 0 22px; background: var(--teal); color: #06201a; border: 0; font: 700 15px var(--head); letter-spacing: .12em; text-transform: uppercase; cursor: pointer; }
+  #out { white-space: pre-wrap; word-break: break-all; font-size: 12px; color: var(--muted); max-height: 40vh; overflow: auto; }
+</style>
+</head>
+<body>
+<main class="dev">
+  <h1>Aim test (dev page)</h1>
+  <p>Standalone harness for <code>ui/aimtest.js</code>. Add <code>?auto=1</code> to run a scripted bot with synthetic input.</p>
+  <label for="dpi">Mouse DPI</label><input id="dpi" type="number" value="800" min="100" max="32000">
+  <label for="cm">Centre cm/360</label><input id="cm" type="number" value="30" min="8" max="160">
+  <label><input id="thorough" type="checkbox"> Thorough (two passes)</label>
+  <button class="go" id="go" type="button">Start aim test</button>
+  <p id="status" role="status"></p>
+  <pre id="out"></pre>
+</main>
+<script src="aim.js"></script>
+<script src="ui/aimtest.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search), auto = params.get("auto") === "1";
+  var statusEl = document.getElementById("status"), outEl = document.getElementById("out");
+  function opts() {
+    var o = { dpi: +document.getElementById("dpi").value || 800, centreCm: +document.getElementById("cm").value || 30,
+      thorough: document.getElementById("thorough").checked, seed: +params.get("seed") || 1, session: "cur" };
+    if (auto) { o.mix = { micro: 2, flick: 2, turn: 1, track: 1 }; o.levels = 3; o.thorough = false; o.source = scripted(); }
+    return o;
+  }
+  function run() {
+    statusEl.textContent = "";
+    var host = document.body;
+    AimTest.start(host, opts(), function (result) {
+      statusEl.textContent = "Done";
+      outEl.textContent = JSON.stringify(result);
+      outEl.id = "out";
+    }, function (reason) { statusEl.textContent = "Cancelled: " + reason; });
+  }
+  document.getElementById("go").addEventListener("click", run);
+
+  /* ---- scripted bot (auto mode): synthetic counts + timestamps, min-jerk moves with noise ---- */
+  function scripted() {
+    var rnd = ValoAim._rng(params.get("botseed") ? +params.get("botseed") : 5), h = null, busy = false, engaged = null, stopped = false;
+    function gauss() { var u = 1 - rnd(), v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.28318 * v); }
+    function now() { return performance.now(); }
+    function dbg() { return AimTest._debug(); }
+    function wrap(d) { return Math.abs(d) <= 180 ? d : d - 360 * Math.round(d / 360); }
+    // minimum-jerk move of (dx, dy) counts over durS seconds, emitting a 1000 Hz event stream tied to the real clock
+    function move(dx, dy, durS, abortId, cb) {
+      var T0 = now(), N = Math.max(1, Math.round(durS * 1000)), i = 0, ex = 0, ey = 0;
+      (function step() {
+        var d = dbg();
+        if (!d || (abortId && (!d.spec || d.spec.id !== abortId))) { cb(false); return; }
+        var upto = Math.min(N, Math.floor(now() - T0));
+        while (i < upto) {
+          i++; var s = i / N, m = 10 * s * s * s - 15 * s * s * s * s + 6 * s * s * s * s * s;
+          var tx = Math.round(dx * m), ty = Math.round(dy * m);
+          h.move(tx - ex, ty - ey, T0 + i); ex = tx; ey = ty;
+        }
+        if (i >= N) cb(true); else requestAnimationFrame(step);
+      })();
+    }
+    function click(cb) { h.down(now()); setTimeout(function () { h.up(now()); cb(); }, 30); }
+    function swipe(d, cb) {
+      var cpc = d.countsPerCm, cm = d.swipeKind === "dpi" ? d.cardCm : d.swipeKind === "pad" ? 42 : 20;
+      var dur = d.swipeKind === "dpi" ? [2.0, 1.0, 0.5][d.swipeIndex] : 0.8;
+      h.down(now());
+      setTimeout(function () { move(Math.round(cm * cpc), 0, dur, null, function () { setTimeout(function () { h.up(now()); cb(); }, 20); }); }, 30);
+    }
+    function aim(d, cb) {
+      var sp = d.spec, k = 360 / sp.cm, cpc = d.countsPerCm, id = sp.id;
+      function err() {
+        var dd = dbg(); if (!dd || !dd.target) return null;
+        return { yaw: wrap(dd.target.yaw - dd.viewYaw), pitch: dd.target.pitch - dd.viewPitch, cm: sp.cm };
+      }
+      if (sp.task === "track") {
+        var t0 = now();
+        (function pursue() {
+          var dd = dbg(), e = dd && dd.spec && dd.spec.id === id ? err() : null;
+          if (!e) { cb(); return; }
+          var cx = (e.yaw / k) * cpc * 0.5 + gauss() * 0.7, cy = (e.pitch / k) * cpc * 0.5 * -1;
+          h.move(Math.round(cx), Math.round(cy), now());
+          requestAnimationFrame(pursue);
+        })();
+        return;
+      }
+      setTimeout(function () {
+        (function attempt() {
+          var e = err();
+          if (!e) { cb(); return; }
+          var amp = Math.sqrt(e.yaw * e.yaw + e.pitch * e.pitch), dur = 0.1 + 0.04 * Math.sqrt(amp);
+          var f = 1 + gauss() * 0.03;
+          var dx = Math.round(e.yaw / k * cpc * f + gauss() * 1.5), dy = Math.round(-(e.pitch / k * cpc) * f + gauss() * 1.5);
+          move(dx, dy, dur, id, function (ok) {
+            if (!ok) { cb(); return; }
+            setTimeout(function () { click(function () { setTimeout(attempt, 60); }); }, 90);
+          });
+        })();
+      }, 200 + rnd() * 80);
+    }
+    function tick() {
+      if (stopped) return;
+      var d = dbg();
+      if (!d) { stopped = true; return; }
+      if (busy) { requestAnimationFrame(tick); return; }
+      if (d.awaiting === "button") {
+        busy = true;
+        setTimeout(function () { var b = document.querySelector(".at-btn.primary"); if (b) b.click(); busy = false; requestAnimationFrame(tick); }, 120);
+        return;
+      }
+      if (d.awaiting === "swipe") { busy = true; swipe(d, function () { busy = false; setTimeout(function () { requestAnimationFrame(tick); }, 150); }); return; }
+      if (d.awaiting === "aim" && d.spec && d.target && engaged !== d.spec.id) {
+        engaged = d.spec.id; busy = true;
+        aim(d, function () { busy = false; requestAnimationFrame(tick); });
+        return;
+      }
+      requestAnimationFrame(tick);
+    }
+    return { attach: function (onMove, onDown, onUp) { h = { move: onMove, down: onDown, up: onUp }; requestAnimationFrame(tick); } };
+  }
+
+  if (auto) run();
+})();
+</script>
+</body>
+</html>

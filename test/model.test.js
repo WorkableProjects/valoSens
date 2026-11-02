@@ -106,8 +106,8 @@ t("results are reproducible", () => {
 /* ---------------- Physically justified properties ---------------- */
 t("more pad space never makes the model optimum faster", () => {
   for (const limb of ["wrist", "wf", "forearm", "arm"]) {
-    let prev = 0;
-    for (let pad = 15; pad <= 150; pad += 5) { const c = rec({ pad, limb }).cModel; assert(c >= prev - 1e-6, limb + " pad " + pad); prev = c; }
+    let prev = 0;  // v6: optima come from a spline table (0.02 ln grid); 0.01% is below its resolution
+    for (let pad = 15; pad <= 150; pad += 5) { const c = rec({ pad, limb }).cModel; assert(c >= prev * (1 - 1e-4), limb + " pad " + pad); prev = c; }
   }
 });
 t("a noisier hand never makes the optimum faster", () => {
@@ -467,6 +467,30 @@ t("v6: measured data narrows the posterior and dominates when clear", () => {
   assert(m.posterior.components.measured, "measured likelihood used");
   assert(m.posterior.sdLn < q.posterior.sdLn);
   assert(Math.abs(Math.log2(m.cm / 30)) < 0.3, m.cm);
+});
+
+t("v6: aiming joint ordering — wrist aimers never get a slower physical optimum than arm aimers", () => {
+  for (const pad of [25, 36, 45, 90]) {
+    const c = ["wrist", "wf", "forearm", "arm"].map(limb => rec({ pad, limb }, { physicsOnly: true }).cm);
+    for (let i = 1; i < c.length; i++) assert(c[i] >= c[i - 1] * (1 - 1e-4), "pad " + pad + ": " + c.map(x => x.toFixed(1)).join(" "));
+  }
+});
+t("v6: arm aimers are never pushed faster than wrist aimers by the reach term", () => {
+  const pr = M.buildProfile({ pad: 45, limb: "wrist" }, M.expectedCurve({ pad: 45 }).base);
+  const r1 = M.recommend({ pad: 45, limb: "arm" }, { physicsOnly: true }), r2 = M.recommend({ pad: 45, limb: "wrist" }, { physicsOnly: true });
+  assert(r1.cm >= r2.cm);
+  assert(pr.reach > 0);
+});
+t("v6: a full recommendation stays fast (< 150 ms)", () => {
+  M.recommend({ pad: 45 }); const t0 = Date.now();
+  for (let i = 0; i < 5; i++) M.recommend({ pad: 45, limb: "wf", agents: ["Jett"], current: { cm: 30 } });
+  const ms = (Date.now() - t0) / 5; assert(ms < 150, ms + " ms");
+});
+t("v6: prior widths come from data; Immortal/Radiant/competitive use the pro width", () => {
+  assert(M.PRIOR.sdLn > 0.3 && M.PRIOR.sdLn < 0.6 && M.PRIOR.sdLnPro > 0.2 && M.PRIOR.sdLnPro < M.PRIOR.sdLn + 1e-9);
+  const g = rec({ experience: "mid" }), p = rec({ experience: "mid", stats: { rank: "rad" } }), c = rec({ experience: "comp" });
+  assert(p.posterior.sdLn < g.posterior.sdLn && c.posterior.sdLn < g.posterior.sdLn);
+  assert(/population_v6/.test(M.PRIOR.source));
 });
 
 console.log("\n" + n + " passed, " + failed + " failed");

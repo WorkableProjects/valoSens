@@ -296,14 +296,60 @@
    * Trial: fixation (500–900 ms) → four identical dark figures, one with the highlight outline at opacity
    * alpha, shown for a fixed whole number of frames (~58 ms) → 350 ms mask of outline fragments in all three
    * colors → the player says where the highlighted figure was (1–4), with no time limit.
-   * Each color has its own weighted up-down staircase on log10(alpha): −0.05 after a correct answer, +0.15
-   * after a wrong one, so it settles near 75% correct (Kaernbach 1991). Staircases are interleaved, and every
+   * Each color has its own QUEST+ posterior over (threshold, slope) on log10(alpha) (Watson 2017): the next
+   * strength is the one that minimises the expected posterior entropy. Colors are interleaved, and every
    * color sees the same scene sequence. About one trial in nine is a catch trial at full opacity and 4× the
    * exposure: missing more than one of those marks the run as unreliable. Trials with a dropped frame are
    * repeated, not scored.
    * ====================================================================== */
-  var VT = { colors: ["yellow", "red", "purple"], perColor: 20, catchN: 7, exposureMs: 58, maskMs: 350, x0: -0.5,
+  var VT = { colors: ["yellow", "red", "purple"], perColor: 16, catchN: 7, exposureMs: 58, maskMs: 350, x0: -0.5,
     down: 0.05, up: 0.15, downEarly: 0.1, upEarly: 0.3, xMin: -2, xMax: 0, gamma: 0.25, lapse: 0.03, tau: 0.25 };
+
+  // QUEST+ (Watson 2017, J Vis 17(3):10). State: posterior over a (threshold, slope) grid; the psychometric
+  // function is the one analyzeVision fits: p = γ + (1 − γ − λ) / (1 + exp(−s (x − α))), x = log10 opacity.
+  var Q_TH = [], Q_X = []; for (var qi = 0; qi <= 50; qi++) { Q_TH.push(-2.5 + 0.05 * qi); Q_X.push(-2.5 + 0.05 * qi); }
+  var Q_LIK = {};
+  function qLik(g, lam) {
+    var key = g + "/" + lam; if (Q_LIK[key]) return Q_LIK[key];
+    var ns = S_GRID.length, t = new Array(Q_X.length * Q_TH.length * ns);
+    for (var xi = 0; xi < Q_X.length; xi++) for (var ti = 0; ti < Q_TH.length; ti++) for (var si = 0; si < ns; si++)
+      t[(xi * Q_TH.length + ti) * ns + si] = g + (1 - g - lam) / (1 + Math.exp(-S_GRID[si] * (Q_X[xi] - Q_TH[ti])));
+    return (Q_LIK[key] = t);
+  }
+  function qCreate(center, sd, g, lam) {
+    var ns = S_GRID.length, post = new Array(Q_TH.length * ns), z = 0;
+    for (var ti = 0; ti < Q_TH.length; ti++) { var w = Math.exp(-0.5 * Math.pow((Q_TH[ti] - center) / sd, 2)); for (var si = 0; si < ns; si++) { post[ti * ns + si] = w; z += w; } }
+    for (var i = 0; i < post.length; i++) post[i] /= z;
+    return { post: post, lik: qLik(g, lam) };
+  }
+  // xi = index into the stimulus grid Q_X (−2.5 … 0, step 0.05).
+  function qUpdate(q, xi, correct) {
+    var n = q.post.length, base = xi * n, z = 0;
+    for (var i = 0; i < n; i++) { var p = q.lik[base + i]; q.post[i] *= correct ? p : 1 - p; z += q.post[i]; }
+    if (z > 0) for (var j = 0; j < n; j++) q.post[j] /= z;
+  }
+  // Index of the stimulus with the lowest expected posterior entropy (first one wins ties).
+  function qNext(q) {
+    var n = q.post.length, best = 0, bestH = Infinity;
+    for (var xi = 0; xi < Q_X.length; xi++) {
+      var base = xi * n, pc = 0;
+      for (var i = 0; i < n; i++) pc += q.post[i] * q.lik[base + i];
+      var hc = 0, hw = 0;
+      for (var k = 0; k < n; k++) {
+        var p = q.lik[base + k], a = q.post[k] * p, b = q.post[k] * (1 - p);
+        if (pc > 0 && a > 0) hc -= a * Math.log(a / pc);
+        if (pc < 1 && b > 0) hw -= b * Math.log(b / (1 - pc));
+      }
+      var H = hc + hw;
+      if (H < bestH - 1e-12) { bestH = H; best = xi; }
+    }
+    return best;
+  }
+  function qMean(q) {
+    var ns = S_GRID.length, m = 0, m2 = 0;
+    for (var i = 0; i < q.post.length; i++) { var th = Q_TH[Math.floor(i / ns)]; m += q.post[i] * th; m2 += q.post[i] * th * th; }
+    return { mean: m, sd: Math.sqrt(Math.max(0, m2 - m * m)) };
+  }
 
   function visionRun(opts) {
     opts = Object.assign({}, VT, opts || {});
@@ -315,14 +361,18 @@
       var at = Math.floor((j + 0.5) * queue.length / opts.catchN);
       queue.splice(at + j, 0, { color: opts.colors[j % opts.colors.length], k: -1, catchTrial: true });
     }
-    // opts.start: per-color starting level (log10 opacity), e.g. from an imported session's thresholds.
-    var st = {}; opts.colors.forEach(function (c) { var x = opts.start && isFinite(opts.start[c]) ? Math.max(opts.xMin, Math.min(opts.xMax, opts.start[c])) : opts.x0; st[c] = { x: x, last: null, reversals: opts.start && isFinite(opts.start[c]) ? 2 : 0, n: 0 }; });
+    // opts.start: per-color prior centre (log10 opacity), e.g. from an imported session's thresholds.
+    var st = {}; opts.colors.forEach(function (c) {
+      var ctr = opts.start && isFinite(opts.start[c]) ? Math.max(Q_TH[0], Math.min(Q_TH[Q_TH.length - 1], opts.start[c])) : opts.x0;
+      st[c] = { q: qCreate(ctr, opts.priorSd || 0.5, opts.gamma, opts.lapse), n: 0 };
+    });
     var trials = [], pos = 0;
     function nextTrial() {
       if (pos >= queue.length) return null;
       var q = queue[pos], s = st[q.color];
+      if (!q.catchTrial) s.xi = qNext(s.q);
       return { idx: pos, color: q.color, hex: TEST_HEX[q.color], catchTrial: !!q.catchTrial,
-        x: q.catchTrial ? 0 : s.x, alpha: q.catchTrial ? 1 : Math.pow(10, s.x), exposureMs: opts.exposureMs * (q.catchTrial ? 4 : 1),
+        x: q.catchTrial ? 0 : Q_X[s.xi], alpha: q.catchTrial ? 1 : Math.pow(10, Q_X[s.xi]), exposureMs: opts.exposureMs * (q.catchTrial ? 4 : 1),
         scene: q.catchTrial ? scenes[Math.floor(r() * scenes.length)] : scenes[q.k % scenes.length],
         target: Math.floor(r() * 4), seed: Math.floor(r() * 1e9) };
     }
@@ -332,10 +382,8 @@
       var correct = res.answer === t.target;
       trials.push(Object.assign({}, t, { answer: res.answer, correct: correct, shownMs: res.shownMs }));
       if (!t.catchTrial) {
-        var s = st[t.color], dir = correct ? -1 : 1, early = s.reversals < 2;
-        if (s.last !== null && dir !== s.last) s.reversals++;
-        s.last = dir; s.n++;
-        s.x = Math.max(opts.xMin, Math.min(opts.xMax, s.x + (correct ? -(early ? opts.downEarly : opts.down) : (early ? opts.upEarly : opts.up))));
+        var s = st[t.color], xi = Math.max(0, Math.min(Q_X.length - 1, Math.round((t.x - Q_X[0]) / 0.05)));
+        qUpdate(s.q, xi, correct); s.n++;
       }
       pos++;
     }
@@ -591,7 +639,7 @@
 
   var api = { VERSION: "3.1.0", XCOLORS: XCOLORS, HCOLORS: HCOLORS, XC: XC, HC: HC, PRO: PRO, SCENES: SCENES, SCENE_KEYS: SCENE_KEYS, TEST_HEX: TEST_HEX,
     POOL: POOL, POOL_BY: POOL_BY, poolCfg: poolCfg, scaleCfg: scaleCfg, xSession: xSession, fitChoices: fitChoices, allowedColor: allowedColor,
-    VT: VT, visionRun: visionRun, analyzeVision: analyzeVision, rng: rng,
+    VT: VT, visionRun: visionRun, _quest: { create: qCreate, update: qUpdate, next: qNext, mean: qMean }, analyzeVision: analyzeVision, rng: rng,
     encode: encode, decode: decode, recommend: recommend, lum: lum, contrast: contrast, clash: clash, simHex: simHex, dE: dE, visAgg: visAgg, headPx: headPx };
   if (typeof module !== "undefined" && module.exports) module.exports = api; else root.ValoXhair = api;
 })(typeof window !== "undefined" ? window : this);

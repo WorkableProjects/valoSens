@@ -199,8 +199,11 @@
                 note: "Typical flick completion time at the best setting in NVIDIA's study." },
     tLift:    { central: 0.30,  low: 0.20,  high: 0.50,  unit: "s",   basis: "estimate",
                 note: "Time lost per mouse lift and re-centre. Casiez et al. 2008: about 24% clutch time raised movement time by 124%; no per-lift time is published for FPS play." },
-    tSwitch:  { central: 0.06,  low: 0.03,  high: 0.12,  unit: "s",   basis: "estimate",
-                note: "Time lost when a movement exceeds the aiming joint's comfortable reach and a bigger joint takes over." },
+    // ---- v6.0 (research/engine_v6_physics.md)
+    kExcess:  { central: 0.004, low: 0.002, high: 0.008, unit: "s/cm", basis: "estimate",
+                note: "v6: time per cm of travel beyond the aiming joint's comfortable reach, covered by a slower, larger joint. Replaces the v5 step-only switch cost, which gave wrist aimers no gradient (they pass 3 cm at almost any sensitivity) and so ranked them slower than arm aimers. No study measures it." },
+    kEnd:     { central: 0.03,  low: 0.015, high: 0.05,  unit: "fraction", basis: "research",
+                note: "v6: signal-dependent endpoint noise after corrections, as a share of movement amplitude (Schmidt et al. 1979; Harris & Wolpert 1998; prior from research/engine_v6_physics.md §1, k_final). Adds to the constant floor sigma0 in quadrature." },
     vPeak:    { central: 150,   low: 100,   high: 250,   unit: "cm/s", basis: "research",
                 note: "Peak hand speed in a large turn. Casiez et al. 2008 measured 1.5 m/s at the 97th percentile (2.4 m/s max) and a 10–14% slowdown near that limit." },
     startSpread: { central: 0.5, low: 0.2,  high: 0.8,   unit: "fraction", basis: "estimate",
@@ -380,13 +383,19 @@
     else excess = (a - rLo) * (a - rLo) / (2 * (rHi - rLo));
     return excess / gain;
   }
+  // v6: expected travel past comfortable reach, E[(a - R)+] with R log-normal(ln reach, reachSd) (closed form).
+  function excessBeyondReach(a, pr) {
+    if (a <= 0) return 0;
+    var s = pr.reachSd, d = (Math.log(a) - Math.log(pr.reach)) / s;
+    return a * normCdf(d) - pr.reach * Math.exp(s * s / 2) * normCdf(d - s);
+  }
   function pBeyondReach(a, pr) { return a <= 0 ? 0 : normCdf((Math.log(a) - Math.log(pr.reach)) / pr.reachSd); }
 
   function taskCost(task, C, pr) {
     var P = pr.P, a = C * task.theta / 360;
     if (task.mech === "floor") {
-      var W = C * pr.headDeg / 360;
-      var p = Math.max(1e-6, erf(W / (2 * Math.SQRT2 * P.sigma0)));
+      var W = C * pr.headDeg / 360, sig = Math.sqrt(P.sigma0 * P.sigma0 + Math.pow(P.kEnd * a, 2));
+      var p = Math.max(1e-6, erf(W / (2 * Math.SQRT2 * sig)));
       return { prec: P.tSub * (1 - p) / p, trav: 0, lift: 0 };
     }
     if (task.mech === "flick") {
@@ -404,7 +413,7 @@
     }
     var dur = 1.875 * a / P.vPeak;        // minimum-jerk duration at peak speed vPeak
     var speed = Math.pow(Math.pow(task.mt, 4) + Math.pow(dur, 4), 0.25) - task.mt;
-    return { prec: 0, trav: speed, lift: P.tLift * expectedLifts(a, pr) + P.tSwitch * pBeyondReach(a, pr) };
+    return { prec: 0, trav: speed, lift: P.tLift * expectedLifts(a, pr) + P.kExcess * excessBeyondReach(a, pr) };
   }
   function costAt(C, pr) {
     var out = { prec: 0, trav: 0, lift: 0 };
@@ -434,41 +443,49 @@
 
   var GRID = (function () { var g = []; for (var x = Math.log(8); x <= Math.log(160) + 1e-9; x += 0.01) g.push(Math.exp(x)); return g; })();
 
+  // v6: each scenario's cost is tabulated once on a coarse log grid (step 0.02) and interpolated with a C1
+  // Catmull-Rom spline. That cuts the cost of a recommendation ~3x and makes per-scenario optima free.
+  var CG = (function () { var g = []; for (var x = Math.log(6); x <= Math.log(200) + 1e-9; x += 0.02) g.push(x); return g; })();
+  var CG0 = CG[0], CGH = 0.02;
+  function spline(arr, x) {
+    var u = (x - CG0) / CGH, i = Math.floor(u);
+    if (i < 1) i = 1; if (i > arr.length - 3) i = arr.length - 3;
+    var t = u - i, p0 = arr[i - 1], p1 = arr[i], p2 = arr[i + 1], p3 = arr[i + 2];
+    if (t < 0 || t > 1) return p1 + (t < 0 ? t * (p2 - p0) / 2 : (t - 0) * (p2 - p1));    // outside the table: linear extension
+    var t2 = t * t, t3 = t2 * t;
+    return 0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3);
+  }
   function expectedCurve(input, opts) {
     opts = opts || {};
     var base = Object.assign(central(), opts.params || {});
     var scen = opts.noUncertainty ? [{ P: base, w: 1 }] : scenarios(base, (opts.uncertain || UNCERTAIN).filter(function (k) { return !(opts.params && k in opts.params); }));
     var profs = scen.map(function (s) { return { pr: buildProfile(input, s.P), w: s.w }; });
+    // Tables: weighted components, plus each scenario's total for its own optimum.
+    var T = { prec: [], trav: [], lift: [], total: [] }, per = profs.map(function () { return []; });
+    CG.forEach(function (x, gi) {
+      var C = Math.exp(x), o = { prec: 0, trav: 0, lift: 0, total: 0 };
+      profs.forEach(function (p, k) { var c = costAt(C, p.pr); per[k][gi] = c.total; o.prec += p.w * c.prec; o.trav += p.w * c.trav; o.lift += p.w * c.lift; o.total += p.w * c.total; });
+      T.prec.push(o.prec); T.trav.push(o.trav); T.lift.push(o.lift); T.total.push(o.total);
+    });
     function at(C) {
-      var o = { prec: 0, trav: 0, lift: 0, total: 0 };
-      profs.forEach(function (x) { var c = costAt(C, x.pr); o.prec += x.w * c.prec; o.trav += x.w * c.trav; o.lift += x.w * c.lift; o.total += x.w * c.total; });
-      return o;
+      var x = Math.log(C);
+      return { prec: spline(T.prec, x), trav: spline(T.trav, x), lift: spline(T.lift, x), total: spline(T.total, x) };
     }
-    var vals = GRID.map(function (C) { return at(C).total; });
-    var bi = 0; for (var i = 1; i < vals.length; i++) if (vals[i] < vals[bi]) bi = i;
-    // golden-section refine in log space
-    var lo = Math.log(GRID[Math.max(0, bi - 1)]), hi = Math.log(GRID[Math.min(GRID.length - 1, bi + 1)]);
-    for (var it = 0; it < 50; it++) {
-      var m1 = lo + (hi - lo) * 0.382, m2 = lo + (hi - lo) * 0.618;
-      if (at(Math.exp(m1)).total < at(Math.exp(m2)).total) hi = m2; else lo = m1;
+    function argmin(arr) {
+      var bi = 1; for (var i = 1; i < arr.length - 2; i++) if (arr[i] < arr[bi]) bi = i;
+      var lo = CG[Math.max(1, bi - 1)], hi = CG[Math.min(arr.length - 3, bi + 1)];
+      for (var it = 0; it < 40; it++) { var m1 = lo + (hi - lo) * 0.382, m2 = lo + (hi - lo) * 0.618; if (spline(arr, m1) < spline(arr, m2)) hi = m2; else lo = m1; }
+      return Math.exp((lo + hi) / 2);
     }
-    var cStar = Math.exp((lo + hi) / 2);
-    // Optimum of each scenario (lazy: only the recommendation needs it). Gives the spread of the optimum
-    // implied by the uncertain constants, and how strongly the scenarios agree on a direction.
+    var cStar = Math.min(GRID[GRID.length - 1], Math.max(GRID[0], argmin(T.total)));
     var scenOpt = null;
     function scenarioOptima() {
-      if (scenOpt) return scenOpt;
-      scenOpt = profs.map(function (x) {
-        var best = 0, bv = Infinity;
-        for (var i = 0; i < GRID.length; i += 3) { var v = costAt(GRID[i], x.pr).total; if (v < bv) { bv = v; best = i; } }
-        var a = Math.max(0, best - 3), b = Math.min(GRID.length - 1, best + 3), bi2 = best;
-        for (var j = a; j <= b; j++) if (costAt(GRID[j], x.pr).total < costAt(GRID[bi2], x.pr).total) bi2 = j;
-        return { c: GRID[bi2], w: x.w, pr: x.pr };
-      });
+      if (!scenOpt) scenOpt = profs.map(function (p, k) { return { c: Math.min(GRID[GRID.length - 1], Math.max(GRID[0], argmin(per[k]))), w: p.w, pr: p.pr }; });
       return scenOpt;
     }
     return { at: at, cStar: cStar, jStar: at(cStar).total, profile: buildProfile(input, base), base: base, nScenarios: scen.length, scenarioOptima: scenarioOptima };
   }
+
   function weightedQuantile(items, q) {
     var b = items.slice().sort(function (x, y) { return x.c - y.c; }), tot = b.reduce(function (s, x) { return s + x.w; }, 0), acc = 0;
     for (var i = 0; i < b.length; i++) { acc += b[i].w; if (acc >= q * tot - 1e-12) return b[i].c; }
@@ -839,7 +856,7 @@
    * Measured (calibration) results are not touched: real data beats any prior.
    * ========================================================================= */
   var BELL = { mean: 0.3, sd: 0.1, min: 0.1, max: 0.7, dpi: 800,
-    muLn: /*@MULN*/3.8937/*@END*/, sdLn: /*@SDLN*/0.1319/*@END*/, rho: /*@RHO*/0.9894/*@END*/, agentWeight: 0.5 };
+    muLn: /*@MULN*/3.8231/*@END*/, sdLn: /*@SDLN*/0.1103/*@END*/, rho: /*@RHO*/0.9894/*@END*/, agentWeight: 0.5 };
   /*@DEMO*/
   var REGION = {"na":{"label":"North America","z":0.0685,"basis":"research","note":"24 pros (United States and Canada). Median slightly above the overall pro median; NOT lower than APAC (Mann-Whitney z=0.07 vs APAC pooled)."},"latam":{"label":"Latin America","z":-0.0715,"basis":"research","note":"Chile/Argentina/Colombia; small n, shrunk hard."},"br":{"label":"Brazil","z":-0.1415,"basis":"research","note":"Brazil; lowest median but wide spread (one 1.5 outlier clamped to 0.7)."},"eu":{"label":"Europe","z":-0.0215,"basis":"research","note":"UK, Russia, Poland, Nordics, Iberia etc.; sits at the overall median."},"mena":{"label":"Middle East & North Africa","z":0.1085,"basis":"research","note":"Turkey 8 + Morocco 1. Turkey classified as Middle East (assumption); Turkish pros skew high. Weak."},"kr":{"label":"Korea","z":-0.0515,"basis":"research","note":"Korean-born pros; median near overall. Includes one eDPI-800 outlier clamped to 0.7."},"jp":{"label":"Japan","z":-0.0515,"basis":"research","note":"n=4 only; mostly shrinkage."},"cn":{"label":"China","z":-0.0015,"basis":"research","note":"n=4 only (EDG); mostly shrinkage."},"sea":{"label":"Southeast Asia","z":0.0885,"basis":"research","note":"Indonesia, Singapore, Malaysia, Thailand, Philippines, Cambodia; high-sens tail (f0rsakeN, cgrs, xccurate). Wide spread."},"oce":{"label":"Oceania","z":-0.0015,"basis":"estimate","note":"No Oceania pros in the ProSettings list; no data, set to 0."},"unsure":{"label":"Prefer not to say","z":0,"basis":"estimate","note":"Always 0."}};
   var AGE = {"u16": {"label": "Under 16", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Guess, no sensitivity-by-age data found. Young players lack settled settings; literature gives no direction."}, "16_19": {"label": "16–19", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Guess. Near the peak-speed ages; no data on sens."}, "20_24": {"label": "20–24", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Reference group."}, "25_29": {"label": "25–29", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Guess from literature: response-speed decline from ~24 (Thompson 2014, StarCraft 2) and speed-accuracy trade-off in older users."}, "30_34": {"label": "30–34", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Judgement from the same literature; direction of the effect on preferred sens is unproven."}, "35p": {"label": "35+", "z": 0, "basis": "estimate", "note": "v6: no sensitivity-by-age data exists, so age only widens the prior (mean shift 0). v5 guess: Judgement. Older users slow down to keep accuracy (Hertzum & Hornbaek 2010). Capped well below 0.4 because no gamer sens data exists."}, "unsure": {"label": "Prefer not to say", "z": 0, "basis": "estimate", "note": "Always 0."}};
@@ -879,13 +896,16 @@
    * so physical effects are shrunk toward the population instead of amplified (fixes the v5 bell layer).
    * ========================================================================= */
   var ENGINE = "6";
-  var PRIOR = { muLn: /*@PMU*/3.9969/*@END*/, sdLn: /*@PSD*/0.33/*@END*/, sigmaModel: /*@SIGMOD*/0.40/*@END*/, ageSdZ: 0.1,
-    source: /*@PSRC*/"Centre: 0.30 sens at 800 DPI (team decision, docs/V1_ENGINE_V6_PLAN.md §-1; pro mean 0.296). Width: SD of ln s800 = 0.33 from 147 pros (research/agent_trends_research.md). Width to be re-estimated from research/population_v6 (D3)."/*@END*/ };
+  var PRIOR = { muLn: /*@PMU*/3.9969/*@END*/, sdLn: /*@PSD*/0.4108/*@END*/, sdLnPro: /*@PSDPRO*/0.3333/*@END*/, sigmaModel: /*@SIGMOD*/0.5002/*@END*/, ageSdZ: 0.1,
+    source: /*@PSRC*/"Centre 0.30 sens @800 (team decision). Width: SD of ln cm/360 = 0.4108 for 4590 general players, 0.3333 for 732 pros (research/population_v6). Physics weight from 995 players with known pad width: slope 0.7154 (SE 0.6732), combined with a prior weight N(0.35, 0.20) -> 0.3796."/*@END*/ };
   var LNGRID = GRID.map(function (c) { return Math.log(c); });
   function normLogPdf(x, m, s) { var z = (x - m) / s; return -0.5 * z * z - Math.log(s); }
   function zToLn(z) { return -z * PRIOR.sdLn; }                // + z (faster) = shorter cm/360
   function priorParts(input) {
-    var parts = [], mu = PRIOR.muLn, v = PRIOR.sdLn * PRIOR.sdLn;
+    // Immortal/Radiant or "competitive" players are compared with the pro distribution (narrower); everyone else with general players.
+    var rank = input.stats && input.stats.rank, proLike = rank === "imm" || rank === "rad" || input.experience === "comp";
+    var sd0 = proLike ? PRIOR.sdLnPro : PRIOR.sdLn;
+    var parts = [], mu = PRIOR.muLn, v = sd0 * sd0;
     [["region", REGION]].forEach(function (g) {
       var e = input[g[0]] != null && input[g[0]] !== "unsure" && g[1][input[g[0]]];
       if (e && e.z) { parts.push({ key: g[0], label: e.label, dLn: zToLn(e.z), basis: e.basis }); mu += zToLn(e.z); }
@@ -898,7 +918,7 @@
       if (za) { parts.push({ key: "agents", label: names.join(", "), dLn: zToLn(BELL.agentWeight * za), basis: "research",
         note: "Empirical agent trend (147 pros) at half weight: ability mechanics already enter the physics term." }); mu += zToLn(BELL.agentWeight * za); }
     }
-    return { mu: mu, sd: Math.sqrt(v), parts: parts };
+    return { mu: mu, sd: Math.sqrt(v), parts: parts, group: proLike ? "pro" : "general" };
   }
   function physicsLik(E0) {
     var opt = E0.scenarioOptima(), tw = 0, m = 0, vv = 0;
