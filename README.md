@@ -1,8 +1,25 @@
-# valoSens 4.0: Valorant settings finder
+# valoSens 5.0: Valorant settings finder
 
 Version 3.0 is a full release covering all three parts: **1. Sensitivity**, **2. Crosshair** (with a rotating visibility test), and **3. Enemy highlight color** (with a vision-threshold test).
 
 Open `index.html` in a browser. It needs no build step or server, and nothing leaves the page.
+
+**Version 5.0: "The BIG Update"**
+- **Bell-curve sensitivity.** Results now follow a normal distribution in *Valorant sens at 800 DPI* (s800): mean **0.3**, SD **0.1**, so 0.2 / 0.4 is one standard deviation, 0.1 / 0.5 two, clamped to 0.1–0.7.
+  1. The physical model (below) still builds the cost curve and finds its optimum.
+  2. That optimum becomes a z-score against the model's optimum over a synthetic population of 1,200 questionnaire profiles (`muLn`, `sdLn`), scaled by `rho` so the whole population keeps SD ≈ 1.
+  3. Region, age group, glasses and agents add shifts in SD units (1 = 0.1 sens at 800 DPI). Each group is centred on its population-weighted mean, so the average stays at 0.3.
+  4. s800 = 0.3 + 0.1 × z. The cost curve keeps its shape but is re-centred on that target, so the progression rule, near-optimal band and scenario agreement work as before.
+  5. Measured (calibration-trial) results are untouched: your own data beats any prior.
+  `recommend(input, { noBell: true })` returns the raw physical optimum. Constants: `ValoModel.BELL`, regenerate with `node scripts/build_bell.js`.
+- **New research** (`research/demographic_research.md`, `research/agent_trends_research.md`):
+  - **Region:** 99 pros from ProSettings by country. The "NA plays slower than APAC" idea is **not supported** (NA median 0.286 vs APAC 0.279). Shifts are small (|z| ≤ 0.14) after shrinkage.
+  - **Age:** no gamer data on sensitivity by age; motor-control literature only. Shifts are labelled estimates (under 16 +0.10 … 35+ −0.25).
+  - **Glasses:** no evidence of any effect, so all shifts are 0. The question is kept so data can be added later.
+  - **Agents:** per-agent empirical trends with empirical-Bayes shrinkage, applied at half weight because ability mechanics already move the physical optimum.
+- **New questions:** region, age group and glasses (all optional, "Prefer not to say" adds nothing).
+- **Skip parts:** the crosshair and enemy-highlight parts can each be skipped, and added back from the results screen.
+- **Animations:** shared motion tokens across the app, directional question transitions, button and choice feedback; on the results screen an animated bell-curve chart with "what moved you" bars, chart and number count-ups. All off under `prefers-reduced-motion`.
 
 **Sensitivity model 4.0**
 - **Progression rule replaces "keep it if it's close enough".** Before, any current setting inside the near-optimal range was kept, so the result often just repeated what you typed. Now the model:

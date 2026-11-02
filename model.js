@@ -547,6 +547,9 @@
     }
     if (input.mouseG != null && !(finitePos(input.mouseG) && input.mouseG >= 20 && input.mouseG <= 250)) throw new RangeError("mouseG must be 20–250 g");
     if (input.grip != null && !GRIP[input.grip]) throw new RangeError("grip must be palm, claw, fingertip or unsure");
+    [["region", REGION], ["age", AGE], ["glasses", GLASSES]].forEach(function (g) {
+      if (input[g[0]] != null && !Object.prototype.hasOwnProperty.call(g[1], input[g[0]])) throw new RangeError(g[0] + " must be one of " + Object.keys(g[1]).join(", "));
+    });
   }
 
   /* =========================================================================
@@ -824,6 +827,49 @@
   }
 
   /* =========================================================================
+   * Bell curve (v5.0, "The BIG Update")
+   * The population of recommendations follows a normal distribution in "Valorant sens at 800 DPI" (s800):
+   * mean 0.3, SD 0.1 (0.2 / 0.4 = one SD, 0.1 / 0.5 = two SD), clamped to [0.1, 0.7].
+   *   zModel = -(ln cStar - muLn) / sdLn   where muLn / sdLn describe the physical model's optimum over a
+   *            synthetic questionnaire population (scripts/bell_population.js). + means faster.
+   *   z      = rho * zModel + region + age + glasses + agentWeight * agents   (shifts in SD units, research/)
+   *   s800   = clamp(0.3 + 0.1 z, 0.1, 0.7)
+   * The physical cost curve keeps its shape but is re-centred (shifted in log space) on the bell target, so
+   * the progression rule, near-optimal band and scenario agreement work exactly as before.
+   * Measured (calibration) results are not touched: real data beats any prior.
+   * ========================================================================= */
+  var BELL = { mean: 0.3, sd: 0.1, min: 0.1, max: 0.7, dpi: 800,
+    muLn: /*@MULN*/3.8937/*@END*/, sdLn: /*@SDLN*/0.1319/*@END*/, rho: /*@RHO*/0.95/*@END*/, agentWeight: 0.5 };
+  /*@DEMO*/
+  var REGION = {"na": {"label": "North America", "z": 0, "basis": "pending"}, "latam": {"label": "Latin America", "z": 0, "basis": "pending"}, "br": {"label": "Brazil", "z": 0, "basis": "pending"}, "eu": {"label": "Europe", "z": 0, "basis": "pending"}, "mena": {"label": "Middle East & North Africa", "z": 0, "basis": "pending"}, "kr": {"label": "Korea", "z": 0, "basis": "pending"}, "jp": {"label": "Japan", "z": 0, "basis": "pending"}, "cn": {"label": "China", "z": 0, "basis": "pending"}, "sea": {"label": "Southeast Asia", "z": 0, "basis": "pending"}, "oce": {"label": "Oceania", "z": 0, "basis": "pending"}, "unsure": {"label": "Prefer not to say", "z": 0, "basis": "pending"}};
+  var AGE = {"u16": {"label": "Under 16", "z": 0, "basis": "pending"}, "16_19": {"label": "16–19", "z": 0, "basis": "pending"}, "20_24": {"label": "20–24", "z": 0, "basis": "pending"}, "25_29": {"label": "25–29", "z": 0, "basis": "pending"}, "30_34": {"label": "30–34", "z": 0, "basis": "pending"}, "35p": {"label": "35+", "z": 0, "basis": "pending"}, "unsure": {"label": "Prefer not to say", "z": 0, "basis": "pending"}};
+  var GLASSES = {"none": {"label": "No glasses", "z": 0, "basis": "pending"}, "glasses": {"label": "Glasses", "z": 0, "basis": "pending"}, "contacts": {"label": "Contact lenses", "z": 0, "basis": "pending"}, "unsure": {"label": "Prefer not to say", "z": 0, "basis": "pending"}};
+  var AGENT_Z = {};
+  /*@END*/
+  function s800FromCm(cm) { return K / (cm * BELL.dpi); }
+  function cmFromS800(s) { return K / (s * BELL.dpi); }
+  function bellTarget(input, cStar) {
+    var zModel = -(Math.log(cStar) - BELL.muLn) / BELL.sdLn, shifts = [];
+    [["region", REGION], ["age", AGE], ["glasses", GLASSES]].forEach(function (g) {
+      var e = input[g[0]] != null && g[1][input[g[0]]];
+      if (e && input[g[0]] !== "unsure") shifts.push({ key: g[0], label: e.label, z: e.z, basis: e.basis });
+    });
+    if (input._agentProf) {
+      var za = 0, names = [];
+      input._agentProf.agents.forEach(function (a) { var e = AGENT_Z[a.name]; if (e) za += a.share * e.z; names.push(a.name); });
+      shifts.push({ key: "agents", label: names.join(", "), z: BELL.agentWeight * za, basis: "research",
+        note: "Empirical agent trend at half weight: ability mechanics already move the physical optimum." });
+    }
+    var zRaw = BELL.rho * zModel + shifts.reduce(function (s, x) { return s + x.z; }, 0);
+    var s800 = clamp(BELL.mean + BELL.sd * zRaw, BELL.min, BELL.max), z = (s800 - BELL.mean) / BELL.sd;
+    var cm = cmFromS800(s800);
+    return { mean: BELL.mean, sd: BELL.sd, min: BELL.min, max: BELL.max, zModel: zModel, rhoZModel: BELL.rho * zModel,
+      shifts: shifts, zRaw: zRaw, z: z, s800: s800, clamped: s800 !== BELL.mean + BELL.sd * zRaw,
+      percentile: normCdf(z), cm: cm, sensAtDpi: input.dpi ? s800 * BELL.dpi / input.dpi : null,
+      cmModel: cStar, s800Model: s800FromCm(cStar) };
+  }
+
+  /* =========================================================================
    * Main entry point
    * input = {
    *   pad (usable width cm, required), dpi?, current?: { cm }, satisfaction? 1..5,
@@ -839,9 +885,14 @@
   function recommend(input, opts) {
     validateInput(input);
     input = withAgents(input, opts && opts.agentRules);
-    var E = expectedCurve(input, opts);
-    var pr = E.profile, P = E.base;
+    var E0 = expectedCurve(input, opts);
+    var pr = E0.profile, P = E0.base;
     var tol = P.tolerance;
+    // v5.0: re-centre the physical curve on the bell-curve target (opts.noBell keeps the raw physical optimum).
+    var bell = opts && opts.noBell ? null : bellTarget(input, E0.cStar);
+    var ratio = bell ? E0.cStar / bell.cm : 1;
+    var E = { at: function (C) { return E0.at(C * ratio); }, cStar: E0.cStar / ratio, jStar: E0.jStar,
+      scenarioOptima: function () { return E0.scenarioOptima().map(function (o) { return { c: o.c / ratio, w: o.w, pr: o.pr }; }); } };
     var band = nearOptimalSet(function (C) { return E.at(C).total; }, E.cStar, E.jStar, tol, GRID[0], GRID[GRID.length - 1]);
 
     var c0 = input.current ? input.current.cm : null, sat = input.satisfaction || 3;
@@ -877,7 +928,7 @@
     var curve = [];
     for (var C = 15; C <= 120; C += 1) { var c = E.at(C); curve.push({ C: C, total: c.total, prec: c.prec, trav: c.trav, lift: c.lift }); }
     // Per-task cost at the result (central constants), so the UI can show what drives the number.
-    var byTask = TASKS.map(function (t, j) { var c = taskCost(t, cm, pr); return { key: t.key, label: t.label, share: pr.mix[j], cost: pr.mix[j] * (c.prec + c.trav + c.lift) }; });
+    var byTask = TASKS.map(function (t, j) { var c = taskCost(t, cm * ratio, pr); return { key: t.key, label: t.label, share: pr.mix[j], cost: pr.mix[j] * (c.prec + c.trav + c.lift) }; });
 
     var unsure = 0; if (!LIMB[input.limb] || input.limb === "unsure") unsure++; if (!input.role && !input._agentProf) unsure++; if (!input.weapon) unsure++;
     var confidence = measured
@@ -889,13 +940,13 @@
     var near = PROS.slice().sort(function (a, b) { return Math.abs(Math.log(a.cm / cm)) - Math.abs(Math.log(b.cm / cm)); }).slice(0, 5);
     return {
       cm: cm, reason: reason, mode: measured ? "measured" : "questionnaire",
-      lo: range[0], hi: range[1], band: band, cModel: E.cStar, modelCost: E.at(E.cStar), tolerance: tol,
+      lo: range[0], hi: range[1], band: band, cModel: E0.cStar, cBell: E.cStar, bell: bell, modelCost: E.at(E.cStar), tolerance: tol,
       profile: pr, anchor: anchor, stats: statsSignals(input.stats), measured: measured, confidence: confidence,
       agents: input._agentProf || null, scopedAdvice: scopedAdvice(input._agentProf, input.weapon),
       dpiAdvice: input.dpi ? dpiAdvice(cm, input.dpi, input.resWidth) : null,
       notes: notes, curve: curve, byTask: byTask, optimumSpread: spread, nearPros: near,
       proPercentile: PROS.filter(function (p) { return p.cm < cm; }).length / Math.max(1, PROS.length),
-      nScenarios: E.nScenarios
+      nScenarios: E0.nScenarios
     };
   }
 
@@ -1089,7 +1140,7 @@
   }
 
   var api = {
-    VERSION: "4.0.0", TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
+    VERSION: "5.0.0", BELL: BELL, REGION: REGION, AGE: AGE, GLASSES: GLASSES, AGENT_Z: AGENT_Z, bellTarget: bellTarget, s800FromCm: s800FromCm, cmFromS800: cmFromS800, TRACK_SHARE: TRACK_SHARE, EXPERIENCE: EXPERIENCE, GRIP: GRIP, progression: progression, carveTracking: carveTracking, dpiAdvice: dpiAdvice, AGENT_LIST: AGENT_LIST, AGENT_RULES: AGENT_RULES,
     findAgent: findAgent, agentMix: agentMix, agentsProfile: agentsProfile, matchMultiplier: matchMultiplier, scopedAdvice: scopedAdvice,
     YAW: YAW, K: K, GAME_YAW: GAME_YAW, OTHER_YAW: OTHER_YAW, LIMITS: LIMITS,
     cmFrom: cmFrom, sensFor: sensFor, edpiFor: edpiFor, toCm: toCm, convert: convert,
