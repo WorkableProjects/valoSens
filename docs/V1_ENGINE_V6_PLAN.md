@@ -6,6 +6,10 @@ Priority order: **Sensitivity (S)** > Validation (V) > Data (D) > UI (U) > Cross
 
 ---
 
+## -1. Notes from Dutch
+
+Ensure that the bell curve replaces the "distribution" curve in the final screen, since middle is ~0.3 and makes more sense (not only for visual, but for calculations too)
+
 ## 0. Version naming
 
 - **App:** `1.0.0` (first stable release). It replaces the 3.x/5.0 labels in the README and UI.
