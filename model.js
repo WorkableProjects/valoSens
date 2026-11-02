@@ -879,8 +879,8 @@
    * so physical effects are shrunk toward the population instead of amplified (fixes the v5 bell layer).
    * ========================================================================= */
   var ENGINE = "6";
-  var PRIOR = { muLn: /*@PMU*/4.0839/*@END*/, sdLn: /*@PSD*/0.33/*@END*/, sigmaModel: /*@SIGMOD*/0.40/*@END*/, ageSdZ: 0.1,
-    source: /*@PSRC*/"147 pros (research/agent_trends_research.md): median s800 0.275, SD of ln 0.33. Placeholder until research/population_v6 (D3)."/*@END*/ };
+  var PRIOR = { muLn: /*@PMU*/3.9969/*@END*/, sdLn: /*@PSD*/0.33/*@END*/, sigmaModel: /*@SIGMOD*/0.40/*@END*/, ageSdZ: 0.1,
+    source: /*@PSRC*/"Centre: 0.30 sens at 800 DPI (team decision, docs/V1_ENGINE_V6_PLAN.md §-1; pro mean 0.296). Width: SD of ln s800 = 0.33 from 147 pros (research/agent_trends_research.md). Width to be re-estimated from research/population_v6 (D3)."/*@END*/ };
   var LNGRID = GRID.map(function (c) { return Math.log(c); });
   function normLogPdf(x, m, s) { var z = (x - m) / s; return -0.5 * z * z - Math.log(s); }
   function zToLn(z) { return -z * PRIOR.sdLn; }                // + z (faster) = shorter cm/360
